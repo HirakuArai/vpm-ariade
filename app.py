@@ -81,12 +81,24 @@ st.set_page_config(page_title="Kai - VPMアシスタント", page_icon="🧠")
 st.title("🧵 Virtual Project Manager - Kai")
 st.write("プロジェクトについて何でも聞いてください。")
 
-user_input = st.text_input("💬 あなたの発言")
+# ログ読み込み
+dialogue = load_conversation_messages()
+
+# 会話履歴の表示（吹き出し風）
+for msg in dialogue:
+    if msg["role"] == "user":
+        with st.chat_message("user"):
+            st.markdown(f"**あなた:** {msg['content']}")
+    else:
+        with st.chat_message("assistant"):
+            st.markdown(f"**Kai:** {msg['content']}")
+
+# 入力欄（最下部）
+user_input = st.chat_input("あなたの発言を入力してください")
 
 if user_input:
-    # ログ読み込み & systemプロンプト付与
-    messages = [{"role": "system", "content": get_system_prompt()}]
-    messages.extend(load_conversation_messages())
+    # 会話のベース構築
+    messages = [{"role": "system", "content": get_system_prompt()}] + dialogue
     messages.append({"role": "user", "content": user_input})
 
     # OpenAI API呼び出し
@@ -96,9 +108,12 @@ if user_input:
     )
     reply = response.choices[0].message["content"]
 
-    # 表示とログ保存
-    st.markdown("#### ✨ Kaiの返答")
-    st.markdown(reply)
+    # 表示 & 保存
+    with st.chat_message("assistant"):
+        st.markdown(f"**Kai:** {reply}")
+
     append_to_log("USER", user_input)
     append_to_log("KAI", reply)
 
+    # リロードで即時反映
+    st.experimental_rerun()
