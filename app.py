@@ -101,3 +101,4 @@ if user_input:
     st.markdown(reply)
     append_to_log("USER", user_input)
     append_to_log("KAI", reply)
+
