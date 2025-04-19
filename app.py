@@ -86,15 +86,23 @@ def get_system_prompt():
 # --- Git操作：自動コミット＋push ---
 def try_git_commit(file_path: str):
     if not github_token:
-        print("※ GitHubトークン未設定。Git操作はスキップされました。")
+        st.warning("※ GitHubトークン未設定。Git操作はスキップされました。")
         return
+    st.info(f"📁 Gitコミット対象: {file_path}")
     try:
-        subprocess.run(["git", "add", file_path], check=True)
-        subprocess.run(["git", "commit", "-m", f"Update log: {os.path.basename(file_path)}"], check=True)
-        subprocess.run(["git", "push", f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"], check=True)
-        print("✅ Git push 成功")
+        add = subprocess.run(["git", "add", file_path], check=True, capture_output=True, text=True)
+        st.code(add.stdout + add.stderr, language="bash")
+
+        commit = subprocess.run(["git", "commit", "-m", f"Update log: {os.path.basename(file_path)}"], check=True, capture_output=True, text=True)
+        st.code(commit.stdout + commit.stderr, language="bash")
+
+        push = subprocess.run(["git", "push", f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"], check=True, capture_output=True, text=True)
+        st.code(push.stdout + push.stderr, language="bash")
+
+        st.success("✅ Git push 成功")
     except subprocess.CalledProcessError as e:
-        print("⚠️ Gitエラー:", e)
+        st.error("⚠️ Gitエラー発生")
+        st.code(e.stderr if e.stderr else str(e), language="bash")
 
 # --- Streamlit UI ---
 st.set_page_config(page_title="Kai - VPMアシスタント", page_icon="🧠")
