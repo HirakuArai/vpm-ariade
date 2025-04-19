@@ -83,26 +83,18 @@ def get_system_prompt():
 {status if status.strip() else "（現在のステータス情報はありません）"}
 """
 
-# --- Git操作：自動コミット＋push ---
+# --- Git操作：自動コミット＋push（非表示） ---
 def try_git_commit(file_path: str):
     if not github_token:
-        st.warning("※ GitHubトークン未設定。Git操作はスキップされました。")
         return
-
     try:
-        # ユーザー名・メール設定（Cloud環境対策）
         subprocess.run(["git", "config", "--global", "user.name", "Kai Bot"], check=True)
         subprocess.run(["git", "config", "--global", "user.email", "kai@example.com"], check=True)
-
-        st.info(f"📁 Gitコミット対象: {file_path}")
         subprocess.run(["git", "add", file_path], check=True)
         subprocess.run(["git", "commit", "-m", f"Update log: {os.path.basename(file_path)}"], check=True)
         subprocess.run(["git", "push", f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"], check=True)
-        st.success("✅ Git push 成功")
-
-    except subprocess.CalledProcessError as e:
-        st.error("⚠️ Gitエラー発生")
-        st.code(e.stderr or str(e), language="bash")
+    except subprocess.CalledProcessError:
+        pass  # 表示を省略
 
 # --- Streamlit UI ---
 st.set_page_config(page_title="Kai - VPMアシスタント", page_icon="🧠")
@@ -129,7 +121,7 @@ if user_input:
     messages.append({"role": "user", "content": user_input})
 
     response = openai.ChatCompletion.create(
-        model="gpt-4.1",  
+        model="gpt-4.1",
         messages=messages
     )
     reply = response.choices[0].message["content"]
