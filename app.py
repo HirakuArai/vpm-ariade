@@ -42,7 +42,7 @@ def load_conversation_messages():
             if line.startswith("## "):
                 if current_role and buffer:
                     messages.append({
-                        "role": "user" if current_role in ["USER", "KAI"] else "assistant",
+                        "role": "user" if current_role == "USER" else "assistant",
                         "content": "\n".join(buffer)
                     })
                 buffer = []
@@ -53,7 +53,7 @@ def load_conversation_messages():
 
     if current_role and buffer:
         messages.append({
-            "role": "user" if current_role in ["USER", "KAI"] else "assistant",
+            "role": "user" if current_role == "USER" else "assistant",
             "content": "\n".join(buffer)
         })
     return messages
@@ -76,44 +76,41 @@ def get_system_prompt():
 {status if status.strip() else "（現在のステータス情報はありません）"}
 """
 
-# ページ設定
+# Streamlit UI
 st.set_page_config(page_title="Kai - VPMアシスタント", page_icon="🧠")
-
 st.title("🧵 Virtual Project Manager - Kai")
+st.write("プロジェクトについて何でも聞いてください。")
 
-# セッション履歴の表示
-messages = [{"role": "system", "content": get_system_prompt()}]
-messages.extend(load_conversation_messages())
-
-for msg in messages:
+# ログを先に表示
+history = load_conversation_messages()
+for msg in history:
     if msg["role"] == "user":
-        with st.chat_message("user"):
+        with st.chat_message("user", avatar="🙋‍♂️"):
             st.markdown(msg["content"])
     elif msg["role"] == "assistant":
-        with st.chat_message("assistant"):
+        with st.chat_message("assistant", avatar="🧠"):
             st.markdown(msg["content"])
 
-# 入力欄（下部）
-user_input = st.chat_input("あなたの発言を入力してください")
+# 入力欄は一番下に配置
+user_input = st.chat_input("あなたの発言")
 
 if user_input:
-    # ユーザー発言を表示
-    with st.chat_message("user"):
+    # 表示とログ保存
+    with st.chat_message("user", avatar="🙋‍♂️"):
         st.markdown(user_input)
     append_to_log("USER", user_input)
 
-    # AI返答を生成
-    chat_history = [{"role": "system", "content": get_system_prompt()}]
-    chat_history.extend(load_conversation_messages())
-    chat_history.append({"role": "user", "content": user_input})
+    # API呼び出し
+    messages = [{"role": "system", "content": get_system_prompt()}]
+    messages.extend(history)
+    messages.append({"role": "user", "content": user_input})
 
     response = openai.ChatCompletion.create(
         model="gpt-4.1",
-        messages=chat_history
+        messages=messages
     )
     reply = response.choices[0].message["content"]
 
-    # AI返答を表示
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar="🧠"):
         st.markdown(reply)
     append_to_log("KAI", reply)
