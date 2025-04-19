@@ -2,6 +2,9 @@
 import streamlit as st
 import openai
 
+# ↓ ここを修正
+openai.api_key = st.secrets["OPENAI_API_KEY"]
+
 st.title("Virtual Project Manager - Ariade")
 st.write("🧵 アリアーデに話しかけてみましょう！")
 
