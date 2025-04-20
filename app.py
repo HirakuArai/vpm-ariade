@@ -4,17 +4,18 @@ import streamlit as st
 import openai
 import os
 import subprocess
+import json
 from datetime import datetime
-from zoneinfo import ZoneInfo          # ← JST 時刻用
+from zoneinfo import ZoneInfo          # JST 時刻用
 from dotenv import load_dotenv
 
 # ────────────────────────────────
 # 認証キー & トークン
 # ────────────────────────────────
-load_dotenv()                                          # .env があれば読む
+load_dotenv()
 openai.api_key = (
-    st.secrets.get("OPENAI_API_KEY")                   # Cloud 優先
-    or os.getenv("OPENAI_API_KEY")                     # ローカル用
+    st.secrets.get("OPENAI_API_KEY")
+    or os.getenv("OPENAI_API_KEY")
 )
 github_token = (
     st.secrets.get("GITHUB_TOKEN")
@@ -27,7 +28,9 @@ github_token = (
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOCS_DIR = os.path.join(BASE_DIR, "docs")
 CONV_DIR = os.path.join(BASE_DIR, "conversations")
+FLAG_PATH = os.path.join(BASE_DIR, "check_flags", "processed_logs.json")
 os.makedirs(CONV_DIR, exist_ok=True)
+os.makedirs(os.path.dirname(FLAG_PATH), exist_ok=True)
 
 # ────────────────────────────────
 # 会話ログ（JSTで 1 日 1 ファイル）
@@ -95,76 +98,74 @@ def get_system_prompt() -> str:
 """
 
 # ────────────────────────────────
-# Git   pull --rebase → add → commit → push
+# Git: pull → commit → push
 # ────────────────────────────────
 def try_git_commit(file_path: str) -> None:
-    if not github_token:          # トークン無ければ何もしない
+    if not github_token:
         return
     try:
-        subprocess.run(
-            ["git", "config", "--global", "user.name", "Kai Bot"],
-            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
-        subprocess.run(
-            ["git", "config", "--global", "user.email", "kai@example.com"],
-            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
-        # ① 最新を取得（rebase）
-        subprocess.run(
-            ["git", "pull", "--rebase", "origin", "main"],
-            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
-        # ② 追加 & コミット
-        subprocess.run(["git", "add", file_path], check=True,
-                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        subprocess.run(
-            ["git", "commit", "-m", f"Update log: {os.path.basename(file_path)}"],
-            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
-        # ③ Push
-        subprocess.run(
-            ["git", "push",
-             f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"],
-            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
+        subprocess.run(["git", "config", "--global", "user.name", "Kai Bot"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["git", "config", "--global", "user.email", "kai@example.com"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["git", "add", file_path], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["git", "commit", "-m", f"Update log: {os.path.basename(file_path)}"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["git", "push", f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError:
-        pass   # 衝突時などは無視（Cloud ログには出ない）
+        pass
+
+# ────────────────────────────────
+# 会話ログ更新判定の確認処理
+# ────────────────────────────────
+def check_unprocessed_logs():
+    try:
+        if os.path.exists(FLAG_PATH):
+            with open(FLAG_PATH, "r", encoding="utf-8") as f:
+                flags = json.load(f)
+        else:
+            flags = {}
+
+        files = sorted(f for f in os.listdir(CONV_DIR) if f.startswith("conversation_") and f.endswith(".md"))
+        updated = False
+        for file in files:
+            if file not in flags:
+                flags[file] = "checked"  # 仮処理: 本来はここで要更新判定
+                updated = True
+
+        if updated:
+            with open(FLAG_PATH, "w", encoding="utf-8") as f:
+                json.dump(flags, f, ensure_ascii=False, indent=2)
+            try_git_commit(FLAG_PATH)
+    except Exception:
+        pass  # ログでエラー出したくない場合は無視
 
 # ────────────────────────────────
 # Streamlit UI
 # ────────────────────────────────
 st.set_page_config(page_title="Kai - VPMアシスタント", page_icon="🧠")
 st.title("🧵 Virtual Project Manager - Kai")
-st.caption("バージョン: 2025-04-20 JST 対応 + gpt-4.1 対応 + architecture_overview 追加")  # ←★ 追加
+st.caption("バージョン: 2025-04-20 JST 対応 + gpt-4.1 対応 + ログ更新判定")
 st.write("プロジェクトについて何でも聞いてください。")
 
+check_unprocessed_logs()
 
 history = load_conversation_messages()
 for m in history:
-    with st.chat_message("user" if m["role"] == "user" else "assistant",
-                         avatar="🙋‍♂️" if m["role"] == "user" else "🧠"):
+    with st.chat_message("user" if m["role"] == "user" else "assistant", avatar="🙋‍♂️" if m["role"] == "user" else "🧠"):
         st.markdown(m["content"])
 
 user_input = st.chat_input("あなたの発言")
-
 if user_input:
-    # ユーザ発話
     with st.chat_message("user", avatar="🙋‍♂️"):
         st.markdown(user_input)
     append_to_log("USER", user_input)
 
-    # OpenAI へ
-    messages = [{"role": "system", "content": get_system_prompt()}] + \
-               history + \
-               [{"role": "user", "content": user_input}]
-
+    messages = [{"role": "system", "content": get_system_prompt()}] + history + [{"role": "user", "content": user_input}]
     response = openai.ChatCompletion.create(
         model="gpt-4.1",
         messages=messages
     )
     reply = response.choices[0].message.content
 
-    # AI 返答
     with st.chat_message("assistant", avatar="🧠"):
         st.markdown(reply)
     append_to_log("KAI", reply)
