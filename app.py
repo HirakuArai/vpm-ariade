@@ -5,6 +5,7 @@ import os
 import subprocess
 from datetime import datetime
 from dotenv import load_dotenv
+from zoneinfo import ZoneInfo 
 
 # --- 認証キーのロード（Cloud / ローカル両対応） ---
 load_dotenv()
@@ -24,14 +25,14 @@ DOCS_DIR = os.path.join(BASE_DIR, "docs")
 CONV_DIR = os.path.join(BASE_DIR, "conversations")
 os.makedirs(CONV_DIR, exist_ok=True)
 
-# --- 会話ログファイル名（今日） ---
+# --- 会話ログファイル名（今日・JST） ---
 def get_today_log_path():
-    today = datetime.now().strftime("%Y%m%d")
+    today = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y%m%d")   # ★ 修正
     return os.path.join(CONV_DIR, f"conversation_{today}.md")
 
 # --- ログ保存処理 ---
 def append_to_log(role: str, content: str):
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M:%S")  # ★ 修正
     path = get_today_log_path()
     with open(path, "a", encoding="utf-8") as f:
         f.write(f"## {timestamp} [ROLE: {role}]\n{content.strip()}\n\n")
