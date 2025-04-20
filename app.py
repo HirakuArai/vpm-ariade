@@ -42,13 +42,10 @@ def load_conversation_messages():
     path = get_today_log_path()
     if not os.path.exists(path):
         return []
-    messages = []
-    current_role = None
-    buffer = []
-
+    messages, current_role, buffer = [], None, []
     with open(path, "r", encoding="utf-8") as f:
         for line in f:
-            line = line.strip()
+            line = line.rstrip("\n")
             if line.startswith("## "):
                 if current_role and buffer:
                     messages.append({
@@ -71,10 +68,16 @@ def load_conversation_messages():
 def get_system_prompt():
     def read_file(path):
         return open(path, "r", encoding="utf-8").read() if os.path.exists(path) else ""
-    base = read_file(os.path.join(DOCS_DIR, "base_os_rules.md"))
+    
+    overview   = read_file(os.path.join(DOCS_DIR, "architecture_overview.md"))  # ★ 追加
+    base_rules = read_file(os.path.join(DOCS_DIR, "base_os_rules.md"))
     definition = read_file(os.path.join(DOCS_DIR, "project_definition.md"))
-    status = read_file(os.path.join(DOCS_DIR, "project_status.md"))
-    return f"""{base}
+    status     = read_file(os.path.join(DOCS_DIR, "project_status.md"))
+
+    # overview を先頭に入れる
+    return f"""{overview}
+
+{base_rules}
 
 【プロジェクト定義】
 {definition}
@@ -101,13 +104,14 @@ st.set_page_config(page_title="Kai - VPMアシスタント", page_icon="🧠")
 st.title("🧵 Virtual Project Manager - Kai")
 st.write("プロジェクトについて何でも聞いてください。")
 
-# 会話ログを上に表示
+# 既存ログを表示
 history = load_conversation_messages()
 for msg in history:
-    with st.chat_message("user" if msg["role"] == "user" else "assistant", avatar="🙋‍♂️" if msg["role"] == "user" else "🧠"):
+    with st.chat_message("user" if msg["role"] == "user" else "assistant",
+                         avatar="🙋‍♂️" if msg["role"] == "user" else "🧠"):
         st.markdown(msg["content"])
 
-# 入力欄は一番下
+# 入力欄
 user_input = st.chat_input("あなたの発言")
 
 if user_input:
@@ -115,16 +119,16 @@ if user_input:
         st.markdown(user_input)
     append_to_log("USER", user_input)
 
-    # 会話送信
+    # OpenAI へ送信
     messages = [{"role": "system", "content": get_system_prompt()}]
     messages.extend(history)
     messages.append({"role": "user", "content": user_input})
 
     response = openai.ChatCompletion.create(
-        model="gpt-4.1",
+        model="gpt-4",     # ★ 正式モデル名を使用
         messages=messages
     )
-    reply = response.choices[0].message["content"]
+    reply = response.choices[0].message.content
 
     with st.chat_message("assistant", avatar="🧠"):
         st.markdown(reply)
