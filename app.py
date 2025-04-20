@@ -135,7 +135,9 @@ def try_git_commit(file_path: str) -> None:
 # ────────────────────────────────
 st.set_page_config(page_title="Kai - VPMアシスタント", page_icon="🧠")
 st.title("🧵 Virtual Project Manager - Kai")
+st.caption("バージョン: 2025-04-20 JST 対応 + gpt-4.1 対応 + architecture_overview 追加")  # ←★ 追加
 st.write("プロジェクトについて何でも聞いてください。")
+
 
 history = load_conversation_messages()
 for m in history:
