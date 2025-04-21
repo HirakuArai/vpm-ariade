@@ -118,6 +118,7 @@ def try_git_commit(file_path: str) -> None:
 # ──────────────────────────────────────────
 
 def check_unprocessed_logs():
+    print("🧪 check_unprocessed_logs() 開始", flush=True)  # ← 追加
     try:
         print("🔍 check_unprocessed_logs: start")
         if os.path.exists(FLAG_PATH):
@@ -143,7 +144,7 @@ def check_unprocessed_logs():
             print("✅ すべてのログが処理済みです")
 
     except Exception as e:
-        print(f"❌ エラー発生: {e}")
+        print(f"❌ check_unprocessed_logs エラー: {e}", flush=True)
 
 # ──────────────────────────────────────────
 # Streamlit UI
