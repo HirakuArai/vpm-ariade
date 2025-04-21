@@ -97,7 +97,7 @@ def try_git_pull_safe():
     try:
         subprocess.run(["git", "stash", "--include-untracked"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         result = subprocess.run(
-            ["git", "pull", "--rebase", "origin", "main"],
+            ["git", "pull", "--rebase", "https://github.com/HirakuArai/vpm-ariade.git"],
             check=False,
             capture_output=True,
             text=True
@@ -109,6 +109,7 @@ def try_git_pull_safe():
         subprocess.run(["git", "stash", "pop"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         print(f"❌ Git pull時の例外: {e}", flush=True)
+
 
 def try_git_commit(file_path: str) -> None:
     if not github_token:
@@ -162,7 +163,7 @@ def check_unprocessed_logs():
 # ──────────────────────────────────────────
 st.set_page_config(page_title="Kai - VPMアシスタント", page_icon="🧠")
 st.title("🧵 Virtual Project Manager - Kai")
-st.caption("バージョン: 2025-04-20 JST対応 + gpt-4.1対応 + 安全Git pull実装")
+st.caption("バージョン: 2025-04-20 JST対応 + gpt-4.1対応 + 安全Git pull実装_2")
 st.write("プロジェクトについて何でも聞いてください。")
 
 try_git_pull_safe()
