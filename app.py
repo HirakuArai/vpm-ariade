@@ -13,12 +13,8 @@ from dotenv import load_dotenv
 # 認証キー & トークン
 # ──────────────────────────────────────────
 load_dotenv()
-openai.api_key = (
-    st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
-)
-github_token = (
-    st.secrets.get("GITHUB_TOKEN") or os.getenv("GITHUB_TOKEN")
-)
+openai.api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+github_token = st.secrets.get("GITHUB_TOKEN") or os.getenv("GITHUB_TOKEN")
 
 # ──────────────────────────────────────────
 # パス類
@@ -33,7 +29,6 @@ os.makedirs(os.path.dirname(FLAG_PATH), exist_ok=True)
 # ──────────────────────────────────────────
 # 会話ログ
 # ──────────────────────────────────────────
-
 def get_today_log_path() -> str:
     today = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y%m%d")
     return os.path.join(CONV_DIR, f"conversation_{today}.md")
@@ -76,7 +71,6 @@ def load_conversation_messages():
 # ──────────────────────────────────────────
 # System プロンプト
 # ──────────────────────────────────────────
-
 def read_file(path: str) -> str:
     return open(path, encoding="utf-8").read() if os.path.exists(path) else ""
 
@@ -97,32 +91,33 @@ def get_system_prompt() -> str:
 """
 
 # ──────────────────────────────────────────
-# Git: pull → commit → push
+# Git: commit → push（pull は省略）
 # ──────────────────────────────────────────
-
 def try_git_commit(file_path: str) -> None:
     if not github_token:
-        print("❌ GitHub トークンが見つかりません", flush=True)
         return
     try:
         print(f"📌 Gitコミット開始: {file_path}", flush=True)
-        subprocess.run(["git", "config", "--global", "user.name", "Kai Bot"], check=True)
-        subprocess.run(["git", "config", "--global", "user.email", "kai@example.com"], check=True)
-        subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=True)
-        subprocess.run(["git", "add", file_path], check=True)
-        subprocess.run(["git", "commit", "-m", f"Update log: {os.path.basename(file_path)}"], check=True)
-        subprocess.run(["git", "push", f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"], check=True)
-        print("✅ Git push 成功", flush=True)
+        subprocess.run(["git", "config", "--global", "user.name", "Kai Bot"],
+                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["git", "config", "--global", "user.email", "kai@example.com"],
+                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        # pull は省略（Streamlit Cloud環境で競合を防ぐため）
+        subprocess.run(["git", "add", file_path],
+                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["git", "commit", "-m", f"Update log: {os.path.basename(file_path)}"],
+                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["git", "push", f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"],
+                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         print(f"❌ Git push 失敗: {e}", flush=True)
 
 # ──────────────────────────────────────────
 # 会話ログの確認処理（未処理ログ → "checked" に更新）
 # ──────────────────────────────────────────
-
 def check_unprocessed_logs():
     print("🧪 check_unprocessed_logs() 開始", flush=True)
-
     try:
         print("🔍 check_unprocessed_logs: start", flush=True)
 
@@ -132,10 +127,8 @@ def check_unprocessed_logs():
         else:
             flags = {}
 
-        files = sorted(
-            f for f in os.listdir(CONV_DIR)
-            if f.startswith("conversation_") and f.endswith(".md")
-        )
+        files = sorted(f for f in os.listdir(CONV_DIR)
+                       if f.startswith("conversation_") and f.endswith(".md"))
 
         updated = False
         for file in files:
@@ -152,17 +145,15 @@ def check_unprocessed_logs():
             try_git_commit(FLAG_PATH)
         else:
             print("✅ すべてのログが処理済みです", flush=True)
-
     except Exception as e:
         print(f"❌ check_unprocessed_logs エラー: {e}", flush=True)
 
 # ──────────────────────────────────────────
 # Streamlit UI
 # ──────────────────────────────────────────
-
 st.set_page_config(page_title="Kai - VPMアシスタント", page_icon="🧠")
 st.title("🧵 Virtual Project Manager - Kai")
-st.caption("バージョン: 2025-04-20 JST対応 + gpt-4.1対応 + ログ更新判定 + 未処理ログ記録機能")
+st.caption("バージョン: 2025-04-20 JST対応 + gpt-4.1対応 + ログ更新判定 + 未処理ログ記録機能 + Git pull除外")
 st.write("プロジェクトについて何でも聞いてください。")
 
 check_unprocessed_logs()
