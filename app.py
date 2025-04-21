@@ -102,16 +102,19 @@ def get_system_prompt() -> str:
 
 def try_git_commit(file_path: str) -> None:
     if not github_token:
+        print("❌ GitHub トークンが見つかりません", flush=True)
         return
     try:
-        subprocess.run(["git", "config", "--global", "user.name", "Kai Bot"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        subprocess.run(["git", "config", "--global", "user.email", "kai@example.com"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        subprocess.run(["git", "add", file_path], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        subprocess.run(["git", "commit", "-m", f"Update log: {os.path.basename(file_path)}"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        subprocess.run(["git", "push", f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except subprocess.CalledProcessError:
-        pass
+        print(f"📌 Gitコミット開始: {file_path}", flush=True)
+        subprocess.run(["git", "config", "--global", "user.name", "Kai Bot"], check=True)
+        subprocess.run(["git", "config", "--global", "user.email", "kai@example.com"], check=True)
+        subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=True)
+        subprocess.run(["git", "add", file_path], check=True)
+        subprocess.run(["git", "commit", "-m", f"Update log: {os.path.basename(file_path)}"], check=True)
+        subprocess.run(["git", "push", f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"], check=True)
+        print("✅ Git push 成功", flush=True)
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Git push 失敗: {e}", flush=True)
 
 # ──────────────────────────────────────────
 # 会話ログの確認処理（未処理ログ → "checked" に更新）
@@ -123,14 +126,12 @@ def check_unprocessed_logs():
     try:
         print("🔍 check_unprocessed_logs: start", flush=True)
 
-        # フラグファイルの読み込み（存在しない場合は空）
         if os.path.exists(FLAG_PATH):
             with open(FLAG_PATH, "r", encoding="utf-8") as f:
                 flags = json.load(f)
         else:
             flags = {}
 
-        # conversation_*.md をすべて取得
         files = sorted(
             f for f in os.listdir(CONV_DIR)
             if f.startswith("conversation_") and f.endswith(".md")
@@ -140,21 +141,20 @@ def check_unprocessed_logs():
         for file in files:
             if file not in flags:
                 print(f"🟡 未処理ログ検出: {file}", flush=True)
-                flags[file] = "checked"  # 仮処理フラグ付け
+                flags[file] = "checked"
                 updated = True
 
         if updated:
             print("📂 フラグを保存します", flush=True)
             with open(FLAG_PATH, "w", encoding="utf-8") as f:
                 json.dump(flags, f, ensure_ascii=False, indent=2)
-            print("📁 保存内容:", flags, flush=True)  # ← 保存後の中身確認
+            print("📁 保存内容:", flags, flush=True)
             try_git_commit(FLAG_PATH)
         else:
             print("✅ すべてのログが処理済みです", flush=True)
 
     except Exception as e:
         print(f"❌ check_unprocessed_logs エラー: {e}", flush=True)
-
 
 # ──────────────────────────────────────────
 # Streamlit UI
