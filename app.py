@@ -96,11 +96,19 @@ def get_system_prompt() -> str:
 def try_git_pull_safe():
     try:
         subprocess.run(["git", "stash", "--include-untracked"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        result = subprocess.run(
+            ["git", "pull", "--rebase", "origin", "main"],
+            check=False,
+            capture_output=True,
+            text=True
+        )
+        if result.returncode != 0:
+            print(f"❌ Git pull失敗: {result.stderr.strip()}", flush=True)
+        else:
+            print("✅ 安全にGit pull完了", flush=True)
         subprocess.run(["git", "stash", "pop"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        print("✅ 安全にGit pull完了", flush=True)
     except subprocess.CalledProcessError as e:
-        print(f"❌ Git pull失敗: {e}", flush=True)
+        print(f"❌ Git pull時の例外: {e}", flush=True)
 
 def try_git_commit(file_path: str) -> None:
     if not github_token:
