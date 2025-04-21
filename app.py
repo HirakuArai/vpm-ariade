@@ -109,7 +109,6 @@ def try_git_commit(file_path: str) -> None:
         print(f"📌 Gitコミット開始: {file_path}", flush=True)
         subprocess.run(["git", "config", "--global", "user.name", "Kai Bot"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         subprocess.run(["git", "config", "--global", "user.email", "kai@example.com"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
         subprocess.run(["git", "add", file_path], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         subprocess.run(["git", "commit", "-m", f"Update log: {os.path.basename(file_path)}"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         subprocess.run(["git", "push", f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -117,12 +116,46 @@ def try_git_commit(file_path: str) -> None:
         print(f"❌ Git push失敗: {e}", flush=True)
 
 # ──────────────────────────────────────────
+# 会話ログの確認処理
+# ──────────────────────────────────────────
+def check_unprocessed_logs():
+    print("🧪 check_unprocessed_logs() 開始", flush=True)
+    try:
+        print("🔍 check_unprocessed_logs: start", flush=True)
+        if os.path.exists(FLAG_PATH):
+            with open(FLAG_PATH, "r", encoding="utf-8") as f:
+                flags = json.load(f)
+        else:
+            flags = {}
+
+        files = sorted(f for f in os.listdir(CONV_DIR)
+                       if f.startswith("conversation_") and f.endswith(".md"))
+
+        updated = False
+        for file in files:
+            if file not in flags:
+                print(f"🟡 未処理ログ検出: {file}", flush=True)
+                flags[file] = "checked"
+                updated = True
+
+        if updated:
+            print("📂 フラグを保存します", flush=True)
+            with open(FLAG_PATH, "w", encoding="utf-8") as f:
+                json.dump(flags, f, ensure_ascii=False, indent=2)
+            print("📁 保存内容:", flags, flush=True)
+            try_git_commit(FLAG_PATH)
+        else:
+            print("✅ すべてのログが処理済みです", flush=True)
+    except Exception as e:
+        print(f"❌ check_unprocessed_logs エラー: {e}", flush=True)
+
+# ──────────────────────────────────────────
 # Streamlit UI
 # ──────────────────────────────────────────
 st.set_page_config(page_title="Kai - VPMアシスタント", page_icon="🧠")
 st.title("🧵 Virtual Project Manager - Kai")
 st.caption("バージョン: 2025-04-20 JST対応 + gpt-4.1対応 + 安全Git pull実装")
-st.write("プロジェクトについて何でも聞いてください。");
+st.write("プロジェクトについて何でも聞いてください。")
 
 try_git_pull_safe()
 check_unprocessed_logs()
