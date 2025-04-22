@@ -187,3 +187,49 @@ if user_input:
     with st.chat_message("assistant", avatar="🧠"):
         st.markdown(reply)
     append_to_log("KAI", reply)
+
+# 関数一覧の抽出
+from core.code_analysis import extract_functions
+
+st.divider()
+st.subheader("🛠 Kai 自己改修：関数選択モード")
+
+function_list = extract_functions("app.py")
+
+# 関数一覧を選択肢として表示
+function_labels = [f"{f['name']} ({', '.join(f['args'])}) @ L{f['lineno']}" for f in function_list]
+selected_func_label = st.selectbox("🔧 修正したい関数を選んでください", function_labels)
+
+# 修正内容の入力段
+user_instruction = st.text_area("📝 修正したい内容を具体的に記入してください")
+
+# ボタンで推薦を取得
+if st.button("💡 GPTに修正案を生成させる"):
+    selected = function_list[function_labels.index(selected_func_label)]
+    with open("app.py", encoding="utf-8") as f:
+        lines = f.readlines()
+    fn_source = "".join(lines[selected["lineno"] - 1 : selected.get("end_lineno", selected["lineno"] + 5)])
+
+    system_prompt = "あなたはプロジェクトKaiのコード修正補助AIです。以下の関数について、ユーザーの指示をもとに改良案を提案してください。"
+
+    user_prompt = f"""# 修正対象の関数
+```python
+{fn_source}
+```
+
+# ユーザーの指示
+{user_instruction}
+
+# 提案内容を Markdown形式で記述してください。
+"""
+
+    response = openai.ChatCompletion.create(
+        model="gpt-4-1106-preview",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ]
+    )
+    proposal = response.choices[0].message["content"]
+    st.markdown("### 💬 修正提案（Kaiから）")
+    st.code(proposal, language="markdown")
