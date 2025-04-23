@@ -9,3 +9,4 @@ config/.env
 
 # Mac OS用キャッシュファイル
 .DS_Store
+archive/
