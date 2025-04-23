@@ -37,3 +37,13 @@ def log_patch(fn_name: str, user_instruction: str, markdown_diff: str):
 
     except Exception as e:
         print(f"❌ パッチ履歴の保存に失敗しました: {e}", flush=True)
+
+def load_patch_history(log_path=LOG_PATH):
+    if not os.path.exists(log_path):
+        return []
+    try:
+        with open(log_path, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"❌ 履歴読み込みに失敗しました: {e}", flush=True)
+        return []

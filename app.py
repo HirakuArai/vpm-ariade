@@ -291,4 +291,18 @@ if st.session_state.get("fn_proposal") and fn_selected:
         else:
             st.error(f"❌ 関数 `{fn_selected}` の更新に失敗しました。")
 
+# 🧾 Step 6: パッチ履歴を表示するUI
+from core.patch_log import load_patch_history
 
+st.divider()
+st.subheader("📜 差分履歴ログ（自動保存）")
+
+history_data = load_patch_history()
+
+if not history_data:
+    st.info("まだパッチ履歴がありません。")
+else:
+    for entry in reversed(history_data):  # 新しい順に表示
+        with st.expander(f"🕒 {entry['timestamp']} | 関数: {entry['function']}"):
+            st.markdown(f"**指示内容**:\n```\n{entry['instruction']}\n```")
+            st.markdown(f"**提案された修正**:\n```markdown\n{entry['diff']}\n```")
