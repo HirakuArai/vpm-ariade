@@ -29,10 +29,17 @@ os.makedirs(os.path.dirname(FLAG_PATH), exist_ok=True)
 # ──────────────────────────────────────────
 # 会話ログ
 # ──────────────────────────────────────────
+from datetime import datetime
+import pytz
+
 def get_today_log_path() -> str:
-    # 🔧 TEST改修済みバージョン
-    from datetime import datetime
-    return "dummy_path_from_test"
+    # 日時とパスを生成する関数を改良
+    tokyo = pytz.timezone('Asia/Tokyo')
+    today = datetime.now(tokyo)
+    date_str = today.strftime('%Y-%m-%d')
+    log_path = f"logs/{date_str}.log"
+    # 戻り値で日付文字列とログパスの両方を返す
+    return date_str, log_path
 
 def append_to_log(role: str, content: str) -> None:
     ts = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M:%S")
