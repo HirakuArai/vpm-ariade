@@ -236,11 +236,12 @@ if st.button("💡 GPTに修正案を生成させる"):
     # ✅ セッションステートに保存する
     st.session_state["fn_proposal"] = proposal
     st.session_state["fn_selected"] = selected["name"]
-    
+
     st.markdown("### 💬 修正提案（Kaiから）")
     st.code(proposal, language="markdown")
 
 # 🛠 Step 4: GPT提案を反映する処理
+fn_selected = st.session_state.get("fn_selected")
 if st.session_state.get("fn_proposal") and fn_selected:
     st.subheader("🔧 GPTの提案を適用する")
     if st.button("💾 修正をapp.pyに反映＋Gitコミット"):
@@ -255,3 +256,5 @@ if st.session_state.get("fn_proposal") and fn_selected:
             st.success(f"✅ 関数 `{fn_selected}` を更新しました！")
         else:
             st.error(f"❌ 関数 `{fn_selected}` の更新に失敗しました。")
+
+
