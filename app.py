@@ -41,14 +41,30 @@ from datetime import datetime
 
 def get_today_log_path() -> tuple:
     """
-    現在の日付に基づいてログファイルのパスを取得する。
-
     現在の日時とログファイルのパスを生成する関数。
 
     Returns:
     tuple: 日時文字列、ログファイルのパスのタプル
     """
-    # 以下、関数の処理は同じ...
+    try:
+        # Tokyoのタイムゾーンを取得
+        tokyo = pytz.timezone('Asia/Tokyo')
+        today = datetime.now(tokyo)
+        date_str = today.strftime('%Y-%m-%d')
+
+        # ログディレクトリのパスを指定
+        log_directory = "logs"
+        os.makedirs(log_directory, exist_ok=True)
+
+        # ログファイルのパスを構築
+        log_path = f"{log_directory}/{date_str}.log"
+
+        return date_str, log_path
+
+    except Exception as e:
+        print(f"❌ get_today_log_path() でエラーが発生しました: {e}", flush=True)
+        # fallback（エラー時用）
+        return "unknown", "logs/unknown.log"
 
 def append_to_log(role: str, content: str) -> None:
     ts = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M:%S")
