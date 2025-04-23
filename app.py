@@ -43,13 +43,13 @@ def get_today_log_path() -> str:
 
 def append_to_log(role: str, content: str) -> None:
     ts = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M:%S")
-    path = get_today_log_path()
+    _, path = get_today_log_path()
     with open(path, "a", encoding="utf-8") as f:
         f.write(f"## {ts} [ROLE: {role}]\n{content.strip()}\n\n")
     try_git_commit(path)
 
 def load_conversation_messages():
-    path = get_today_log_path()
+    _, path = get_today_log_path()
     if not os.path.exists(path):
         return []
 
