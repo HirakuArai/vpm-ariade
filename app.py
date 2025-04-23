@@ -35,6 +35,10 @@ import pytz
 from datetime import datetime
 import pytz
 
+import os
+import pytz
+from datetime import datetime
+
 def get_today_log_path() -> tuple:
     """
     現在の日時とログファイルのパスを生成する関数。
@@ -51,8 +55,14 @@ def get_today_log_path() -> tuple:
     # 日付の文字列をフォーマットして取得
     date_str = today.strftime('%Y-%m-%d')
     
+    # ログディレクトリのパスを指定
+    log_directory = "logs"
+    
+    # ディレクトリが存在しない場合は生成
+    os.makedirs(log_directory, exist_ok=True)
+    
     # ログファイルのパスを構築
-    log_path = f"logs/{date_str}.log"
+    log_path = f"{log_directory}/{date_str}.log"
     
     # 日付文字列とログパスをタプルで返す
     return date_str, log_path
