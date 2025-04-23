@@ -1,6 +1,7 @@
 from core.markdown_utils import extract_code_from_markdown
 from core.code_rewriter import replace_function_in_source
 from core.git_ops import try_git_commit
+from core.patch_log import log_patch
 
 def apply_gpt_patch(markdown_text: str, fn_name: str, source_path: str = "app.py", auto_commit: bool = True) -> bool:
     """
@@ -13,6 +14,14 @@ def apply_gpt_patch(markdown_text: str, fn_name: str, source_path: str = "app.py
         return False
 
     success = replace_function_in_source(source_path, fn_name, code)
-    if success and auto_commit:
-        try_git_commit(source_path)
+    if success:
+        # ✅ Patch log を記録
+        instruction = (
+            f"関数 `{fn_name}` を GPT により自動改修（Kai UIから）"
+        )
+        log_patch(fn_name=fn_name, user_instruction=instruction, markdown_diff=markdown_text)
+
+        if auto_commit:
+            try_git_commit(source_path)
+
     return success

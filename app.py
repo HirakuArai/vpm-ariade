@@ -259,6 +259,7 @@ if st.button("💡 GPTに修正案を生成させる"):
     # ✅ セッションステートに保存する
     st.session_state["fn_proposal"] = proposal
     st.session_state["fn_selected"] = selected["name"]
+    st.session_state["fn_instruction"] = user_instruction
 
     st.markdown("### 💬 修正提案（Kaiから）")
     st.code(proposal, language="markdown")
