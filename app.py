@@ -30,8 +30,9 @@ os.makedirs(os.path.dirname(FLAG_PATH), exist_ok=True)
 # 会話ログ
 # ──────────────────────────────────────────
 def get_today_log_path() -> str:
-    today = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y%m%d")
-    return os.path.join(CONV_DIR, f"conversation_{today}.md")
+    # 🔧 TEST改修済みバージョン
+    from datetime import datetime
+    return "dummy_path_from_test"
 
 def append_to_log(role: str, content: str) -> None:
     ts = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M:%S")
@@ -233,3 +234,19 @@ if st.button("💡 GPTに修正案を生成させる"):
     proposal = response.choices[0].message["content"]
     st.markdown("### 💬 修正提案（Kaiから）")
     st.code(proposal, language="markdown")
+
+# 🛠 Step 4: GPT提案を反映する処理
+if st.session_state.get("fn_proposal") and fn_selected:
+    st.subheader("🔧 GPTの提案を適用する")
+    if st.button("💾 修正をapp.pyに反映＋Gitコミット"):
+        from core.kai_patch_applier import apply_gpt_patch
+        success = apply_gpt_patch(
+            markdown_text=st.session_state["fn_proposal"],
+            fn_name=fn_selected,
+            source_path="app.py",
+            auto_commit=True
+        )
+        if success:
+            st.success(f"✅ 関数 `{fn_selected}` を更新しました！")
+        else:
+            st.error(f"❌ 関数 `{fn_selected}` の更新に失敗しました。")
