@@ -32,13 +32,29 @@ os.makedirs(os.path.dirname(FLAG_PATH), exist_ok=True)
 from datetime import datetime
 import pytz
 
-def get_today_log_path() -> str:
-    # 日時とパスを生成する関数を改良
+from datetime import datetime
+import pytz
+
+def get_today_log_path() -> tuple:
+    """
+    現在の日時とログファイルのパスを生成する関数。
+
+    Returns:
+    tuple: 日時文字列、ログファイルのパスのタプル
+    """
+    # Tokyoのタイムゾーンを取得
     tokyo = pytz.timezone('Asia/Tokyo')
+    
+    # Tokyoの現在時刻を取得
     today = datetime.now(tokyo)
+    
+    # 日付の文字列をフォーマットして取得
     date_str = today.strftime('%Y-%m-%d')
+    
+    # ログファイルのパスを構築
     log_path = f"logs/{date_str}.log"
-    # 戻り値で日付文字列とログパスの両方を返す
+    
+    # 日付文字列とログパスをタプルで返す
     return date_str, log_path
 
 def append_to_log(role: str, content: str) -> None:
