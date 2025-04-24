@@ -221,118 +221,112 @@ def check_unprocessed_logs():
         print(f"❌ check_unprocessed_logs エラー: {e}", flush=True)
 
 # ──────────────────────────────────────────
-# Streamlit UI
+# Streamlit UI（Kai モード切り替え統合版）
 # ──────────────────────────────────────────
 st.set_page_config(page_title="Kai - VPMアシスタント", page_icon="🧠")
 st.title("🧵 Virtual Project Manager - Kai")
-st.caption("バージョン: 2025-04-24 Patch履歴UI実装 + 安全Git commit対応 + GPT修正提案反映")
+st.caption("バージョン: 2025-04-25 Kai修正文提案機能をUI統合")
 st.write("プロジェクトについて何でも聞いてください。")
 
-try_git_pull_safe()
-check_unprocessed_logs()
-
-history = load_conversation_messages()
-for m in history:
-    with st.chat_message("user" if m["role"] == "user" else "assistant", avatar="👋" if m["role"] == "user" else "🧠"):
-        st.markdown(m["content"])
-
-user_input = st.chat_input("あなたの発言")
-if user_input:
-    with st.chat_message("user", avatar="👋"):
-        st.markdown(user_input)
-    append_to_log("USER", user_input)
-
-    messages = [{"role": "system", "content": get_system_prompt()}] + history + [{"role": "user", "content": user_input}]
-    response = openai.ChatCompletion.create(model="gpt-4.1", messages=messages)
-    reply = response.choices[0].message.content
-
-    with st.chat_message("assistant", avatar="🧠"):
-        st.markdown(reply)
-    append_to_log("KAI", reply)
-
-# 関数一覧の抽出
 from core.code_analysis import extract_functions
-
-st.divider()
-st.subheader("🛠 Kai 自己改修：関数選択モード")
-
-function_list = extract_functions("app.py")
-
-# 関数一覧を選択肢として表示
-function_labels = [f"{f['name']} ({', '.join(f['args'])}) @ L{f['lineno']}" for f in function_list]
-selected_func_label = st.selectbox("🔧 修正したい関数を選んでください", function_labels)
-
-# 修正内容の入力段
-user_instruction = st.text_area("📝 修正したい内容を具体的に記入してください")
-
-# ボタンで推薦を取得
-if st.button("💡 GPTに修正案を生成させる"):
-    selected = function_list[function_labels.index(selected_func_label)]
-    with open("app.py", encoding="utf-8") as f:
-        lines = f.readlines()
-    fn_source = "".join(lines[selected["lineno"] - 1 : selected.get("end_lineno", selected["lineno"] + 5)])
-
-    system_prompt = "あなたはプロジェクトKaiのコード修正補助AIです。以下の関数について、ユーザーの指示をもとに改良案を提案してください。"
-
-    user_prompt = f"""# 修正対象の関数
-```python
-{fn_source}
-```
-
-# ユーザーの指示
-{user_instruction}
-
-# 提案内容を Markdown形式で記述してください。
-"""
-
-    response = openai.ChatCompletion.create(
-        model="gpt-4.1",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
-        ]
-    )
-    proposal = response.choices[0].message["content"]
-
-    # ✅ セッションステートに保存する
-    st.session_state["fn_proposal"] = proposal
-    st.session_state["fn_selected"] = selected["name"]
-    st.session_state["fn_instruction"] = user_instruction
-
-    st.markdown("### 💬 修正提案（Kaiから）")
-    st.code(proposal, language="markdown")
-
-# 🛠 Step 4: GPT提案を反映する処理
-fn_selected = st.session_state.get("fn_selected")
-if st.session_state.get("fn_proposal") and fn_selected:
-    st.subheader("🔧 GPTの提案を適用する")
-    if st.button("💾 修正をapp.pyに反映＋Gitコミット"):
-        from core.kai_patch_applier import apply_gpt_patch
-        success = apply_gpt_patch(
-            markdown_text=st.session_state["fn_proposal"],
-            fn_name=fn_selected,
-            source_path="app.py",
-            auto_commit=True
-        )
-        if success:
-            st.success(f"✅ 関数 `{fn_selected}` を更新しました！")
-            st.toast("💾 修正内容が履歴に保存されました", icon="📜")
-            st.balloons()
-        else:
-            st.error(f"❌ 関数 `{fn_selected}` の更新に失敗しました。")
-
-# 🧾 Step 6: パッチ履歴を表示するUI
 from core.patch_log import load_patch_history
+from core import log_utils, doc_update_engine
 
-st.divider()
-st.subheader("📜 差分履歴ログ（自動保存）")
+# モード切り替え
+mode = st.sidebar.radio("📂 モード選択", ["チャット", "関数修正", "ドキュメント更新"])
 
-history_data = load_patch_history()
+if mode == "チャット":
+    try_git_pull_safe()
+    check_unprocessed_logs()
+    history = load_conversation_messages()
+    for m in history:
+        with st.chat_message("user" if m["role"] == "user" else "assistant", avatar="👋" if m["role"] == "user" else "🧠"):
+            st.markdown(m["content"])
+    user_input = st.chat_input("あなたの発言")
+    if user_input:
+        with st.chat_message("user", avatar="👋"):
+            st.markdown(user_input)
+        append_to_log("USER", user_input)
+        messages = [{"role": "system", "content": get_system_prompt()}] + history + [{"role": "user", "content": user_input}]
+        response = openai.ChatCompletion.create(model="gpt-4.1", messages=messages)
+        reply = response.choices[0].message.content
+        with st.chat_message("assistant", avatar="🧠"):
+            st.markdown(reply)
+        append_to_log("KAI", reply)
 
-if not history_data:
-    st.info("まだパッチ履歴がありません。")
-else:
-    for entry in reversed(history_data):  # 新しい順に表示
-        with st.expander(f"🕒 {entry['timestamp']} | 関数: {entry['function']}"):
-            st.markdown(f"**指示内容**:\n```\n{entry['instruction']}\n```")
-            st.markdown(f"**提案された修正**:\n```markdown\n{entry['diff']}\n```")
+elif mode == "関数修正":
+    st.divider()
+    st.subheader("🛠 Kai 自己改修：関数選択モード")
+    function_list = extract_functions("app.py")
+    function_labels = [f"{f['name']} ({', '.join(f['args'])}) @ L{f['lineno']}" for f in function_list]
+    selected_func_label = st.selectbox("🔧 修正したい関数を選んでください", function_labels)
+    user_instruction = st.text_area("📝 修正したい内容を具体的に記入してください")
+    if st.button("💡 GPTに修正案を生成させる"):
+        selected = function_list[function_labels.index(selected_func_label)]
+        with open("app.py", encoding="utf-8") as f:
+            lines = f.readlines()
+        fn_source = "".join(lines[selected["lineno"] - 1 : selected.get("end_lineno", selected["lineno"] + 5)])
+        system_prompt = "あなたはプロジェクトKaiのコード修正補助AIです。以下の関数について、ユーザーの指示をもとに改良案を提案してください。"
+        user_prompt = f"# 修正対象の関数\n```python\n{fn_source}\n```\n# ユーザーの指示\n{user_instruction}\n# 提案内容を Markdown形式で記述してください。"
+        response = openai.ChatCompletion.create(
+            model="gpt-4.1",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ]
+        )
+        proposal = response.choices[0].message["content"]
+        st.session_state["fn_proposal"] = proposal
+        st.session_state["fn_selected"] = selected["name"]
+        st.session_state["fn_instruction"] = user_instruction
+        st.markdown("### 💬 修正提案（Kaiから）")
+        st.code(proposal, language="markdown")
+
+    fn_selected = st.session_state.get("fn_selected")
+    if st.session_state.get("fn_proposal") and fn_selected:
+        st.subheader("🔧 GPTの提案を適用する")
+        if st.button("💾 修正をapp.pyに反映＋Gitコミット"):
+            from core.kai_patch_applier import apply_gpt_patch
+            success = apply_gpt_patch(
+                markdown_text=st.session_state["fn_proposal"],
+                fn_name=fn_selected,
+                source_path="app.py",
+                auto_commit=True
+            )
+            if success:
+                st.success(f"✅ 関数 `{fn_selected}` を更新しました！")
+                st.toast("💾 修正内容が履歴に保存されました", icon="📜")
+                st.balloons()
+            else:
+                st.error(f"❌ 関数 `{fn_selected}` の更新に失敗しました。")
+
+    st.divider()
+    st.subheader("📜 差分履歴ログ（自動保存）")
+    history_data = load_patch_history()
+    if not history_data:
+        st.info("まだパッチ履歴がありません。")
+    else:
+        for entry in reversed(history_data):
+            with st.expander(f"🕒 {entry['timestamp']} | 関数: {entry['function']}"):
+                st.markdown(f"**指示内容**:\n```
+{entry['instruction']}
+```")
+                st.markdown(f"**提案された修正**:\n```markdown\n{entry['diff']}\n```")
+
+elif mode == "ドキュメント更新":
+    st.header("🧠 ドキュメント更新提案（Kai）")
+    md_files = [f for f in os.listdir(DOCS_DIR) if f.endswith(".md")]
+    doc_name = st.selectbox("更新対象のドキュメントを選択", md_files)
+    if st.button("🔍 GPTで修正提案を確認"):
+        messages = log_utils.load_yesterdays_log_as_messages()
+        if not messages:
+            st.warning("昨日の会話ログが見つからない、または空です。")
+        else:
+            conv_text = log_utils.messages_to_text(messages)
+            with st.spinner("GPTが修正文を生成中..."):
+                proposal = doc_update_engine.propose_doc_update(doc_name, conv_text)
+            st.subheader("💡 GPT修正提案")
+            st.code(proposal, language="diff")
+            if st.button("✅ この修正を反映してGitコミット"):
+                doc_update_engine.apply_update(doc_name, proposal, auto_approve=True)
+                st.success("✅ コミット完了！")
