@@ -286,7 +286,7 @@ if st.button("💡 GPTに修正案を生成させる"):
 """
 
     response = openai.ChatCompletion.create(
-        model="gpt-4-1106-preview",
+        model="gpt-4.1",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
