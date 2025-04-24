@@ -4,7 +4,8 @@ import os
 import subprocess
 from datetime import datetime
 
-from openai import OpenAI
+import openai
+
 from dotenv import load_dotenv
 
 from core.log_utils import messages_to_text
@@ -17,7 +18,7 @@ load_dotenv()  # ← ここで .env を読み込む
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise RuntimeError("❗ OPENAI_API_KEY is not set in the environment. Please check your .env file.")
-client = OpenAI(api_key=api_key)
+# client = OpenAI(api_key=api_key)
 
 # ───────────────────────────────
 # パス設定
