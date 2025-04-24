@@ -308,9 +308,7 @@ elif mode == "関数修正":
     else:
         for entry in reversed(history_data):
             with st.expander(f"🕒 {entry['timestamp']} | 関数: {entry['function']}"):
-                st.markdown(f"**指示内容**:\n```
-{entry['instruction']}
-```")
+                st.markdown(f"**指示内容**:\n```\n{entry['instruction']}\n```")
                 st.markdown(f"**提案された修正**:\n```markdown\n{entry['diff']}\n```")
 
 elif mode == "ドキュメント更新":
