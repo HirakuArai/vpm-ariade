@@ -225,7 +225,7 @@ def check_unprocessed_logs():
 # ──────────────────────────────────────────
 st.set_page_config(page_title="Kai - VPMアシスタント", page_icon="🧠")
 st.title("🧵 Virtual Project Manager - Kai")
-st.caption("バージョン: 2025-04-20 JST対応 + gpt-4.1対応 + 安全Git pull実装_3")
+st.caption("バージョン: 2025-04-24 Patch履歴UI実装 + 安全Git commit対応 + GPT修正提案反映")
 st.write("プロジェクトについて何でも聞いてください。")
 
 try_git_pull_safe()
@@ -316,6 +316,8 @@ if st.session_state.get("fn_proposal") and fn_selected:
         )
         if success:
             st.success(f"✅ 関数 `{fn_selected}` を更新しました！")
+            st.toast("💾 修正内容が履歴に保存されました", icon="📜")
+            st.balloons()
         else:
             st.error(f"❌ 関数 `{fn_selected}` の更新に失敗しました。")
 
