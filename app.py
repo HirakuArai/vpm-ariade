@@ -71,12 +71,36 @@ def get_today_log_path() -> tuple:
         # エラー発生時のフォールバックパスを返す
         return "unknown", "logs/unknown.log"
 
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 def append_to_log(role: str, content: str) -> None:
+    """
+    指定されたロールとコンテンツを用いて、日付付きのログエントリを作成し、
+    今日のログファイルに追加します。その後、変更をGitリポジトリにコミットします。
+
+    :param role: ログエントリに添付する役割の説明。
+    :param content: ログに書き込む内容。
+    """
+
+    # 現在時刻（東京タイムゾーン）を取得して、フォーマットされたログのタイムスタンプを生成します。
     ts = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M:%S")
+    
+    # 本日のログファイルに対するパスを取得します。
+    # `get_today_log_path`関数は当日の日付を基にログファイルのパスを返します。
     _, path = get_today_log_path()
+    
+    # ログファイルを開き、指定されたフォーマットでログエントリを追記します。
+    # ログエントリは次の形式で記録されます: "## タイムスタンプ [ROLE: 役割]\n内容\n\n"
     with open(path, "a", encoding="utf-8") as f:
         f.write(f"## {ts} [ROLE: {role}]\n{content.strip()}\n\n")
+    
+    # ログファイルへの変更をGitリポジトリにコミットするために関数を呼び出します。
+    # この操作はログの変更履歴を追跡しやすくするために行われます。
     try_git_commit(path)
+
+# 必要な関数定義 `get_today_log_path` と `try_git_commit` はドキュメントに記述されていませんが、
+# 前提としてこれらの関数はこのコード用に正しく設計されているものとします。
 
 def load_conversation_messages():
     _, path = get_today_log_path()
