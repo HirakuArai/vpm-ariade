@@ -167,46 +167,6 @@ def try_git_commit(file_path: str) -> None:
         print(f"❌ Git push失敗: {e}", flush=True)
 
 # ──────────────────────────────────────────
-# 会話ログの確認処理
-# ──────────────────────────────────────────
-
-def show_patch_log():
-    """docs/patch_log.json から修正履歴を読み込み、Streamlitで表示します。"""
-    st.subheader("📘 修正履歴ログ（ドキュメント）")
-    patch_log_path = os.path.join("docs", "patch_log.json")
-
-    if not os.path.exists(patch_log_path):
-        st.info("修正履歴はまだありません。")
-        return
-
-    try:
-        with open(patch_log_path, "r", encoding="utf-8") as f:
-            patch_logs = json.load(f)
-    except Exception as e:
-        st.error(f"修正履歴の読み込み時にエラーが発生しました: {e}")
-        return
-
-    if not patch_logs:
-        st.info("修正履歴はまだありません。")
-        return
-
-    # 新しい順に並び替え（修正日時が "timestamp" キー等に入っている前提）
-    patch_logs_sorted = sorted(
-        patch_logs,
-        key=lambda x: x.get("timestamp", ""),
-        reverse=True
-    )
-
-    for log in patch_logs_sorted:
-        dt = log.get("timestamp", "日時不明")
-        fname = log.get("filename", "ファイル名不明")
-        diff = log.get("diff", "")
-
-        with st.expander(f"{dt} — {fname}", expanded=False):
-            st.write("**差分内容：**")
-            st.code(diff, language="diff")
-
-# ──────────────────────────────────────────
 # Streamlit UI（Kai モード切り替え統合版）
 # ──────────────────────────────────────────
 st.set_page_config(page_title="Kai - VPMアシスタント", page_icon="🧠")
@@ -296,9 +256,9 @@ elif mode == "関数修正":
             with st.expander(f"🕒 {entry['timestamp']} | 関数: {entry['function']}"):
                 st.markdown(f"**指示内容**:\n```\n{entry['instruction']}\n```")
                 st.markdown(f"**提案された修正**:\n```markdown\n{entry['diff']}\n```")
-                st.divider()
-                show_patch_log()
 
+        st.divider()
+        show_patch_log()
 
 elif mode == "ドキュメント更新":
     st.header("🧠 ドキュメント更新提案（Kai）")
