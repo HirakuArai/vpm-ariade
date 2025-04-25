@@ -77,6 +77,39 @@ def load_conversation_messages():
         })
     return msgs
 
+def check_unprocessed_logs():
+    """未処理の会話ログファイルをチェックしてGit管理する"""
+    print("🧪 check_unprocessed_logs() 開始", flush=True)
+    try:
+        print("🔍 check_unprocessed_logs: start", flush=True)
+        if os.path.exists(FLAG_PATH):
+            with open(FLAG_PATH, "r", encoding="utf-8") as f:
+                flags = json.load(f)
+        else:
+            flags = {}
+
+        files = sorted(f for f in os.listdir(CONV_DIR)
+                       if f.startswith("conversation_") and f.endswith(".md"))
+
+        updated = False
+        for file in files:
+            if file not in flags:
+                print(f"🟡 未処理ログ検出: {file}", flush=True)
+                flags[file] = "checked"
+                updated = True
+
+        if updated:
+            print("📂 フラグを保存します", flush=True)
+            with open(FLAG_PATH, "w", encoding="utf-8") as f:
+                json.dump(flags, f, ensure_ascii=False, indent=2)
+            print("📁 保存内容:", flags, flush=True)
+            try_git_commit(FLAG_PATH)
+        else:
+            print("✅ すべてのログが処理済みです", flush=True)
+
+    except Exception as e:
+        print(f"❌ check_unprocessed_logs エラー: {e}", flush=True)
+
 # ──────────────────────────────────────────
 # System プロンプト
 # ──────────────────────────────────────────
