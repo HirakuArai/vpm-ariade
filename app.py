@@ -1,24 +1,25 @@
 # app.py  –  Kai (Streamlit Cloud)
 
-import streamlit as st
-import openai
+# ──────────────────────────────────────────
+# 必要なライブラリ import（すべて先頭に集約）
+# ──────────────────────────────────────────
 import os
-import subprocess
 import json
+import subprocess
 from datetime import datetime
 from zoneinfo import ZoneInfo
+import pytz
+import streamlit as st
+import openai
 from dotenv import load_dotenv
 
 # ──────────────────────────────────────────
-# 認証キー & トークン
+# 認証キー & パス
 # ──────────────────────────────────────────
 load_dotenv()
 openai.api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
 github_token = st.secrets.get("GITHUB_TOKEN") or os.getenv("GITHUB_TOKEN")
 
-# ──────────────────────────────────────────
-# パス類
-# ──────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOCS_DIR = os.path.join(BASE_DIR, "docs")
 CONV_DIR = os.path.join(BASE_DIR, "conversations")
@@ -27,56 +28,33 @@ os.makedirs(CONV_DIR, exist_ok=True)
 os.makedirs(os.path.dirname(FLAG_PATH), exist_ok=True)
 
 # ──────────────────────────────────────────
-# 会話ログ
+# 会話ログ処理系 関数定義
 # ──────────────────────────────────────────
-from datetime import datetime
-import pytz
 
-from datetime import datetime
-import pytz
-
-import os
-import pytz
-from datetime import datetime
-
-function_list = extract_functions("app.py")
-
-from datetime import datetime
-from zoneinfo import ZoneInfo
+def get_today_log_path() -> tuple:
+    try:
+        tokyo = pytz.timezone('Asia/Tokyo')
+        today = datetime.now(tokyo)
+        date_str = today.strftime('%Y-%m-%d')
+        log_directory = "logs"
+        os.makedirs(log_directory, exist_ok=True)
+        log_path = f"{log_directory}/{date_str}.log"
+        return date_str, log_path
+    except Exception as e:
+        print(f"❌ get_today_log_path() でエラー: {e}", flush=True)
+        return "unknown", "logs/unknown.log"
 
 def append_to_log(role: str, content: str) -> None:
-    """
-    指定されたロールとコンテンツを用いて、日付付きのログエントリを作成し、
-    今日のログファイルに追加します。その後、変更をGitリポジトリにコミットします。
-
-    :param role: ログエントリに添付する役割の説明。
-    :param content: ログに書き込む内容。
-    """
-
-    # 現在時刻（東京タイムゾーン）を取得して、フォーマットされたログのタイムスタンプを生成します。
     ts = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M:%S")
-    
-    # 本日のログファイルに対するパスを取得します。
-    # `get_today_log_path`関数は当日の日付を基にログファイルのパスを返します。
     _, path = get_today_log_path()
-    
-    # ログファイルを開き、指定されたフォーマットでログエントリを追記します。
-    # ログエントリは次の形式で記録されます: "## タイムスタンプ [ROLE: 役割]\n内容\n\n"
     with open(path, "a", encoding="utf-8") as f:
         f.write(f"## {ts} [ROLE: {role}]\n{content.strip()}\n\n")
-    
-    # ログファイルへの変更をGitリポジトリにコミットするために関数を呼び出します。
-    # この操作はログの変更履歴を追跡しやすくするために行われます。
     try_git_commit(path)
-
-# 必要な関数定義 `get_today_log_path` と `try_git_commit` はドキュメントに記述されていませんが、
-# 前提としてこれらの関数はこのコード用に正しく設計されているものとします。
 
 def load_conversation_messages():
     _, path = get_today_log_path()
     if not os.path.exists(path):
         return []
-
     msgs, cur_role, buf = [], None, []
     with open(path, encoding="utf-8") as f:
         for line in f:
@@ -92,7 +70,6 @@ def load_conversation_messages():
                     cur_role = line.split("[ROLE: ")[1].split("]")[0]
             else:
                 buf.append(line)
-
     if cur_role and buf:
         msgs.append({
             "role": "user" if cur_role == "USER" else "assistant",
@@ -227,7 +204,7 @@ if mode == "チャット":
 elif mode == "関数修正":
     st.divider()
     st.subheader("🛠 Kai 自己改修：関数選択モード")
-    function_list = extract_functions("app.py")
+    function_list = extract_functions("app.py") + extract_functions("core/doc_update_engine.py")
     function_labels = [f"{f['name']} ({', '.join(f['args'])}) @ L{f['lineno']}" for f in function_list]
     selected_func_label = st.selectbox("🔧 修正したい関数を選んでください", function_labels)
     user_instruction = st.text_area("📝 修正したい内容を具体的に記入してください")
