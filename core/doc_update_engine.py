@@ -91,14 +91,35 @@ def update_doc_with_gpt(doc_name: str, conversation_text: str, auto_approve=Fals
 
     apply_update(doc_name, proposal, auto_approve=True)
 
+import difflib
+import json
+
 def apply_update(doc_name: str, new_content: str, auto_approve=False):
     """
-    GPTが生成したMarkdown内容をファイルに反映し、Gitコミットする
+    GPTが生成したMarkdown内容をファイルに反映し、Gitコミット＋patch_log.jsonに差分履歴を記録する
     """
     target_path = os.path.join(DOCS_DIR, doc_name)
     if not os.path.exists(target_path):
         print(f"※ 指定のドキュメントが存在しません: {target_path}")
         return
+
+    # 旧内容の読み込み
+    with open(target_path, "r", encoding="utf-8") as f:
+        old_content = f.read()
+
+    if old_content == new_content:
+        print("内容に変更がないため、更新は行われません。")
+        return
+
+    # 差分生成（unified形式）
+    diff = list(difflib.unified_diff(
+        old_content.splitlines(),
+        new_content.splitlines(),
+        fromfile=f'a/{doc_name}',
+        tofile=f'b/{doc_name}',
+        lineterm=''
+    ))
+    diff_text = "\n".join(diff)
 
     print("=== 以下の内容でドキュメントを更新します ===")
     print(new_content)
@@ -115,10 +136,37 @@ def apply_update(doc_name: str, new_content: str, auto_approve=False):
         f.write(new_content)
     print(f"※ ファイルを更新しました: {target_path}")
 
+    # patch_log.json に履歴を追記
+    patch_log_path = os.path.join(DOCS_DIR, "patch_log.json")
+    patch_entry = {
+        "file": doc_name,
+        "datetime": datetime.utcnow().isoformat() + "Z",
+        "diff": diff_text
+    }
+
+    try:
+        if os.path.exists(patch_log_path):
+            with open(patch_log_path, "r", encoding="utf-8") as f:
+                patch_log = json.load(f)
+                if not isinstance(patch_log, list):
+                    patch_log = []
+        else:
+            patch_log = []
+    except Exception:
+        patch_log = []
+
+    patch_log.append(patch_entry)
+
+    with open(patch_log_path, "w", encoding="utf-8") as f:
+        json.dump(patch_log, f, ensure_ascii=False, indent=2)
+
+    print(f"✅ {doc_name} を修正し、差分を patch_log.json に記録しました")
+
     # Gitコミット
     commit_msg = f"update: {doc_name} via GPT apply_update ({datetime.now().strftime('%Y-%m-%d')})"
     try:
         subprocess.run(["git", "-C", BASE_DIR, "add", target_path], check=True)
+        subprocess.run(["git", "-C", BASE_DIR, "add", patch_log_path], check=True)  # patch_log もコミット対象に
         subprocess.run(["git", "-C", BASE_DIR, "commit", "-m", commit_msg], check=True)
         print(f"✅ Gitコミット完了: {commit_msg}")
     except subprocess.CalledProcessError as e:
