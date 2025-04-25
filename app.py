@@ -136,9 +136,6 @@ def try_git_commit(file_path: str) -> None:
 # ──────────────────────────────────────────
 # 会話ログの確認処理
 # ──────────────────────────────────────────
-import os
-import json
-import streamlit as st
 
 def show_patch_log():
     """docs/patch_log.json から修正履歴を読み込み、Streamlitで表示します。"""
@@ -185,7 +182,7 @@ st.caption("バージョン: 2025-04-25 Kai修正文提案機能をUI統合")
 st.write("プロジェクトについて何でも聞いてください。")
 
 from core.code_analysis import extract_functions
-from core.patch_log import load_patch_history
+from core.patch_log import load_patch_history, show_patch_log
 from core import log_utils, doc_update_engine
 
 # モード切り替え
@@ -266,6 +263,9 @@ elif mode == "関数修正":
             with st.expander(f"🕒 {entry['timestamp']} | 関数: {entry['function']}"):
                 st.markdown(f"**指示内容**:\n```\n{entry['instruction']}\n```")
                 st.markdown(f"**提案された修正**:\n```markdown\n{entry['diff']}\n```")
+                st.divider()
+                show_patch_log()
+
 
 elif mode == "ドキュメント更新":
     st.header("🧠 ドキュメント更新提案（Kai）")
