@@ -136,36 +136,45 @@ def try_git_commit(file_path: str) -> None:
 # ──────────────────────────────────────────
 # 会話ログの確認処理
 # ──────────────────────────────────────────
-def check_unprocessed_logs():
-    print("🧪 check_unprocessed_logs() 開始", flush=True)
+import os
+import json
+import streamlit as st
+
+def show_patch_log():
+    """docs/patch_log.json から修正履歴を読み込み、Streamlitで表示します。"""
+    st.subheader("📘 修正履歴ログ（ドキュメント）")
+    patch_log_path = os.path.join("docs", "patch_log.json")
+
+    if not os.path.exists(patch_log_path):
+        st.info("修正履歴はまだありません。")
+        return
+
     try:
-        print("🔍 check_unprocessed_logs: start", flush=True)
-        if os.path.exists(FLAG_PATH):
-            with open(FLAG_PATH, "r", encoding="utf-8") as f:
-                flags = json.load(f)
-        else:
-            flags = {}
-
-        files = sorted(f for f in os.listdir(CONV_DIR)
-                       if f.startswith("conversation_") and f.endswith(".md"))
-
-        updated = False
-        for file in files:
-            if file not in flags:
-                print(f"🟡 未処理ログ検出: {file}", flush=True)
-                flags[file] = "checked"
-                updated = True
-
-        if updated:
-            print("📂 フラグを保存します", flush=True)
-            with open(FLAG_PATH, "w", encoding="utf-8") as f:
-                json.dump(flags, f, ensure_ascii=False, indent=2)
-            print("📁 保存内容:", flags, flush=True)
-            try_git_commit(FLAG_PATH)
-        else:
-            print("✅ すべてのログが処理済みです", flush=True)
+        with open(patch_log_path, "r", encoding="utf-8") as f:
+            patch_logs = json.load(f)
     except Exception as e:
-        print(f"❌ check_unprocessed_logs エラー: {e}", flush=True)
+        st.error(f"修正履歴の読み込み時にエラーが発生しました: {e}")
+        return
+
+    if not patch_logs:
+        st.info("修正履歴はまだありません。")
+        return
+
+    # 新しい順に並び替え（修正日時が "timestamp" キー等に入っている前提）
+    patch_logs_sorted = sorted(
+        patch_logs,
+        key=lambda x: x.get("timestamp", ""),
+        reverse=True
+    )
+
+    for log in patch_logs_sorted:
+        dt = log.get("timestamp", "日時不明")
+        fname = log.get("filename", "ファイル名不明")
+        diff = log.get("diff", "")
+
+        with st.expander(f"{dt} — {fname}", expanded=False):
+            st.write("**差分内容：**")
+            st.code(diff, language="diff")
 
 # ──────────────────────────────────────────
 # Streamlit UI（Kai モード切り替え統合版）
