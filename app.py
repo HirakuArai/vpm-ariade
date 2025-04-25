@@ -39,37 +39,7 @@ import os
 import pytz
 from datetime import datetime
 
-def get_today_log_path() -> tuple:
-    """
-    現在の日時を東京のタイムゾーンで取得し、その日付を用いてログファイルの保存パスを生成します。
-    もしログディレクトリが存在しない場合は作成し、日付に応じたログファイルのパスを構築して返します。
-
-    Returns:
-        tuple: 生成された日付の文字列と、対応するログファイルのパスを含むタプル。
-               フォーマット - ('YYYY-MM-DD', 'logs/YYYY-MM-DD.log')
-    
-    Exceptions:
-        万が一、パスの生成やディレクトリの作成においてエラーが発生した場合、標準エラー出力にエラーメッセージを出力し、
-        ('unknown', 'logs/unknown.log') を返します。
-    """
-    try:
-        # Tokyoのタイムゾーンを取得
-        tokyo = pytz.timezone('Asia/Tokyo')
-        today = datetime.now(tokyo)
-        date_str = today.strftime('%Y-%m-%d')
-
-        # ログディレクトリのパスを構築し、必要に応じてディレクトリを作成
-        log_directory = "logs"
-        os.makedirs(log_directory, exist_ok=True)
-
-        # 日付を用いてログファイルの完全なパスを構築
-        log_path = f"{log_directory}/{date_str}.log"
-        return date_str, log_path
-
-    except Exception as e:
-        print(f"❌ get_today_log_path() でエラーが発生しました: {e}", flush=True)
-        # エラー発生時のフォールバックパスを返す
-        return "unknown", "logs/unknown.log"
+function_list = extract_functions("app.py")
 
 from datetime import datetime
 from zoneinfo import ZoneInfo
