@@ -1,4 +1,8 @@
 import openai
+import os
+import json
+
+DOCS_DIR = "docs"  # app.pyでも同じなので合わせます
 
 def generate_tags(text: str) -> list[str]:
     """テキスト内容に基づき、最大3個の日本語タグを返す"""
@@ -18,3 +22,21 @@ def generate_tags(text: str) -> list[str]:
     except Exception as e:
         print(f"❌ タグ生成失敗: {e}", flush=True)
         return []
+
+def save_tags(doc_name: str, tags: list):
+    """
+    指定されたMarkdownファイルに対応する.tagsファイルを作成し、タグを保存する
+    """
+    if not tags:
+        print("⚠️ タグが空のため保存しません。")
+        return
+
+    base_name = os.path.splitext(doc_name)[0]
+    tags_path = os.path.join(DOCS_DIR, f"{base_name}.tags")
+
+    try:
+        with open(tags_path, "w", encoding="utf-8") as f:
+            json.dump(tags, f, ensure_ascii=False, indent=2)
+        print(f"✅ タグを保存しました: {tags_path}")
+    except Exception as e:
+        print(f"❌ タグ保存に失敗しました: {e}")

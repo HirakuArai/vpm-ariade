@@ -278,7 +278,7 @@ elif mode == "ドキュメント更新":
             if st.button("✅ この修正を反映してGitコミット"):
                 doc_update_engine.apply_update(doc_name, proposal, auto_approve=True)
                 st.success("✅ コミット完了！")
-
+    
     st.divider()
     st.header("🏷 ドキュメント自動タグ付けツール（Kai）")
 
@@ -288,6 +288,13 @@ elif mode == "ドキュメント更新":
             tags = generate_tags(content)
             if tags:
                 st.success(f"✅ タグ生成完了: {', '.join(tags)}")
+                st.session_state["generated_tags"] = tags  # セッションに一時保存
             else:
                 st.warning("⚠ タグを生成できませんでした。")
 
+    # 🔥 タグ保存ボタン（上でタグ生成された場合のみ）
+    if "generated_tags" in st.session_state and st.session_state["generated_tags"]:
+        if st.button("💾 生成したタグをファイルに保存する"):
+            from core.tagging import save_tags  # ここでimport（またはファイル先頭にまとめる）
+            save_tags(doc_name, st.session_state["generated_tags"])
+            st.success("✅ タグファイルを保存しました！")
