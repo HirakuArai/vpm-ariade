@@ -298,3 +298,5 @@ elif mode == "ドキュメント更新":
             from core.tagging import save_tags  # ここでimport（またはファイル先頭にまとめる）
             save_tags(doc_name, st.session_state["generated_tags"])
             st.success("✅ タグファイルを保存しました！")
+            # ⬇ Gitに自動コミット！
+            try_git_commit(os.path.join(DOCS_DIR, doc_name.replace(".md", ".tags")))
