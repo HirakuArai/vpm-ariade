@@ -177,6 +177,7 @@ st.write("プロジェクトについて何でも聞いてください。")
 from core.code_analysis import extract_functions
 from core.patch_log import load_patch_history, show_patch_log
 from core import log_utils, doc_update_engine
+from core.tagging import generate_tags  # 🆕 追加
 
 # モード切り替え
 mode = st.sidebar.radio("📂 モード選択", ["チャット", "関数修正", "ドキュメント更新"])
@@ -277,3 +278,16 @@ elif mode == "ドキュメント更新":
             if st.button("✅ この修正を反映してGitコミット"):
                 doc_update_engine.apply_update(doc_name, proposal, auto_approve=True)
                 st.success("✅ コミット完了！")
+
+    st.divider()
+    st.header("🏷 ドキュメント自動タグ付けツール（Kai）")
+
+    if st.button("🏷 選択中のドキュメントにタグを生成する"):
+        with st.spinner("タグを生成中..."):
+            content = read_file(os.path.join(DOCS_DIR, doc_name))
+            tags = generate_tags(content)
+            if tags:
+                st.success(f"✅ タグ生成完了: {', '.join(tags)}")
+            else:
+                st.warning("⚠ タグを生成できませんでした。")
+
