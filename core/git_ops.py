@@ -12,6 +12,13 @@ FLAG_PATH = PROJECT_ROOT / "check_flags" / "processed_logs.json"
 github_token = os.getenv("GITHUB_TOKEN") or ""
 
 # ── Git: pull
+@kai_capability(
+    id="safe_pull",
+    name="リモートリポジトリを最新化",
+    description="安全な方法でリモートリポジトリから変更を取得（git pull）します。",
+    requires_confirm=True
+)
+
 def try_git_pull_safe():
     try:
         subprocess.run(["git", "stash", "--include-untracked"], check=True,

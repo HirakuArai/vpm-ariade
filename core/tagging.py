@@ -2,7 +2,16 @@ import openai
 import os
 import json
 
+from core.capabilities_registry import kai_capability
+
 DOCS_DIR = "docs"  # app.pyでも同じなので合わせます
+
+@kai_capability(
+    id="generate_tags",
+    name="ドキュメントタグ生成",
+    description="ドキュメント内容を解析し、関連するキーワードタグを自動生成します。",
+    requires_confirm=False
+)
 
 def generate_tags(text: str) -> list[str]:
     """テキスト内容に基づき、最大3個の日本語タグを返す"""

@@ -4,6 +4,15 @@ from core.git_ops import try_git_commit
 from core.patch_log import log_patch
 import os
 
+from core.capabilities_registry import kai_capability
+
+@kai_capability(
+    id="apply_patch",
+    name="GPT修正提案を適用",
+    description="GPTが提案したコード修正案をソースコードに適用します。",
+    requires_confirm=True
+)
+
 def apply_gpt_patch(markdown_text: str, fn_name: str, source_path: str = "app.py", auto_commit: bool = True) -> bool:
     """
     GPTが返したMarkdown形式の修正提案（markdown_text）からコードブロックを抽出し、

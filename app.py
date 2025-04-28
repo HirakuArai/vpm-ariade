@@ -13,6 +13,8 @@ import streamlit as st
 import openai
 from dotenv import load_dotenv
 
+from core.capabilities_registry import kai_capability
+
 # ──────────────────────────────────────────
 # 認証キー & パス
 # ──────────────────────────────────────────
@@ -44,12 +46,26 @@ def get_today_log_path() -> tuple:
         print(f"❌ get_today_log_path() でエラー: {e}", flush=True)
         return "unknown", "logs/unknown.log"
 
+@kai_capability(
+    id="append_log",
+    name="会話ログを保存",
+    description="ユーザーとの会話内容をログファイルに記録します。",
+    requires_confirm=False
+)
+
 def append_to_log(role: str, content: str) -> None:
     ts = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M:%S")
     _, path = get_today_log_path()
     with open(path, "a", encoding="utf-8") as f:
         f.write(f"## {ts} [ROLE: {role}]\n{content.strip()}\n\n")
     try_git_commit(path)
+
+@kai_capability(
+    id="load_log",
+    name="会話ログを読み込む",
+    description="保存された過去の会話ログを読み込みます。",
+    requires_confirm=False
+)
 
 def load_conversation_messages():
     _, path = get_today_log_path()

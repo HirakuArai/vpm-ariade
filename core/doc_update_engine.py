@@ -9,6 +9,7 @@ import openai
 from dotenv import load_dotenv
 
 from core.log_utils import messages_to_text
+from core.capabilities_registry import kai_capability
 
 load_dotenv()  # ← ここで .env を読み込む
 
@@ -31,6 +32,13 @@ def safe_load_text(path: str) -> str:
         with open(path, "r", encoding="utf-8") as f:
             return f.read()
     return ""
+
+@kai_capability(
+    id="doc_update_proposal",
+    name="ドキュメント修正提案",
+    description="ユーザーとの会話内容をもとにドキュメント修正案を生成します。",
+    requires_confirm=False
+)
 
 def propose_doc_update(doc_name: str, conversation_text: str, model="gpt-4.1") -> str:
     base_os = safe_load_text(os.path.join(DOCS_DIR, "base_os_rules_a.md"))
