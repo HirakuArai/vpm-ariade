@@ -116,11 +116,28 @@ def check_unprocessed_logs():
 def read_file(path: str) -> str:
     return open(path, encoding="utf-8").read() if os.path.exists(path) else ""
 
+
 def get_system_prompt() -> str:
     overview   = read_file(os.path.join(DOCS_DIR, "architecture_overview.md"))
     base_rules = read_file(os.path.join(DOCS_DIR, "base_os_rules.md"))
     definition = read_file(os.path.join(DOCS_DIR, "project_definition.md"))
     status     = read_file(os.path.join(DOCS_DIR, "project_status.md"))
+
+    # ── NEW: kai_capabilities.json ─────────────────
+    caps_path = os.path.join(DOCS_DIR, "kai_capabilities.json")
+    caps = []
+    if os.path.exists(caps_path):
+        import json
+        with open(caps_path, "r", encoding="utf-8") as f:
+            caps = json.load(f)
+
+    caps_text = "\n".join(
+        f"- **{c.get('name','')}**: {c.get('description','')}"
+        + (" (要承認)" if c.get('requires_confirm') else "")
+        for c in caps if c.get("enabled", True)
+    ) or "（能力リストがまだ登録されていません）"
+    # ──────────────────────────────────────────────
+
     return f"""{overview}
 
 {base_rules}
@@ -130,6 +147,9 @@ def get_system_prompt() -> str:
 
 【現在のステータス】
 {status if status.strip() else "（現在のステータス情報はありません）"}
+
+【Kai Capabilities】
+{caps_text}
 """
 
 # ──────────────────────────────────────────

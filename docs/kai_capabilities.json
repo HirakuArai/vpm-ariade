@@ -1,0 +1,52 @@
+[
+    {
+      "id": "read_doc",
+      "name": "ドキュメント閲覧",
+      "description": "指定した Markdown やテキストファイルを読み取り、内容を表示する。",
+      "requires_confirm": false,
+      "enabled": true
+    },
+    {
+      "id": "edit_file",
+      "name": "ファイル修正提案",
+      "description": "Python ファイルや Markdown ファイルの特定箇所を抽出し、修正案を生成して提示する。",
+      "requires_confirm": true,
+      "enabled": true
+    },
+    {
+      "id": "git_commit",
+      "name": "Git コミット & プッシュ",
+      "description": "承認済みの変更を git add / commit / push でリポジトリへ反映する。",
+      "requires_confirm": true,
+      "enabled": true
+    },
+    {
+      "id": "show_status",
+      "name": "プロジェクト状況表示",
+      "description": "project_status.md から進捗・タスク・リスクを読み取り UI に表示する。",
+      "requires_confirm": false,
+      "enabled": true
+    },
+    {
+      "id": "tag_document",
+      "name": "ドキュメントタグ生成",
+      "description": "指定ドキュメント(.md)のキーワードタグ(.tagファイル)を生成する。",
+      "requires_confirm": true,
+      "enabled": true
+    },
+    {
+      "id": "sync_repo",
+      "name": "リモートリポジトリ同期",
+      "description": "安全な git pull を行いローカル環境を最新状態に同期する。",
+      "requires_confirm": true,
+      "enabled": true
+    },
+    {
+      "id": "code_analysis",
+      "name": "コード静的解析",
+      "description": "選択した Python ファイルに対して AST 解析を行い、関数一覧や問題点を抽出する。",
+      "requires_confirm": false,
+      "enabled": true
+    }
+  ]
+  
