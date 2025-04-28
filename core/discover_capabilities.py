@@ -4,7 +4,7 @@ import os
 import ast
 from pathlib import Path
 
-def discover_capabilities(base_dir: str = ".") -> list:
+def discover_capabilities(base_dir: str = ".", full_scan: bool = False) -> list:
     capabilities = []
 
     # 走査対象
@@ -21,12 +21,22 @@ def discover_capabilities(base_dir: str = ".") -> list:
             tree = ast.parse(f.read(), filename=str(file_path))
 
         for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef) and node.decorator_list:
-                for deco in node.decorator_list:
+            if isinstance(node, ast.FunctionDef):
+                meta = {
+                    "id": None,
+                    "name": node.name,
+                    "description": "",
+                    "requires_confirm": False,
+                    "enabled": True,
+                    "decorated": False
+                }
+                # デコレータチェック
+                for deco in node.decorator_list or []:
                     if isinstance(deco, ast.Call) and getattr(deco.func, "id", "") == "kai_capability":
-                        cap = {}
                         for keyword in deco.keywords:
-                            cap[keyword.arg] = ast.literal_eval(keyword.value)
-                        capabilities.append(cap)
+                            meta[keyword.arg] = ast.literal_eval(keyword.value)
+                        meta["decorated"] = True
+                if full_scan or meta["decorated"]:
+                    capabilities.append(meta)
 
     return capabilities

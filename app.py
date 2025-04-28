@@ -333,3 +333,12 @@ if st.sidebar.button("🔍 Discover Kai Capabilities (テスト)"):
     st.subheader("Kaiが自己解析した能力一覧（生データ）")
     capabilities = discover_capabilities()
     st.json(capabilities)
+
+# ──────────────────────────────────────────
+# 仮設：全関数AST走査ボタン
+# ──────────────────────────────────────────
+
+if st.sidebar.button("📜 AST 走査で関数一覧を出力"):
+    st.subheader("🔍 Kaiが検出した関数一覧（decorated=Trueがcapability）")
+    capabilities_full = discover_capabilities(full_scan=True)
+    st.json(capabilities_full)
