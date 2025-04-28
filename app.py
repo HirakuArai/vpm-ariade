@@ -320,3 +320,16 @@ elif mode == "ドキュメント更新":
             st.success("✅ タグファイルを保存しました！")
             # ⬇ Gitに自動コミット！
             try_git_commit(os.path.join(DOCS_DIR, doc_name.replace(".md", ".tags")))
+
+# ──────────────────────────────────────────
+# 仮設：テスト用ボタン（discover_capabilities）
+# ──────────────────────────────────────────
+from core.discover_capabilities import discover_capabilities  # インポートも必須（まだならファイル頭で！）
+
+st.divider()
+st.subheader("🔍 Kai自己能力解析（テスト用）")
+
+if st.sidebar.button("🔍 Discover Kai Capabilities (テスト)"):
+    st.subheader("Kaiが自己解析した能力一覧（生データ）")
+    capabilities = discover_capabilities()
+    st.json(capabilities)
