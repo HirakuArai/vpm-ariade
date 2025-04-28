@@ -2,6 +2,8 @@
 import os, subprocess, json, sys
 from pathlib import Path
 
+from core.capabilities_registry import kai_capability
+
 # プロジェクト直下を基点にパスを計算
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CONV_DIR = PROJECT_ROOT / "conversations"
@@ -23,6 +25,13 @@ def try_git_pull_safe():
         print("❌ Git pull 失敗:", e, flush=True)
 
 # ── Git: commit & push
+@kai_capability(
+    id="git_commit",
+    name="Git コミット & プッシュ",
+    description="承認済み変更を git add / commit / push でリポジトリに反映する。",
+    requires_confirm=True
+)
+
 def try_git_commit(file_path: str):
     if not github_token:
         return
