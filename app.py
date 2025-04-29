@@ -384,3 +384,21 @@ if st.sidebar.button("📜 AST 走査で関数一覧を出力"):
     st.subheader("🔍 Kaiが検出した関数一覧（decorated=Trueがcapability）")
     capabilities_full = discover_capabilities(full_scan=True)
     st.json(capabilities_full)
+
+# ──────────────────────────────────────────
+# 仮設：自己能力差分チェック（capabilities_diff）
+# ──────────────────────────────────────────
+from core.capabilities_diff import (
+    load_ast_capabilities,
+    load_json_capabilities,
+    compare_capabilities,
+    format_diff_for_output
+)
+
+if st.sidebar.button("🧪 Kai能力差分チェック（AST vs JSON）"):
+    st.subheader("🧠 Kai 自己能力 差分チェック結果")
+    ast_caps = load_ast_capabilities()
+    json_caps = load_json_capabilities()
+    diff = compare_capabilities(ast_caps, json_caps)
+    formatted = format_diff_for_output(diff)
+    st.markdown(formatted)

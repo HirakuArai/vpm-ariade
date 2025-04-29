@@ -14,13 +14,6 @@
       "enabled": true
     },
     {
-      "id": "git_commit",
-      "name": "Git コミット & プッシュ",
-      "description": "承認済みの変更を git add / commit / push でリポジトリへ反映する。",
-      "requires_confirm": true,
-      "enabled": true
-    },
-    {
       "id": "show_status",
       "name": "プロジェクト状況表示",
       "description": "project_status.md から進捗・タスク・リスクを読み取り UI に表示する。",
@@ -47,6 +40,55 @@
       "description": "選択した Python ファイルに対して AST 解析を行い、関数一覧や問題点を抽出する。",
       "requires_confirm": false,
       "enabled": true
-    }
+    },
+    {
+      "id": "append_log",
+      "name": "会話ログを保存",
+      "description": "ユーザーとの会話内容をログファイルに記録します。",
+      "requires_confirm": false,
+      "enabled": true
+    },
+    {
+      "id": "load_log",
+      "name": "会話ログを読み込む",
+      "description": "保存された過去の会話ログを読み込みます。",
+      "requires_confirm": false,
+      "enabled": true
+    },
+    {
+      "id": "safe_pull",
+      "name": "リモートリポジトリを最新化",
+      "description": "安全な方法でリモートリポジトリから変更を取得（git pull）します。",
+      "requires_confirm": true,
+      "enabled": true
+    },
+    {
+      "id": "doc_update_proposal",
+      "name": "ドキュメント修正提案",
+      "description": "ユーザーとの会話内容をもとにドキュメント修正案を生成します。",
+      "requires_confirm": false,
+      "enabled": true
+    },
+    {
+      "id": "apply_patch",
+      "name": "GPT修正提案を適用",
+      "description": "GPTが提案したコード修正案をソースコードに適用します。",
+      "requires_confirm": true,
+      "enabled": true
+    },
+    {
+      "id": "generate_tags",
+      "name": "ドキュメントタグ生成",
+      "description": "ドキュメント内容を解析し、関連するキーワードタグを自動生成します。",
+      "requires_confirm": false,
+      "enabled": true
+    },
+    {
+      "id": "git_commit",
+      "name": "Git コミット & プッシュ",
+      "description": "承認済み変更を git add / commit / push でリポジトリに反映する。",
+      "requires_confirm": true,
+      "enabled": true
+    }      
   ]
   
