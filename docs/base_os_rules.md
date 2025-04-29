@@ -1,3 +1,11 @@
++---
++doc_type: "base_os_rules"
++required_capabilities:
++  - "read_doc"
++  - "enforce_rules"       # OS ルール適用
++  - "handle_approval"     # 承認フロー管理
++---
+
 # base_os_rules.md (PoC 最小版・Kai 統一)
 
 このドキュメントは PoC 段階の “Virtual Project Manager (VPM) – Ariade” が

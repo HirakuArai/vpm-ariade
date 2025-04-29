@@ -1,6 +1,14 @@
++---
++doc_type: "project_definition"
++required_capabilities:
++  - "read_doc"            # ドキュメント閲覧
++  - "edit_file"           # ファイル修正提案
++  - "propose_doc_update"  # Ariade_A 呼び出し
++  - "manage_tasks"        # タスク一覧を扱う
++---
+
 ```diff
 --- project_definition.md ( PoC 最小構成・Kai 統合 )
-+++ project_definition.md ( PoC 最小構成・Kai 統合 )
 
 @@
 -## 2. 全体目的
