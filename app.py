@@ -16,16 +16,41 @@ from dotenv import load_dotenv
 from core.capabilities_registry import kai_capability
 
 # ──────────────────────────────────────────
+# 開発モード設定
+# ──────────────────────────────────────────
+DEVELOPMENT_MODE = True  # 本番デプロイ時はFalseに変更
+
+# ──────────────────────────────────────────
 # 認証キー & パス
 # ──────────────────────────────────────────
-load_dotenv()
-openai.api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
-github_token = st.secrets.get("GITHUB_TOKEN") or os.getenv("GITHUB_TOKEN")
+import os
+from dotenv import load_dotenv
+import streamlit as st
 
+# 環境変数ロード
+load_dotenv()
+
+# 認証キー安全取得
+openai_api_key = os.getenv("OPENAI_API_KEY")
+github_token = os.getenv("GITHUB_TOKEN")
+
+# secrets.tomlが存在すれば読む（ローカル環境対策）
+try:
+    if hasattr(st, "secrets") and st.secrets:
+        openai_api_key = openai_api_key or st.secrets.get("OPENAI_API_KEY", None)
+        github_token = github_token or st.secrets.get("GITHUB_TOKEN", None)
+except Exception:
+    pass
+
+openai.api_key = openai_api_key
+
+# パス類
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOCS_DIR = os.path.join(BASE_DIR, "docs")
 CONV_DIR = os.path.join(BASE_DIR, "conversations")
 FLAG_PATH = os.path.join(BASE_DIR, "check_flags", "processed_logs.json")
+
+# 必須フォルダ作成
 os.makedirs(CONV_DIR, exist_ok=True)
 os.makedirs(os.path.dirname(FLAG_PATH), exist_ok=True)
 
@@ -219,7 +244,8 @@ from core.tagging import generate_tags  # 🆕 追加
 mode = st.sidebar.radio("📂 モード選択", ["チャット", "関数修正", "ドキュメント更新"])
 
 if mode == "チャット":
-    try_git_pull_safe()
+    if not DEVELOPMENT_MODE:
+        try_git_pull_safe()
     check_unprocessed_logs()
     history = load_conversation_messages()
     for m in history:
