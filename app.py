@@ -18,7 +18,7 @@ from core.capabilities_registry import kai_capability
 # ──────────────────────────────────────────
 # 開発モード設定
 # ──────────────────────────────────────────
-DEVELOPMENT_MODE = True  # 本番デプロイ時はFalseに変更
+DEVELOPMENT_MODE = False  # 本番デプロイ時はFalseに変更
 
 # ──────────────────────────────────────────
 # 認証キー & パス
