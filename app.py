@@ -12,6 +12,7 @@ import pytz
 import streamlit as st
 import openai
 from dotenv import load_dotenv
+import shutil
 
 from core.capabilities_registry import kai_capability
 
@@ -23,9 +24,6 @@ DEVELOPMENT_MODE = False  # 本番デプロイ時はFalseに変更
 # ──────────────────────────────────────────
 # 認証キー & パス
 # ──────────────────────────────────────────
-import os
-from dotenv import load_dotenv
-import streamlit as st
 
 # 環境変数ロード
 load_dotenv()
@@ -402,3 +400,55 @@ if st.sidebar.button("🧪 Kai能力差分チェック（AST vs JSON）"):
     diff = compare_capabilities(ast_caps, json_caps)
     formatted = format_diff_for_output(diff)
     st.markdown(formatted)
+
+# ──────────────────────────────────────────
+# 仮設：自己更新提案生成（capabilities_suggester）
+# ──────────────────────────────────────────
+from core.capabilities_suggester import generate_suggestions, generate_updated_capabilities
+
+if st.sidebar.button("🧪 Kai自己更新提案を生成（PoC）"):
+    st.subheader("🧠 Kai 自己更新提案")
+    ast_caps = load_ast_capabilities()
+    json_caps = load_json_capabilities()
+    diff = compare_capabilities(ast_caps, json_caps)
+    suggestion = generate_suggestions(diff)
+    st.markdown(suggestion)
+
+# ──────────────────────────────────────────
+# 仮設：自己更新提案を仮保存する（proposedファイル生成）
+# ──────────────────────────────────────────
+
+if st.sidebar.button("✅ 提案を承認して仮保存（PoC）"):
+    st.subheader("✅ 提案内容を仮保存しました（proposedファイル）")
+    ast_caps = load_ast_capabilities()
+    json_caps = load_json_capabilities()
+    updated_caps = generate_updated_capabilities(ast_caps, json_caps)
+
+    save_path = os.path.join(DOCS_DIR, "kai_capabilities_proposed.json")
+    with open(save_path, "w", encoding="utf-8") as f:
+        json.dump(updated_caps, f, ensure_ascii=False, indent=2)
+
+    st.success(f"✅ 仮保存完了: {save_path}")
+
+# ──────────────────────────────────────────
+# 仮設：自己更新提案を本番反映する（正式capabilities.jsonに上書き）
+# ──────────────────────────────────────────
+
+if st.sidebar.button("🚀 仮保存内容を本番反映する（慎重に）"):
+    st.subheader("🚀 本番反映を実行しました")
+    
+    proposed_path = os.path.join(DOCS_DIR, "kai_capabilities_proposed.json")
+    target_path = os.path.join(DOCS_DIR, "kai_capabilities.json")
+    
+    if not os.path.exists(proposed_path):
+        st.error("❌ 仮保存ファイルが存在しません！まず提案を仮保存してください。")
+    else:
+        # バックアップを作成
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_path = os.path.join(DOCS_DIR, f"kai_capabilities_backup_{timestamp}.json")
+        shutil.copy2(target_path, backup_path)
+        st.info(f"🗂️ バックアップ作成済み: {backup_path}")
+        
+        # 本番ファイルを上書き
+        shutil.copy2(proposed_path, target_path)
+        st.success("✅ kai_capabilities.json に本番反映が完了しました！")
