@@ -1,0 +1,466 @@
+[
+  {
+    "id": "get_today_log_path",
+    "name": "get_today_log_path",
+    "description": "TODO: Kaiの能力 'get_today_log_path' の説明を補完してください。",
+    "source_file": "app.py",
+    "args": []
+  },
+  {
+    "id": "append_to_log",
+    "name": "append_to_log",
+    "description": "TODO: Kaiの能力 'append_to_log' の説明を補完してください。",
+    "source_file": "app.py",
+    "args": [
+      "role",
+      "content"
+    ]
+  },
+  {
+    "id": "load_conversation_messages",
+    "name": "load_conversation_messages",
+    "description": "TODO: Kaiの能力 'load_conversation_messages' の説明を補完してください。",
+    "source_file": "app.py",
+    "args": []
+  },
+  {
+    "id": "check_unprocessed_logs",
+    "name": "check_unprocessed_logs",
+    "description": "TODO: Kaiの能力 'check_unprocessed_logs' の説明を補完してください。",
+    "source_file": "app.py",
+    "args": []
+  },
+  {
+    "id": "get_system_prompt",
+    "name": "get_system_prompt",
+    "description": "TODO: Kaiの能力 'get_system_prompt' の説明を補完してください。",
+    "source_file": "app.py",
+    "args": []
+  },
+  {
+    "id": "try_git_pull_safe",
+    "name": "try_git_pull_safe",
+    "description": "TODO: Kaiの能力 'try_git_pull_safe' の説明を補完してください。",
+    "source_file": "app.py",
+    "args": []
+  },
+  {
+    "id": "try_git_commit",
+    "name": "try_git_commit",
+    "description": "TODO: Kaiの能力 'try_git_commit' の説明を補完してください。",
+    "source_file": "app.py",
+    "args": [
+      "file_path"
+    ]
+  },
+  {
+    "id": "handle_approval",
+    "name": "handle_approval",
+    "description": "TODO: Kaiの能力 'handle_approval' の説明を補完してください。",
+    "source_file": "core/handle_approval.py",
+    "args": [
+      "requester",
+      "document",
+      "approval_status"
+    ]
+  },
+  {
+    "id": "select_next_task",
+    "name": "select_next_task",
+    "description": "TODO: Kaiの能力 'select_next_task' の説明を補完してください。",
+    "source_file": "core/task_selector.py",
+    "args": []
+  },
+  {
+    "id": "kai_capability",
+    "name": "kai_capability",
+    "description": "TODO: Kaiの能力 'kai_capability' の説明を補完してください。",
+    "source_file": "core/capabilities_registry.py",
+    "args": [
+      "id",
+      "name",
+      "description",
+      "requires_confirm",
+      "enabled"
+    ]
+  },
+  {
+    "id": "decorator",
+    "name": "decorator",
+    "description": "TODO: Kaiの能力 'decorator' の説明を補完してください。",
+    "source_file": "core/capabilities_registry.py",
+    "args": [
+      "fn"
+    ]
+  },
+  {
+    "id": "log_patch",
+    "name": "log_patch",
+    "description": "TODO: Kaiの能力 'log_patch' の説明を補完してください。",
+    "source_file": "core/patch_log.py",
+    "args": [
+      "fn_name",
+      "user_instruction",
+      "markdown_diff"
+    ]
+  },
+  {
+    "id": "load_patch_history",
+    "name": "load_patch_history",
+    "description": "TODO: Kaiの能力 'load_patch_history' の説明を補完してください。",
+    "source_file": "core/patch_log.py",
+    "args": [
+      "log_path"
+    ]
+  },
+  {
+    "id": "show_patch_log",
+    "name": "show_patch_log",
+    "description": "TODO: Kaiの能力 'show_patch_log' の説明を補完してください。",
+    "source_file": "core/patch_log.py",
+    "args": []
+  },
+  {
+    "id": "try_git_pull_safe",
+    "name": "try_git_pull_safe",
+    "description": "TODO: Kaiの能力 'try_git_pull_safe' の説明を補完してください。",
+    "source_file": "core/git_ops.py",
+    "args": []
+  },
+  {
+    "id": "try_git_commit",
+    "name": "try_git_commit",
+    "description": "TODO: Kaiの能力 'try_git_commit' の説明を補完してください。",
+    "source_file": "core/git_ops.py",
+    "args": [
+      "file_path"
+    ]
+  },
+  {
+    "id": "check_unprocessed_logs",
+    "name": "check_unprocessed_logs",
+    "description": "TODO: Kaiの能力 'check_unprocessed_logs' の説明を補完してください。",
+    "source_file": "core/git_ops.py",
+    "args": []
+  },
+  {
+    "id": "main",
+    "name": "main",
+    "description": "TODO: Kaiの能力 'main' の説明を補完してください。",
+    "source_file": "core/run_code_analysis.py",
+    "args": []
+  },
+  {
+    "id": "get_yesterday_log_filename",
+    "name": "get_yesterday_log_filename",
+    "description": "TODO: Kaiの能力 'get_yesterday_log_filename' の説明を補完してください。",
+    "source_file": "core/log_utils.py",
+    "args": []
+  },
+  {
+    "id": "load_yesterdays_log_as_messages",
+    "name": "load_yesterdays_log_as_messages",
+    "description": "TODO: Kaiの能力 'load_yesterdays_log_as_messages' の説明を補完してください。",
+    "source_file": "core/log_utils.py",
+    "args": []
+  },
+  {
+    "id": "messages_to_text",
+    "name": "messages_to_text",
+    "description": "TODO: Kaiの能力 'messages_to_text' の説明を補完してください。",
+    "source_file": "core/log_utils.py",
+    "args": [
+      "messages"
+    ]
+  },
+  {
+    "id": "create_task",
+    "name": "create_task",
+    "description": "TODO: Kaiの能力 'create_task' の説明を補完してください。",
+    "source_file": "core/manage_tasks.py",
+    "args": [
+      "title",
+      "description",
+      "due_date",
+      "priority"
+    ]
+  },
+  {
+    "id": "update_task",
+    "name": "update_task",
+    "description": "TODO: Kaiの能力 'update_task' の説明を補完してください。",
+    "source_file": "core/manage_tasks.py",
+    "args": [
+      "task_id",
+      "title",
+      "description",
+      "due_date",
+      "priority"
+    ]
+  },
+  {
+    "id": "delete_task",
+    "name": "delete_task",
+    "description": "TODO: Kaiの能力 'delete_task' の説明を補完してください。",
+    "source_file": "core/manage_tasks.py",
+    "args": [
+      "task_id"
+    ]
+  },
+  {
+    "id": "list_tasks",
+    "name": "list_tasks",
+    "description": "TODO: Kaiの能力 'list_tasks' の説明を補完してください。",
+    "source_file": "core/manage_tasks.py",
+    "args": [
+      "filter_by",
+      "order_by"
+    ]
+  },
+  {
+    "id": "extract_code_from_markdown",
+    "name": "extract_code_from_markdown",
+    "description": "TODO: Kaiの能力 'extract_code_from_markdown' の説明を補完してください。",
+    "source_file": "core/markdown_utils.py",
+    "args": [
+      "markdown_text",
+      "language"
+    ]
+  },
+  {
+    "id": "load_json",
+    "name": "load_json",
+    "description": "TODO: Kaiの能力 'load_json' の説明を補完してください。",
+    "source_file": "core/utils.py",
+    "args": [
+      "path"
+    ]
+  },
+  {
+    "id": "read_file",
+    "name": "read_file",
+    "description": "TODO: Kaiの能力 'read_file' の説明を補完してください。",
+    "source_file": "core/utils.py",
+    "args": [
+      "path"
+    ]
+  },
+  {
+    "id": "write_file",
+    "name": "write_file",
+    "description": "TODO: Kaiの能力 'write_file' の説明を補完してください。",
+    "source_file": "core/utils.py",
+    "args": [
+      "path",
+      "content"
+    ]
+  },
+  {
+    "id": "ensure_output_dir",
+    "name": "ensure_output_dir",
+    "description": "TODO: Kaiの能力 'ensure_output_dir' の説明を補完してください。",
+    "source_file": "core/utils.py",
+    "args": [
+      "path"
+    ]
+  },
+  {
+    "id": "safe_mkdir",
+    "name": "safe_mkdir",
+    "description": "TODO: Kaiの能力 'safe_mkdir' の説明を補完してください。",
+    "source_file": "core/utils.py",
+    "args": [
+      "path"
+    ]
+  },
+  {
+    "id": "safe_load_text",
+    "name": "safe_load_text",
+    "description": "TODO: Kaiの能力 'safe_load_text' の説明を補完してください。",
+    "source_file": "core/doc_update_engine.py",
+    "args": [
+      "path"
+    ]
+  },
+  {
+    "id": "propose_doc_update",
+    "name": "propose_doc_update",
+    "description": "TODO: Kaiの能力 'propose_doc_update' の説明を補完してください。",
+    "source_file": "core/doc_update_engine.py",
+    "args": [
+      "doc_name",
+      "conversation_text",
+      "model"
+    ]
+  },
+  {
+    "id": "update_doc_with_gpt",
+    "name": "update_doc_with_gpt",
+    "description": "TODO: Kaiの能力 'update_doc_with_gpt' の説明を補完してください。",
+    "source_file": "core/doc_update_engine.py",
+    "args": [
+      "doc_name",
+      "conversation_text",
+      "auto_approve"
+    ]
+  },
+  {
+    "id": "apply_update",
+    "name": "apply_update",
+    "description": "TODO: Kaiの能力 'apply_update' の説明を補完してください。",
+    "source_file": "core/doc_update_engine.py",
+    "args": [
+      "doc_name",
+      "new_content",
+      "auto_approve"
+    ]
+  },
+  {
+    "id": "apply_gpt_patch",
+    "name": "apply_gpt_patch",
+    "description": "TODO: Kaiの能力 'apply_gpt_patch' の説明を補完してください。",
+    "source_file": "core/kai_patch_applier.py",
+    "args": [
+      "markdown_text",
+      "fn_name",
+      "source_path",
+      "auto_commit"
+    ]
+  },
+  {
+    "id": "append_to_log",
+    "name": "append_to_log",
+    "description": "TODO: Kaiの能力 'append_to_log' の説明を補完してください。",
+    "source_file": "core/append_to_log.py",
+    "args": [
+      "message",
+      "log_file_path"
+    ]
+  },
+  {
+    "id": "generate_suggestions",
+    "name": "generate_suggestions",
+    "description": "TODO: Kaiの能力 'generate_suggestions' の説明を補完してください。",
+    "source_file": "core/capabilities_suggester.py",
+    "args": [
+      "diff_result"
+    ]
+  },
+  {
+    "id": "generate_updated_capabilities",
+    "name": "generate_updated_capabilities",
+    "description": "TODO: Kaiの能力 'generate_updated_capabilities' の説明を補完してください。",
+    "source_file": "core/capabilities_suggester.py",
+    "args": [
+      "ast_caps",
+      "json_caps"
+    ]
+  },
+  {
+    "id": "extract_functions",
+    "name": "extract_functions",
+    "description": "TODO: Kaiの能力 'extract_functions' の説明を補完してください。",
+    "source_file": "core/code_analysis.py",
+    "args": [
+      "source_path"
+    ]
+  },
+  {
+    "id": "extract_classes",
+    "name": "extract_classes",
+    "description": "TODO: Kaiの能力 'extract_classes' の説明を補完してください。",
+    "source_file": "core/code_analysis.py",
+    "args": [
+      "source_path"
+    ]
+  },
+  {
+    "id": "extract_variables",
+    "name": "extract_variables",
+    "description": "TODO: Kaiの能力 'extract_variables' の説明を補完してください。",
+    "source_file": "core/code_analysis.py",
+    "args": [
+      "source_path"
+    ]
+  },
+  {
+    "id": "discover_capabilities",
+    "name": "discover_capabilities",
+    "description": "TODO: Kaiの能力 'discover_capabilities' の説明を補完してください。",
+    "source_file": "core/discover_capabilities.py",
+    "args": [
+      "base_dir",
+      "full_scan"
+    ]
+  },
+  {
+    "id": "write_stub_file",
+    "name": "write_stub_file",
+    "description": "TODO: Kaiの能力 'write_stub_file' の説明を補完してください。",
+    "source_file": "core/stub_writer.py",
+    "args": [
+      "id",
+      "code"
+    ]
+  },
+  {
+    "id": "write_metadata_file",
+    "name": "write_metadata_file",
+    "description": "TODO: Kaiの能力 'write_metadata_file' の説明を補完してください。",
+    "source_file": "core/stub_writer.py",
+    "args": [
+      "id",
+      "name",
+      "description"
+    ]
+  },
+  {
+    "id": "save_capability_stub",
+    "name": "save_capability_stub",
+    "description": "TODO: Kaiの能力 'save_capability_stub' の説明を補完してください。",
+    "source_file": "core/stub_writer.py",
+    "args": [
+      "id",
+      "name",
+      "description",
+      "code"
+    ]
+  },
+  {
+    "id": "replace_function_in_source",
+    "name": "replace_function_in_source",
+    "description": "TODO: Kaiの能力 'replace_function_in_source' の説明を補完してください。",
+    "source_file": "core/code_rewriter.py",
+    "args": [
+      "source_path",
+      "fn_name",
+      "new_code"
+    ]
+  },
+  {
+    "id": "generate_tags",
+    "name": "generate_tags",
+    "description": "TODO: Kaiの能力 'generate_tags' の説明を補完してください。",
+    "source_file": "core/tagging.py",
+    "args": [
+      "text"
+    ]
+  },
+  {
+    "id": "save_tags",
+    "name": "save_tags",
+    "description": "TODO: Kaiの能力 'save_tags' の説明を補完してください。",
+    "source_file": "core/tagging.py",
+    "args": [
+      "doc_name",
+      "tags"
+    ]
+  },
+  {
+    "id": "load_ast_capabilities",
+    "name": "load_ast_capabilities",
+    "description": "TODO: Kaiの能力 'load_ast_capabilities' の説明を補完してください。",
+    "source_file": "core/capabilities_diff.py",
+    "args": []
+  }
+]

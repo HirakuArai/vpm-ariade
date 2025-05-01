@@ -1,0 +1,7 @@
+{
+  "id": "generate_report",
+  "name": "レポート生成",
+  "description": "指定された形式で日次レポートを自動生成します。",
+  "requires_confirm": false,
+  "enabled": true
+}

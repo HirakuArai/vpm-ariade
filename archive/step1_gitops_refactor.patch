@@ -1,0 +1,62 @@
+diff --git a/app.py b/app.py
+index 59aaacc..8c6c6f1 100644
+--- a/app.py
++++ b/app.py
+@@ -12,6 +12,8 @@
+ from zoneinfo import ZoneInfo
+ from dotenv import load_dotenv
+
++# Git処理系を core/git_ops.py へ分離
++from core.git_ops import try_git_pull_safe, try_git_commit, check_unprocessed_logs
+@@ def get_system_prompt() -> str:
+     return f"""{overview}
+
+ {base_rules}
+
+ 【プロジェクト定義】
+ {definition}
+
+ 【現在のステータス】
+ {status if status.strip() else "（現在のステータス情報はありません）"}"""
+@@
+-# ──────────────────────────────────────────
+-# Git: 安全にpull → commit → push
+-# ──────────────────────────────────────────
+-def try_git_pull_safe():
+-    try:
+-        subprocess.run(["git", "stash", "--include-untracked"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+-        repo_url_with_token = f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"
+-        result = subprocess.run(
+-            ["git", "pull", "--rebase", repo_url_with_token],
+-            check=False,
+-            capture_output=True,
+-            text=True
+-        )
+-        if result.returncode != 0:
+-            print(f"❌ Git pull失敗: {result.stderr.strip()}", flush=True)
+-        else:
+-            print("✅ 安全にGit pull完了", flush=True)
+-        subprocess.run(["git", "stash", "pop"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+-    except subprocess.CalledProcessError as e:
+-        print(f"❌ Git pull時の例外: {e}", flush=True)
+-
+-def try_git_commit(file_path: str) -> None:
+-    if not github_token:
+-        return
+-    try:
+-        print(f"📌 Gitコミット開始: {file_path}", flush=True)
+-        subprocess.run(["git", "config", "--global", "user.name", "Kai Bot"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+-        subprocess.run(["git", "config", "--global", "user.email", "kai@example.com"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+-        subprocess.run(["git", "add", file_path], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+-        subprocess.run(["git", "commit", "-m", f"Update log: {os.path.basename(file_path)}"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+-        subprocess.run(["git", "push", f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+-    except subprocess.CalledProcessError as e:
+-        print(f"❌ Git push失敗: {e}", flush=True)
+-
+-# ──────────────────────────────────────────
+-# 会話ログの確認処理
+-# ──────────────────────────────────────────
+-def check_unprocessed_logs():
+-    print("🧪 check_unprocessed_logs() 開始", flush=True)
+-    try:
+-        ...

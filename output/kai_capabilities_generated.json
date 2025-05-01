@@ -1,0 +1,466 @@
+[
+  {
+    "file": "app.py",
+    "type": "function",
+    "name": "get_today_log_path",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "app.py",
+    "type": "function",
+    "name": "append_to_log",
+    "args": [
+      "role",
+      "content"
+    ],
+    "doc": null
+  },
+  {
+    "file": "app.py",
+    "type": "function",
+    "name": "load_conversation_messages",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "app.py",
+    "type": "function",
+    "name": "check_unprocessed_logs",
+    "args": [],
+    "doc": "未処理の会話ログファイルをチェックしてGit管理する"
+  },
+  {
+    "file": "app.py",
+    "type": "function",
+    "name": "get_system_prompt",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "app.py",
+    "type": "function",
+    "name": "try_git_pull_safe",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "app.py",
+    "type": "function",
+    "name": "try_git_commit",
+    "args": [
+      "file_path"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/handle_approval.py",
+    "type": "function",
+    "name": "handle_approval",
+    "args": [
+      "requester",
+      "document",
+      "approval_status"
+    ],
+    "doc": "指定されたドキュメントの承認処理を行います。"
+  },
+  {
+    "file": "core/task_selector.py",
+    "type": "function",
+    "name": "select_next_task",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/capabilities_registry.py",
+    "type": "function",
+    "name": "kai_capability",
+    "args": [
+      "id",
+      "name",
+      "description",
+      "requires_confirm",
+      "enabled"
+    ],
+    "doc": "Kai の能力情報を関数に付与するためのデコレータ。"
+  },
+  {
+    "file": "core/capabilities_registry.py",
+    "type": "function",
+    "name": "decorator",
+    "args": [
+      "fn"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/patch_log.py",
+    "type": "function",
+    "name": "log_patch",
+    "args": [
+      "fn_name",
+      "user_instruction",
+      "markdown_diff"
+    ],
+    "doc": "関数修正履歴をpatch_history.jsonに保存する"
+  },
+  {
+    "file": "core/patch_log.py",
+    "type": "function",
+    "name": "load_patch_history",
+    "args": [
+      "log_path"
+    ],
+    "doc": "patch_history.jsonから履歴を読み込む"
+  },
+  {
+    "file": "core/patch_log.py",
+    "type": "function",
+    "name": "show_patch_log",
+    "args": [],
+    "doc": "patch_history.jsonから履歴をStreamlitで表示する"
+  },
+  {
+    "file": "core/git_ops.py",
+    "type": "function",
+    "name": "try_git_pull_safe",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/git_ops.py",
+    "type": "function",
+    "name": "try_git_commit",
+    "args": [
+      "file_path"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/git_ops.py",
+    "type": "function",
+    "name": "check_unprocessed_logs",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/run_code_analysis.py",
+    "type": "function",
+    "name": "main",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/log_utils.py",
+    "type": "function",
+    "name": "get_yesterday_log_filename",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/log_utils.py",
+    "type": "function",
+    "name": "load_yesterdays_log_as_messages",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/log_utils.py",
+    "type": "function",
+    "name": "messages_to_text",
+    "args": [
+      "messages"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/manage_tasks.py",
+    "type": "function",
+    "name": "create_task",
+    "args": [
+      "title",
+      "description",
+      "due_date",
+      "priority"
+    ],
+    "doc": "新しいタスクを作成し、保存する。"
+  },
+  {
+    "file": "core/manage_tasks.py",
+    "type": "function",
+    "name": "update_task",
+    "args": [
+      "task_id",
+      "title",
+      "description",
+      "due_date",
+      "priority"
+    ],
+    "doc": "既存のタスクを更新する。"
+  },
+  {
+    "file": "core/manage_tasks.py",
+    "type": "function",
+    "name": "delete_task",
+    "args": [
+      "task_id"
+    ],
+    "doc": "指定されたIDのタスクを削除する。"
+  },
+  {
+    "file": "core/manage_tasks.py",
+    "type": "function",
+    "name": "list_tasks",
+    "args": [
+      "filter_by",
+      "order_by"
+    ],
+    "doc": "保存されているタスクのリストを取得する。フィルターやソート順を指定できる。"
+  },
+  {
+    "file": "core/markdown_utils.py",
+    "type": "function",
+    "name": "extract_code_from_markdown",
+    "args": [
+      "markdown_text",
+      "language"
+    ],
+    "doc": "GPTから返されたMarkdown形式の提案から、指定言語のコードブロックを抽出する。"
+  },
+  {
+    "file": "core/utils.py",
+    "type": "function",
+    "name": "load_json",
+    "args": [
+      "path"
+    ],
+    "doc": "JSONファイルを読み込んで返す。ファイルが存在しない場合は空の dict または文字列を返す。"
+  },
+  {
+    "file": "core/utils.py",
+    "type": "function",
+    "name": "read_file",
+    "args": [
+      "path"
+    ],
+    "doc": "指定されたファイルを読み取り文字列として返す。存在しない場合は空文字列。"
+  },
+  {
+    "file": "core/utils.py",
+    "type": "function",
+    "name": "write_file",
+    "args": [
+      "path",
+      "content"
+    ],
+    "doc": "指定されたパスに文字列を保存する。"
+  },
+  {
+    "file": "core/utils.py",
+    "type": "function",
+    "name": "ensure_output_dir",
+    "args": [
+      "path"
+    ],
+    "doc": "指定パスのディレクトリを作成（既に存在すれば何もしない）。"
+  },
+  {
+    "file": "core/utils.py",
+    "type": "function",
+    "name": "safe_mkdir",
+    "args": [
+      "path"
+    ],
+    "doc": "指定されたディレクトリを作成（存在チェック付き）。"
+  },
+  {
+    "file": "core/doc_update_engine.py",
+    "type": "function",
+    "name": "safe_load_text",
+    "args": [
+      "path"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/doc_update_engine.py",
+    "type": "function",
+    "name": "propose_doc_update",
+    "args": [
+      "doc_name",
+      "conversation_text",
+      "model"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/doc_update_engine.py",
+    "type": "function",
+    "name": "update_doc_with_gpt",
+    "args": [
+      "doc_name",
+      "conversation_text",
+      "auto_approve"
+    ],
+    "doc": "GPTによる修正文提案 → ユーザー承認 → ファイル更新 → Gitコミット"
+  },
+  {
+    "file": "core/doc_update_engine.py",
+    "type": "function",
+    "name": "apply_update",
+    "args": [
+      "doc_name",
+      "new_content",
+      "auto_approve"
+    ],
+    "doc": "GPTが生成したMarkdown内容をファイルに反映し、Gitコミット＋patch_log.jsonに差分履歴を記録する"
+  },
+  {
+    "file": "core/kai_patch_applier.py",
+    "type": "function",
+    "name": "apply_gpt_patch",
+    "args": [
+      "markdown_text",
+      "fn_name",
+      "source_path",
+      "auto_commit"
+    ],
+    "doc": "GPTが返したMarkdown形式の修正提案（markdown_text）からコードブロックを抽出し、"
+  },
+  {
+    "file": "core/append_to_log.py",
+    "type": "function",
+    "name": "append_to_log",
+    "args": [
+      "message",
+      "log_file_path"
+    ],
+    "doc": "指定されたログファイルにメッセージを追加する関数。"
+  },
+  {
+    "file": "core/capabilities_suggester.py",
+    "type": "function",
+    "name": "generate_suggestions",
+    "args": [
+      "diff_result"
+    ],
+    "doc": "差分結果をもとに、日本語で修正提案文を生成する。"
+  },
+  {
+    "file": "core/capabilities_suggester.py",
+    "type": "function",
+    "name": "generate_updated_capabilities",
+    "args": [
+      "ast_caps",
+      "json_caps"
+    ],
+    "doc": "AST結果と既存JSONを突き合わせて、仮の新しいcapabilitiesリストを生成する。"
+  },
+  {
+    "file": "core/code_analysis.py",
+    "type": "function",
+    "name": "extract_functions",
+    "args": [
+      "source_path"
+    ],
+    "doc": "Pythonファイルから関数定義を抽出する"
+  },
+  {
+    "file": "core/code_analysis.py",
+    "type": "function",
+    "name": "extract_classes",
+    "args": [
+      "source_path"
+    ],
+    "doc": "クラスとそのメソッド一覧を抽出"
+  },
+  {
+    "file": "core/code_analysis.py",
+    "type": "function",
+    "name": "extract_variables",
+    "args": [
+      "source_path"
+    ],
+    "doc": "トップレベルの定数や変数を抽出（文字列・数値・リストなど）"
+  },
+  {
+    "file": "core/discover_capabilities.py",
+    "type": "function",
+    "name": "discover_capabilities",
+    "args": [
+      "base_dir",
+      "full_scan"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/stub_writer.py",
+    "type": "function",
+    "name": "write_stub_file",
+    "args": [
+      "id",
+      "code"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/stub_writer.py",
+    "type": "function",
+    "name": "write_metadata_file",
+    "args": [
+      "id",
+      "name",
+      "description"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/stub_writer.py",
+    "type": "function",
+    "name": "save_capability_stub",
+    "args": [
+      "id",
+      "name",
+      "description",
+      "code"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/code_rewriter.py",
+    "type": "function",
+    "name": "replace_function_in_source",
+    "args": [
+      "source_path",
+      "fn_name",
+      "new_code"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/tagging.py",
+    "type": "function",
+    "name": "generate_tags",
+    "args": [
+      "text"
+    ],
+    "doc": "テキスト内容に基づき、最大3個の日本語タグを返す"
+  },
+  {
+    "file": "core/tagging.py",
+    "type": "function",
+    "name": "save_tags",
+    "args": [
+      "doc_name",
+      "tags"
+    ],
+    "doc": "指定されたMarkdownファイルに対応する.tagsファイルを作成し、タグを保存する"
+  },
+  {
+    "file": "core/capabilities_diff.py",
+    "type": "function",
+    "name": "load_ast_capabilities",
+    "args": [],
+    "doc": "AST解析により、@kai_capability付き関数を含む関数一覧を取得する。"
+  }
+]

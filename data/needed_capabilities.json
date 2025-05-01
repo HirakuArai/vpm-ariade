@@ -1,0 +1,49 @@
+{
+  "read_doc": {
+    "source_docs": [
+      "architecture_overview.md",
+      "project_definition.md",
+      "base_os_rules.md"
+    ]
+  },
+  "append_to_log": {
+    "source_docs": [
+      "architecture_overview.md"
+    ]
+  },
+  "git_push": {
+    "source_docs": [
+      "architecture_overview.md"
+    ]
+  },
+  "embed_logs": {
+    "source_docs": [
+      "architecture_overview.md"
+    ]
+  },
+  "edit_file": {
+    "source_docs": [
+      "project_definition.md"
+    ]
+  },
+  "propose_doc_update": {
+    "source_docs": [
+      "project_definition.md"
+    ]
+  },
+  "manage_tasks": {
+    "source_docs": [
+      "project_definition.md"
+    ]
+  },
+  "enforce_rules": {
+    "source_docs": [
+      "base_os_rules.md"
+    ]
+  },
+  "handle_approval": {
+    "source_docs": [
+      "base_os_rules.md"
+    ]
+  }
+}
