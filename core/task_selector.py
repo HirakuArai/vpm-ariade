@@ -1,14 +1,7 @@
-import json
-import os
+from core.utils import load_json
 
 CAP_PRIORITY_PATH = "docs/capability_priorities.json"
 KAI_CAPS_PATH = "docs/kai_capabilities.json"
-
-def load_json(path):
-    if not os.path.exists(path):
-        return {}
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
 
 def select_next_task():
     priorities = load_json(CAP_PRIORITY_PATH)

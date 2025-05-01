@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 import shutil
 
 from core.capabilities_registry import kai_capability
+from core.utils import read_file
 
 # ──────────────────────────────────────────
 # 開発モード設定
@@ -152,10 +153,6 @@ def check_unprocessed_logs():
 # ──────────────────────────────────────────
 # System プロンプト
 # ──────────────────────────────────────────
-def read_file(path: str) -> str:
-    return open(path, encoding="utf-8").read() if os.path.exists(path) else ""
-
-
 def get_system_prompt() -> str:
     overview   = read_file(os.path.join(DOCS_DIR, "architecture_overview.md"))
     base_rules = read_file(os.path.join(DOCS_DIR, "base_os_rules.md"))
