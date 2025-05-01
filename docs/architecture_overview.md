@@ -1,11 +1,11 @@
-+---
-+doc_type: "architecture_overview"
-+required_capabilities:
-+  - "read_doc"
-+  - "append_to_log"       # 会話ログ保存
-+  - "git_push"            # 自動コミット／Push
-+  - "embed_logs"          # RAG 用ベクトル化（将来）
-+---
+---
+doc_type: "architecture_overview"
+required_capabilities:
+  - "read_doc"
+  - "append_to_log"       # 会話ログ保存
+  - "git_push"            # 自動コミット／Push
+  - "embed_logs"          # RAG 用ベクトル化（将来）
+---
 
 # アーキテクチャ概要 ― VPM‑Ariade PoC
 
