@@ -1,10 +1,14 @@
 import os
 import json
 import sys
+
+# 🔧 パス解決のためにルートを追加
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from core.utils import load_json  # ← 共通ユーティリティを使用
 
 PATCH_DIR = "patches"
-CAPABILITY_FILE = "docs/kai_capabilities.json"
+CAPABILITY_FILE = "data/kai_capabilities.json"  # ← 正しいファイル位置に修正
 
 def save_json(path, data):
     with open(path, "w", encoding="utf-8") as f:

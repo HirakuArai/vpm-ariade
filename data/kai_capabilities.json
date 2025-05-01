@@ -562,5 +562,16 @@
     "args": [],
     "enabled": true,
     "requires_confirm": false
+  },
+  {
+    "id": "enforce_rules",
+    "name": "Kaiのルール適用チェック",
+    "description": "この能力は、Kaiが自身の行動や処理がプロジェクトのルール（kai_rules.json）に違反していないかを自己チェックする機能を実現します。",
+    "source_file": "core/enforcement.py",
+    "args": [
+      "action_context"
+    ],
+    "enabled": true,
+    "requires_confirm": false
   }
 ]
