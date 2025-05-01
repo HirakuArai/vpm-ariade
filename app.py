@@ -252,7 +252,7 @@ if mode == "チャット":
             st.markdown(user_input)
         append_to_log("USER", user_input)
         messages = [{"role": "system", "content": get_system_prompt()}] + history + [{"role": "user", "content": user_input}]
-        response = openai.ChatCompletion.create(model="gpt-4.1", messages=messages)
+        response = openai.chat.completions.create(model="gpt-4.1", messages=messages)
         reply = response.choices[0].message.content
         with st.chat_message("assistant", avatar="🧠"):
             st.markdown(reply)
@@ -272,7 +272,7 @@ elif mode == "関数修正":
         fn_source = "".join(lines[selected["lineno"] - 1 : selected.get("end_lineno", selected["lineno"] + 5)])
         system_prompt = "あなたはプロジェクトKaiのコード修正補助AIです。以下の関数について、ユーザーの指示をもとに改良案を提案してください。"
         user_prompt = f"# 修正対象の関数\n```python\n{fn_source}\n```\n# ユーザーの指示\n{user_instruction}\n# 提案内容を Markdown形式で記述してください。"
-        response = openai.ChatCompletion.create(
+        response = openai.chat.completions.create(
             model="gpt-4.1",
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -449,3 +449,50 @@ if st.sidebar.button("🚀 仮保存内容を本番反映する（慎重に）")
         # 本番ファイルを上書き
         shutil.copy2(proposed_path, target_path)
         st.success("✅ kai_capabilities.json に本番反映が完了しました！")
+
+# ──────────────────────────────────────────
+# A1: Kai自己状態同期（差分・不足・違反チェック）
+# ──────────────────────────────────────────
+
+if st.sidebar.button("🧠 Kai状態を同期"):
+    st.subheader("🧠 Kai状態同期（Self-Introspection）")
+    
+    from core.discover_capabilities import discover_capabilities
+    from core.capabilities_diff import load_json_capabilities, compare_capabilities, format_diff_for_output
+    from core.enforcement import enforce_rules
+    from core.utils import load_json  # もしくは独自のjson loader
+
+    # 1. ASTから自己能力を抽出
+    ast_caps = discover_capabilities(full_scan=True)
+
+    # 2. 登録済み能力をロード
+    json_caps = load_json_capabilities()
+
+    # 3. 差分比較（未登録など）
+    diff = compare_capabilities(ast_caps, json_caps)
+    formatted_diff = format_diff_for_output(diff)
+    st.markdown("### 🔍 登録とASTとの差分")
+    st.markdown(formatted_diff or "✅ 差分はありません。")
+
+    # 4. 必要能力との比較（必要だけど未登録）
+    try:
+        needed = load_json("output/needed_capabilities_gpt.json")["required_capabilities"]
+        registered_ids = [c["id"] for c in json_caps]
+        missing_needed = [cap for cap in needed if cap not in registered_ids]
+        st.markdown("### 📌 必要だが未登録な能力")
+        if missing_needed:
+            st.error(f"❌ 未登録の必要能力: {', '.join(missing_needed)}")
+        else:
+            st.success("✅ 必要能力はすべて登録済みです。")
+    except Exception as e:
+        st.warning(f"⚠ 必要能力ファイルの読み込みに失敗しました: {e}")
+
+    # 5. ルール違反の検出（仮に何かの文脈があれば）
+    st.markdown("### ⚖ ルール違反チェック（テスト文脈）")
+    dummy_ctx = {"action": "apply_update", "doc_type": "ondemand", "approved": False}
+    violations = enforce_rules(dummy_ctx)
+    if violations:
+        for v in violations:
+            st.warning(f"❌ 違反: {v['id']} - {v['description']}")
+    else:
+        st.success("✅ ルール違反なし（この文脈では）")

@@ -1,0 +1,83 @@
+{
+  "version": "1.0",
+  "rules": [
+    {
+      "id": "kai-refer-base-docs",
+      "description": "Kaiは常時参照型ドキュメント（例: base_os_rules.md, project_definition.md, architecture_overview.md, project_status.md）を全リクエストのシステムプロンプトに必ず含めなければならない。",
+      "scope": "information_reference",
+      "severity": "high"
+    },
+    {
+      "id": "kai-on-demand-doc-block",
+      "description": "オンデマンド参照型ドキュメント（docs/ondemand/ 配下）はユーザーの明示指示がある場合のみ読み込み・引用し、自発的な推論や要約への利用を禁止する。",
+      "scope": "information_reference",
+      "severity": "high"
+    },
+    {
+      "id": "kai-conversation-log-control",
+      "description": "会話ログは1日1ファイルとして再構成型で保存し、Kaiは必要に応じて直近の会話ログのみをOpenAI APIへの送信メッセージとして利用する。ログ変換や引用にはマークダウン構文エラーが無いことを自己チェックすること。",
+      "scope": "conversation_log_handling",
+      "severity": "medium"
+    },
+    {
+      "id": "kai-update-propose-approval",
+      "description": "ドキュメント更新は必ず propose_doc_update() でAriade_Aへの提案リクエスト→Kai自身/ユーザーの承認→更新ファイル反映→1ドキュメント1コミット→GitHubプッシュ、のフローを厳守する。承認無き自動ファイル更新は禁止。",
+      "scope": "document_update",
+      "severity": "high"
+    },
+    {
+      "id": "kai-single-doc-single-commit",
+      "description": "1つのドキュメントにつき1コミットのみとし、複数ドキュメントをまとめてコミットすることを禁止する。自動Push時も例外無く遵守する。",
+      "scope": "git_ops",
+      "severity": "high"
+    },
+    {
+      "id": "kai-markdown-syntax-check",
+      "description": "Ariade_Aからの提案適用時、マークダウン構文エラーが無いか自己チェックを行う。エラーを検知した場合は必ず修正、またはユーザーへ報告してその後の処理を中断する。",
+      "scope": "document_update",
+      "severity": "high"
+    },
+    {
+      "id": "kai-doc-log-integrity",
+      "description": "ドキュメント更新時は常時参照型ドキュメント間で矛盾や不整合が発生しないかを自己チェックし、指摘・是正する。会話ログやユーザー指示も必ず反映されているか自己確認する。",
+      "scope": "document_update",
+      "severity": "high"
+    },
+    {
+      "id": "kai-error-reporting",
+      "description": "エラーや更新失敗、承認却下が発生した場合は処理を中断し、速やかにユーザーへ明確に報告・説明した後、Kaiは却下理由を聞き取りAriade_Aプロンプトにフィードバックすること。",
+      "scope": "error_handling",
+      "severity": "medium"
+    },
+    {
+      "id": "kai-api-key-security",
+      "description": "APIキー等の機密情報は .streamlit/secrets.toml（Cloud）、.env（ローカル）など正規の秘密管理機構のみで読み込み、リポジトリやログ等に含めることを禁止する。",
+      "scope": "security",
+      "severity": "high"
+    },
+    {
+      "id": "kai-edit-restriction-on-demand",
+      "description": "オンデマンド参照型ドキュメントの内容変更または推論改変は明示的なユーザー指示と承認が無い限りKai側からは実行しない。",
+      "scope": "edit_restriction",
+      "severity": "high"
+    },
+    {
+      "id": "kai-self-consistency-principle",
+      "description": "Kaiによる判断・処理はベースOSルールやproject_definition, architecture_overview等、常時参照ドキュメントの最新内容と矛盾してはならない。疑義があればユーザー確認を優先する。",
+      "scope": "self_governance",
+      "severity": "high"
+    },
+    {
+      "id": "kai-task-list-management",
+      "description": "タスク管理・進捗記載・タスク割当等の操作はプロジェクト定義・最新status.md内容に則して行い、タスクの重複・不整合を防ぐ。",
+      "scope": "task_management",
+      "severity": "medium"
+    },
+    {
+      "id": "kai-auto-operation-limit",
+      "description": "PoC段階においては機密性確保と誤操作防止のため、『完全自動処理』の範囲を必要最小限に留め、必ずユーザー承認フローを介する。MVP/Prod段階までは自己判断のみでの対外変更禁止。",
+      "scope": "auto_operation",
+      "severity": "high"
+    }
+  ]
+}

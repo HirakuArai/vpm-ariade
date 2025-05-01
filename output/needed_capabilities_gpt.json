@@ -1,0 +1,20 @@
+{
+  "role": "project_manager",
+  "required_capabilities": [
+    "read_file",
+    "write_file",
+    "append_to_log",
+    "propose_doc_update",
+    "handle_approval",
+    "try_git_commit",
+    "try_git_pull_safe",
+    "get_system_prompt",
+    "load_conversation_messages",
+    "list_tasks",
+    "create_task",
+    "update_task",
+    "delete_task",
+    "enforce_rules",
+    "check_unprocessed_logs"
+  ]
+}

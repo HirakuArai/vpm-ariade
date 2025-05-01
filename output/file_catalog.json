@@ -1,0 +1,704 @@
+[
+  {
+    "path": "dummy.txt",
+    "filename": "dummy.txt",
+    "type": "other",
+    "purpose": "不明",
+    "last_modified": "2025-04-20T06:19:54.880316",
+    "size": 0,
+    "is_active": true
+  },
+  {
+    "path": "run_replace_test.py",
+    "filename": "run_replace_test.py",
+    "type": "script_test",
+    "purpose": "不明",
+    "last_modified": "2025-04-23T08:52:06.100958",
+    "size": 368,
+    "is_active": true
+  },
+  {
+    "path": "test_doc_engine.py",
+    "filename": "test_doc_engine.py",
+    "type": "script_test",
+    "purpose": "不明",
+    "last_modified": "2025-04-25T03:49:16.351945",
+    "size": 554,
+    "is_active": true
+  },
+  {
+    "path": "requirements.txt",
+    "filename": "requirements.txt",
+    "type": "other",
+    "purpose": "不明",
+    "last_modified": "2025-05-01T15:35:35.823483",
+    "size": 99,
+    "is_active": true
+  },
+  {
+    "path": "test_env.py",
+    "filename": "test_env.py",
+    "type": "script_test",
+    "purpose": "不明",
+    "last_modified": "2025-04-25T03:33:24.823494",
+    "size": 105,
+    "is_active": true
+  },
+  {
+    "path": ".gitignore",
+    "filename": ".gitignore",
+    "type": "other",
+    "purpose": "不明",
+    "last_modified": "2025-04-23T15:48:03.124371",
+    "size": 144,
+    "is_active": true
+  },
+  {
+    "path": ".env",
+    "filename": ".env",
+    "type": "other",
+    "purpose": "不明",
+    "last_modified": "2025-04-24T15:20:09.809746",
+    "size": 181,
+    "is_active": true
+  },
+  {
+    "path": "app.py",
+    "filename": "app.py",
+    "type": "script",
+    "purpose": "不明",
+    "last_modified": "2025-05-01T15:17:18.471750",
+    "size": 21986,
+    "is_active": true
+  },
+  {
+    "path": "patch_history.json",
+    "filename": "patch_history.json",
+    "type": "data",
+    "purpose": "不明",
+    "last_modified": "2025-04-26T03:10:36.707730",
+    "size": 6456,
+    "is_active": true
+  },
+  {
+    "path": "core/handle_approval.py",
+    "filename": "handle_approval.py",
+    "type": "script",
+    "purpose": "承認処理",
+    "last_modified": "2025-05-01T03:10:23.626606",
+    "size": 1075,
+    "is_active": true
+  },
+  {
+    "path": "core/task_selector.py",
+    "filename": "task_selector.py",
+    "type": "script",
+    "purpose": "タスク管理",
+    "last_modified": "2025-05-01T15:17:18.472123",
+    "size": 735,
+    "is_active": true
+  },
+  {
+    "path": "core/capabilities_registry.py",
+    "filename": "capabilities_registry.py",
+    "type": "script",
+    "purpose": "Kai能力管理",
+    "last_modified": "2025-04-29T02:12:35.450804",
+    "size": 584,
+    "is_active": true
+  },
+  {
+    "path": "core/patch_log.py",
+    "filename": "patch_log.py",
+    "type": "script_patch",
+    "purpose": "ログ管理",
+    "last_modified": "2025-04-26T04:17:09.132336",
+    "size": 3000,
+    "is_active": true
+  },
+  {
+    "path": "core/git_ops.py",
+    "filename": "git_ops.py",
+    "type": "script",
+    "purpose": "不明",
+    "last_modified": "2025-04-29T03:45:48.681906",
+    "size": 3030,
+    "is_active": true
+  },
+  {
+    "path": "core/run_code_analysis.py",
+    "filename": "run_code_analysis.py",
+    "type": "script",
+    "purpose": "不明",
+    "last_modified": "2025-04-23T03:36:51.380094",
+    "size": 1074,
+    "is_active": true
+  },
+  {
+    "path": "core/log_utils.py",
+    "filename": "log_utils.py",
+    "type": "script",
+    "purpose": "ログ管理",
+    "last_modified": "2025-04-24T15:13:49.945308",
+    "size": 1746,
+    "is_active": true
+  },
+  {
+    "path": "core/__init__.py",
+    "filename": "__init__.py",
+    "type": "script",
+    "purpose": "不明",
+    "last_modified": "2025-05-01T14:09:47.419396",
+    "size": 0,
+    "is_active": true
+  },
+  {
+    "path": "core/manage_tasks.py",
+    "filename": "manage_tasks.py",
+    "type": "script",
+    "purpose": "タスク管理",
+    "last_modified": "2025-04-30T17:26:16.824946",
+    "size": 637,
+    "is_active": true
+  },
+  {
+    "path": "core/markdown_utils.py",
+    "filename": "markdown_utils.py",
+    "type": "script",
+    "purpose": "不明",
+    "last_modified": "2025-04-23T05:29:21.492334",
+    "size": 465,
+    "is_active": true
+  },
+  {
+    "path": "core/utils.py",
+    "filename": "utils.py",
+    "type": "script",
+    "purpose": "不明",
+    "last_modified": "2025-05-01T15:17:18.472239",
+    "size": 1106,
+    "is_active": true
+  },
+  {
+    "path": "core/doc_update_engine.py",
+    "filename": "doc_update_engine.py",
+    "type": "script",
+    "purpose": "ドキュメント更新",
+    "last_modified": "2025-04-29T03:56:21.764764",
+    "size": 6664,
+    "is_active": true
+  },
+  {
+    "path": "core/kai_patch_applier.py",
+    "filename": "kai_patch_applier.py",
+    "type": "script_patch",
+    "purpose": "不明",
+    "last_modified": "2025-04-29T03:55:44.550487",
+    "size": 1571,
+    "is_active": true
+  },
+  {
+    "path": "core/append_to_log.py",
+    "filename": "append_to_log.py",
+    "type": "script",
+    "purpose": "ログ管理",
+    "last_modified": "2025-04-30T17:08:43.655292",
+    "size": 912,
+    "is_active": true
+  },
+  {
+    "path": "core/capabilities_suggester.py",
+    "filename": "capabilities_suggester.py",
+    "type": "script",
+    "purpose": "Kai能力管理",
+    "last_modified": "2025-04-30T01:18:28.849588",
+    "size": 3061,
+    "is_active": true
+  },
+  {
+    "path": "core/code_analysis.py",
+    "filename": "code_analysis.py",
+    "type": "script",
+    "purpose": "不明",
+    "last_modified": "2025-04-23T03:36:51.379495",
+    "size": 2527,
+    "is_active": true
+  },
+  {
+    "path": "core/discover_capabilities.py",
+    "filename": "discover_capabilities.py",
+    "type": "script",
+    "purpose": "Kai能力管理",
+    "last_modified": "2025-04-29T03:18:49.503267",
+    "size": 1392,
+    "is_active": true
+  },
+  {
+    "path": "core/stub_writer.py",
+    "filename": "stub_writer.py",
+    "type": "script",
+    "purpose": "不明",
+    "last_modified": "2025-05-01T15:17:18.471943",
+    "size": 806,
+    "is_active": true
+  },
+  {
+    "path": "core/code_rewriter.py",
+    "filename": "code_rewriter.py",
+    "type": "script",
+    "purpose": "不明",
+    "last_modified": "2025-04-23T08:46:18.952204",
+    "size": 1151,
+    "is_active": true
+  },
+  {
+    "path": "core/tagging.py",
+    "filename": "tagging.py",
+    "type": "script",
+    "purpose": "タグ生成",
+    "last_modified": "2025-04-29T03:56:38.734505",
+    "size": 1890,
+    "is_active": true
+  },
+  {
+    "path": "core/capabilities_diff.py",
+    "filename": "capabilities_diff.py",
+    "type": "script",
+    "purpose": "Kai能力管理",
+    "last_modified": "2025-04-30T01:18:28.849364",
+    "size": 2932,
+    "is_active": true
+  },
+  {
+    "path": ".pytest_cache/CACHEDIR.TAG",
+    "filename": "CACHEDIR.TAG",
+    "type": "other",
+    "purpose": "タグ生成",
+    "last_modified": "2025-04-23T02:25:56.199948",
+    "size": 191,
+    "is_active": true
+  },
+  {
+    "path": ".pytest_cache/README.md",
+    "filename": "README.md",
+    "type": "doc",
+    "purpose": "不明",
+    "last_modified": "2025-04-23T02:25:56.199832",
+    "size": 302,
+    "is_active": true
+  },
+  {
+    "path": ".pytest_cache/.gitignore",
+    "filename": ".gitignore",
+    "type": "other",
+    "purpose": "不明",
+    "last_modified": "2025-04-23T02:25:56.199900",
+    "size": 37,
+    "is_active": true
+  },
+  {
+    "path": ".pytest_cache/v/cache/nodeids",
+    "filename": "nodeids",
+    "type": "other",
+    "purpose": "不明",
+    "last_modified": "2025-04-23T02:25:56.200186",
+    "size": 2,
+    "is_active": true
+  },
+  {
+    "path": ".pytest_cache/v/cache/stepwise",
+    "filename": "stepwise",
+    "type": "other",
+    "purpose": "不明",
+    "last_modified": "2025-04-23T02:25:56.200257",
+    "size": 2,
+    "is_active": true
+  },
+  {
+    "path": "config/.env",
+    "filename": ".env",
+    "type": "other",
+    "purpose": "不明",
+    "last_modified": "2025-04-20T06:03:02.097051",
+    "size": 238,
+    "is_active": true
+  },
+  {
+    "path": "patches/handle_approval_capability.json",
+    "filename": "handle_approval_capability.json",
+    "type": "data",
+    "purpose": "承認処理",
+    "last_modified": "2025-05-01T03:10:23.626995",
+    "size": 343,
+    "is_active": true
+  },
+  {
+    "path": "output/needed_capabilities_autogen.json",
+    "filename": "needed_capabilities_autogen.json",
+    "type": "data",
+    "purpose": "Kai能力管理",
+    "last_modified": "2025-05-01T17:37:46.917171",
+    "size": 200,
+    "is_active": true
+  },
+  {
+    "path": "output/kai_capabilities_generated.json",
+    "filename": "kai_capabilities_generated.json",
+    "type": "data",
+    "purpose": "Kai能力管理",
+    "last_modified": "2025-05-01T16:05:49.430845",
+    "size": 10233,
+    "is_active": true
+  },
+  {
+    "path": "output/needed_capabilities_gpt.json",
+    "filename": "needed_capabilities_gpt.json",
+    "type": "data",
+    "purpose": "Kai能力管理",
+    "last_modified": "2025-05-01T17:52:55.731157",
+    "size": 401,
+    "is_active": true
+  },
+  {
+    "path": "output/kai_capabilities_patch.json",
+    "filename": "kai_capabilities_patch.json",
+    "type": "data",
+    "purpose": "Kai能力管理",
+    "last_modified": "2025-05-01T16:17:04.566657",
+    "size": 12937,
+    "is_active": true
+  },
+  {
+    "path": "output/kai_capabilities_completion.json",
+    "filename": "kai_capabilities_completion.json",
+    "type": "data",
+    "purpose": "Kai能力管理",
+    "last_modified": "2025-05-01T16:33:12.918551",
+    "size": 21553,
+    "is_active": true
+  },
+  {
+    "path": "docs/base_os_rules_a.md",
+    "filename": "base_os_rules_a.md",
+    "type": "doc",
+    "purpose": "不明",
+    "last_modified": "2025-04-20T02:40:21.798021",
+    "size": 1015,
+    "is_active": true
+  },
+  {
+    "path": "docs/project_status.md",
+    "filename": "project_status.md",
+    "type": "doc",
+    "purpose": "不明",
+    "last_modified": "2025-05-01T15:43:53.710722",
+    "size": 3655,
+    "is_active": true
+  },
+  {
+    "path": "docs/architecture_overview.md",
+    "filename": "architecture_overview.md",
+    "type": "doc",
+    "purpose": "不明",
+    "last_modified": "2025-04-30T03:28:16.230319",
+    "size": 4572,
+    "is_active": true
+  },
+  {
+    "path": "docs/project_definition.tags",
+    "filename": "project_definition.tags",
+    "type": "other",
+    "purpose": "タグ生成",
+    "last_modified": "2025-04-29T01:01:59.323525",
+    "size": 73,
+    "is_active": true
+  },
+  {
+    "path": "docs/project_definition.md",
+    "filename": "project_definition.md",
+    "type": "doc",
+    "purpose": "不明",
+    "last_modified": "2025-04-30T03:38:44.589638",
+    "size": 1189,
+    "is_active": true
+  },
+  {
+    "path": "docs/project_definition_a.md",
+    "filename": "project_definition_a.md",
+    "type": "doc",
+    "purpose": "不明",
+    "last_modified": "2025-04-20T02:40:56.139306",
+    "size": 852,
+    "is_active": true
+  },
+  {
+    "path": "docs/base_os_rules.md",
+    "filename": "base_os_rules.md",
+    "type": "doc",
+    "purpose": "不明",
+    "last_modified": "2025-04-30T03:27:50.721265",
+    "size": 2761,
+    "is_active": true
+  },
+  {
+    "path": "docs/ondemand_index.md",
+    "filename": "ondemand_index.md",
+    "type": "doc",
+    "purpose": "不明",
+    "last_modified": "2025-04-20T01:23:12.352562",
+    "size": 568,
+    "is_active": true
+  },
+  {
+    "path": "logs/2025-05-01.log",
+    "filename": "2025-05-01.log",
+    "type": "other",
+    "purpose": "ログ管理",
+    "last_modified": "2025-05-01T15:35:29.363315",
+    "size": 3410,
+    "is_active": true
+  },
+  {
+    "path": "logs/2025-04-26.log",
+    "filename": "2025-04-26.log",
+    "type": "other",
+    "purpose": "ログ管理",
+    "last_modified": "2025-04-26T02:25:43.442749",
+    "size": 1939,
+    "is_active": true
+  },
+  {
+    "path": "logs/2025-04-25.log",
+    "filename": "2025-04-25.log",
+    "type": "other",
+    "purpose": "ログ管理",
+    "last_modified": "2025-04-26T01:52:26.041484",
+    "size": 12227,
+    "is_active": true
+  },
+  {
+    "path": "logs/2025-04-28.log",
+    "filename": "2025-04-28.log",
+    "type": "other",
+    "purpose": "ログ管理",
+    "last_modified": "2025-04-28T03:27:49.868739",
+    "size": 478,
+    "is_active": true
+  },
+  {
+    "path": "logs/2025-04-29.log",
+    "filename": "2025-04-29.log",
+    "type": "other",
+    "purpose": "ログ管理",
+    "last_modified": "2025-04-29T11:31:57.666389",
+    "size": 8929,
+    "is_active": true
+  },
+  {
+    "path": "check_flags/processed_logs.json",
+    "filename": "processed_logs.json",
+    "type": "data",
+    "purpose": "ログ管理",
+    "last_modified": "2025-04-29T11:31:57.665487",
+    "size": 166,
+    "is_active": true
+  },
+  {
+    "path": "conversations/conversation_20250419.md",
+    "filename": "conversation_20250419.md",
+    "type": "doc",
+    "purpose": "不明",
+    "last_modified": "2025-04-20T13:05:43.403853",
+    "size": 1105,
+    "is_active": true
+  },
+  {
+    "path": "conversations/conversation_20250421.md",
+    "filename": "conversation_20250421.md",
+    "type": "doc",
+    "purpose": "不明",
+    "last_modified": "2025-04-22T04:06:54.163849",
+    "size": 1908,
+    "is_active": true
+  },
+  {
+    "path": "conversations/conversation_20250420.md",
+    "filename": "conversation_20250420.md",
+    "type": "doc",
+    "purpose": "不明",
+    "last_modified": "2025-04-20T13:05:43.403976",
+    "size": 23641,
+    "is_active": true
+  },
+  {
+    "path": "conversations/conversation_20250424.md",
+    "filename": "conversation_20250424.md",
+    "type": "doc",
+    "purpose": "不明",
+    "last_modified": "2025-04-24T15:26:07.817232",
+    "size": 297,
+    "is_active": true
+  },
+  {
+    "path": "scripts/file_catalog.py",
+    "filename": "file_catalog.py",
+    "type": "script",
+    "purpose": "ログ管理",
+    "last_modified": "2025-05-02T01:40:24.012593",
+    "size": 2853,
+    "is_active": true
+  },
+  {
+    "path": "scripts/kai_autogen_one.py",
+    "filename": "kai_autogen_one.py",
+    "type": "script",
+    "purpose": "不明",
+    "last_modified": "2025-05-01T03:01:10.508014",
+    "size": 2922,
+    "is_active": true
+  },
+  {
+    "path": "scripts/gpt_generate_capability.py",
+    "filename": "gpt_generate_capability.py",
+    "type": "script",
+    "purpose": "不明",
+    "last_modified": "2025-04-30T16:53:03.078207",
+    "size": 1492,
+    "is_active": true
+  },
+  {
+    "path": "scripts/compare_capabilities.py",
+    "filename": "compare_capabilities.py",
+    "type": "script",
+    "purpose": "Kai能力管理",
+    "last_modified": "2025-05-01T16:17:01.804013",
+    "size": 1382,
+    "is_active": true
+  },
+  {
+    "path": "scripts/propose_capability_code.py",
+    "filename": "propose_capability_code.py",
+    "type": "script",
+    "purpose": "不明",
+    "last_modified": "2025-05-01T16:29:42.670304",
+    "size": 2230,
+    "is_active": true
+  },
+  {
+    "path": "scripts/frontmatter_scanner.py",
+    "filename": "frontmatter_scanner.py",
+    "type": "script",
+    "purpose": "情報抽出・分析",
+    "last_modified": "2025-04-30T03:23:19.198337",
+    "size": 1388,
+    "is_active": true
+  },
+  {
+    "path": "scripts/register_capabilities.py",
+    "filename": "register_capabilities.py",
+    "type": "script",
+    "purpose": "Kai能力管理",
+    "last_modified": "2025-05-01T16:37:46.222031",
+    "size": 1480,
+    "is_active": true
+  },
+  {
+    "path": "scripts/scan_required_capabilities.py",
+    "filename": "scan_required_capabilities.py",
+    "type": "script",
+    "purpose": "Kai能力管理",
+    "last_modified": "2025-05-01T17:37:29.810298",
+    "size": 2218,
+    "is_active": true
+  },
+  {
+    "path": "scripts/scan_required_capabilities_gpt.py",
+    "filename": "scan_required_capabilities_gpt.py",
+    "type": "script",
+    "purpose": "Kai能力管理",
+    "last_modified": "2025-05-01T17:52:42.859472",
+    "size": 3195,
+    "is_active": true
+  },
+  {
+    "path": "scripts/test_core_functions.py",
+    "filename": "test_core_functions.py",
+    "type": "script_test",
+    "purpose": "不明",
+    "last_modified": "2025-05-01T14:22:33.100682",
+    "size": 946,
+    "is_active": true
+  },
+  {
+    "path": "scripts/generate_capability_patches.py",
+    "filename": "generate_capability_patches.py",
+    "type": "script_patch",
+    "purpose": "不明",
+    "last_modified": "2025-05-01T02:54:16.534001",
+    "size": 3120,
+    "is_active": true
+  },
+  {
+    "path": "scripts/register_capability_patch.py",
+    "filename": "register_capability_patch.py",
+    "type": "script_patch",
+    "purpose": "不明",
+    "last_modified": "2025-05-01T15:35:29.365976",
+    "size": 1244,
+    "is_active": true
+  },
+  {
+    "path": "scripts/capability_diff.py",
+    "filename": "capability_diff.py",
+    "type": "script",
+    "purpose": "不明",
+    "last_modified": "2025-05-01T15:35:29.365882",
+    "size": 999,
+    "is_active": true
+  },
+  {
+    "path": "scripts/extract_capabilities.py",
+    "filename": "extract_capabilities.py",
+    "type": "script",
+    "purpose": "Kai能力管理",
+    "last_modified": "2025-05-01T16:05:07.036561",
+    "size": 2651,
+    "is_active": true
+  },
+  {
+    "path": "scripts/priority_proposer.py",
+    "filename": "priority_proposer.py",
+    "type": "script",
+    "purpose": "不明",
+    "last_modified": "2025-05-01T02:03:32.336033",
+    "size": 2696,
+    "is_active": true
+  },
+  {
+    "path": "data/needed_capabilities.json",
+    "filename": "needed_capabilities.json",
+    "type": "data",
+    "purpose": "Kai能力管理",
+    "last_modified": "2025-04-30T03:38:48.427356",
+    "size": 797,
+    "is_active": true
+  },
+  {
+    "path": "data/capability_priorities.json",
+    "filename": "capability_priorities.json",
+    "type": "data",
+    "purpose": "不明",
+    "last_modified": "2025-05-01T02:10:49.125149",
+    "size": 1693,
+    "is_active": true
+  },
+  {
+    "path": "data/kai_capabilities.json",
+    "filename": "kai_capabilities.json",
+    "type": "data",
+    "purpose": "Kai能力管理",
+    "last_modified": "2025-05-01T16:38:04.957516",
+    "size": 24153,
+    "is_active": true
+  }
+]

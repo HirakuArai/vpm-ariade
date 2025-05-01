@@ -1,0 +1,11 @@
+{
+  "role": "project_manager",
+  "required_capabilities": [
+    "append_to_log",
+    "doc_update_proposal",
+    "handle_approval",
+    "list_tasks",
+    "try_git_commit",
+    "try_git_pull_safe"
+  ]
+}

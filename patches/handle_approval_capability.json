@@ -1,0 +1,8 @@
+{
+  "id": "handle_approval",
+  "name": "Handle Approval",
+  "description": "承認プロセスはプロジェクトの進行において重要なゲートキーピング機能であり、適切な承認がなければプロジェクトの品質が保証されないため",
+  "priority": "high",
+  "requires_confirm": true,
+  "enabled": true
+}

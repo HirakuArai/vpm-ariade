@@ -18,7 +18,7 @@ def generate_tags(text: str) -> list[str]:
     system_prompt = "あなたはプロジェクト管理支援AIです。以下の内容を読んで、簡潔な日本語タグを最大3個生成してください。出力はリスト形式で。"
 
     try:
-        response = openai.ChatCompletion.create(
+        response = openai.chat.completions.create(
             model="gpt-4.1",
             messages=[
                 {"role": "system", "content": system_prompt},
