@@ -10,7 +10,7 @@ def load_ast_capabilities() -> List[Dict[str, Any]]:
     """
     return discover_capabilities(full_scan=True)
 
-def load_json_capabilities(json_path: str = "docs/kai_capabilities.json") -> List[Dict[str, Any]]:
+def load_json_capabilities(json_path: str = "data/kai_capabilities.json") -> List[Dict[str, Any]]:
     """
     kai_capabilities.jsonを読み込んで返す。
     """
