@@ -533,8 +533,8 @@
   },
   {
     "id": "generate_tags",
-    "name": "タグ生成",
-    "description": "Kaiは与えられたテキストから関連性のあるタグを生成する能力を持ちます。この機能は文章や文章群のキーワード分析などに利用されるでしょう。",
+    "name": "ドキュメントタグ生成",
+    "description": "ドキュメント内容を解析し、関連するキーワードタグを自動生成します。",
     "source_file": "core/tagging.py",
     "args": [
       "text"
@@ -566,7 +566,7 @@
   {
     "id": "enforce_rules",
     "name": "Kaiのルール適用チェック",
-    "description": "この能力は、Kaiが自身の行動や処理がプロジェクトのルール（kai_rules.json）に違反していないかを自己チェックする機能を実現します。",
+    "description": "Kaiが操作中にベース人格OSやプロジェクトルールに違反していないかを検査します。",
     "source_file": "core/enforcement.py",
     "args": [
       "action_context"
