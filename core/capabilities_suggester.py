@@ -84,9 +84,6 @@ def generate_updated_capabilities(ast_caps: List[Dict[str, Any]], json_caps: Lis
     return updated_caps
 
 def generate_needed_capabilities(role: str = "project_manager") -> Dict[str, Any]:
-    """
-    Kaiが担うロールに必要なcapability IDをGPTに判定させる。
-    """
     system_prompt = f"""
 あなたはAIエージェントKaiの能力設計補助AIです。
 以下のような仮想エージェントにとって、どのような機能（関数ID）を備えるべきかを判断し、
@@ -96,7 +93,7 @@ def generate_needed_capabilities(role: str = "project_manager") -> Dict[str, Any
 - 目的: AIによるプロジェクト管理の補助
 - 出力形式:
 {{"role": "{role}", "required_capabilities": ["能力ID1", "能力ID2", ...]}}
-"""
+    """
 
     response = client.chat.completions.create(
         model="gpt-4.1",
