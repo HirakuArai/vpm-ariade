@@ -6,7 +6,8 @@
     "source_file": "app.py",
     "args": [],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "append_to_log",
@@ -18,7 +19,8 @@
       "content"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "load_conversation_messages",
@@ -27,7 +29,8 @@
     "source_file": "app.py",
     "args": [],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "check_unprocessed_logs",
@@ -36,7 +39,8 @@
     "source_file": "app.py",
     "args": [],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "get_system_prompt",
@@ -45,7 +49,8 @@
     "source_file": "app.py",
     "args": [],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "try_git_pull_safe",
@@ -54,7 +59,8 @@
     "source_file": "app.py",
     "args": [],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "try_git_commit",
@@ -65,7 +71,8 @@
       "file_path"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "handle_approval",
@@ -78,7 +85,8 @@
       "approval_status"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "select_next_task",
@@ -87,7 +95,8 @@
     "source_file": "core/task_selector.py",
     "args": [],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "kai_capability",
@@ -102,7 +111,8 @@
       "enabled"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "decorator",
@@ -113,7 +123,8 @@
       "fn"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "log_patch",
@@ -126,7 +137,8 @@
       "markdown_diff"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "load_patch_history",
@@ -137,7 +149,8 @@
       "log_path"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "show_patch_log",
@@ -146,7 +159,8 @@
     "source_file": "core/patch_log.py",
     "args": [],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "try_git_pull_safe",
@@ -155,7 +169,8 @@
     "source_file": "core/git_ops.py",
     "args": [],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "try_git_commit",
@@ -166,7 +181,8 @@
       "file_path"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "check_unprocessed_logs",
@@ -175,7 +191,8 @@
     "source_file": "core/git_ops.py",
     "args": [],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "main",
@@ -184,7 +201,8 @@
     "source_file": "core/run_code_analysis.py",
     "args": [],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "get_yesterday_log_filename",
@@ -193,7 +211,8 @@
     "source_file": "core/log_utils.py",
     "args": [],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "load_yesterdays_log_as_messages",
@@ -202,7 +221,8 @@
     "source_file": "core/log_utils.py",
     "args": [],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "messages_to_text",
@@ -213,7 +233,8 @@
       "messages"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "create_task",
@@ -227,7 +248,8 @@
       "priority"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "update_task",
@@ -242,7 +264,8 @@
       "priority"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "delete_task",
@@ -253,7 +276,8 @@
       "task_id"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "list_tasks",
@@ -265,7 +289,8 @@
       "order_by"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "extract_code_from_markdown",
@@ -277,7 +302,8 @@
       "language"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "load_json",
@@ -288,7 +314,8 @@
       "path"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "read_file",
@@ -299,7 +326,8 @@
       "path"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "write_file",
@@ -311,7 +339,8 @@
       "content"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "ensure_output_dir",
@@ -322,7 +351,8 @@
       "path"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "safe_mkdir",
@@ -333,7 +363,8 @@
       "path"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "safe_load_text",
@@ -344,7 +375,8 @@
       "path"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "propose_doc_update",
@@ -357,7 +389,8 @@
       "model"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "update_doc_with_gpt",
@@ -370,7 +403,8 @@
       "auto_approve"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "apply_update",
@@ -383,7 +417,8 @@
       "auto_approve"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "apply_gpt_patch",
@@ -397,7 +432,8 @@
       "auto_commit"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "append_to_log",
@@ -409,7 +445,8 @@
       "log_file_path"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "generate_suggestions",
@@ -420,7 +457,8 @@
       "diff_result"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "generate_updated_capabilities",
@@ -432,7 +470,8 @@
       "json_caps"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "extract_functions",
@@ -443,7 +482,8 @@
       "source_path"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "extract_classes",
@@ -454,7 +494,8 @@
       "source_path"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "extract_variables",
@@ -465,7 +506,8 @@
       "source_path"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "discover_capabilities",
@@ -477,7 +519,8 @@
       "full_scan"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "write_stub_file",
@@ -489,7 +532,8 @@
       "code"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "write_metadata_file",
@@ -502,7 +546,8 @@
       "description"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "save_capability_stub",
@@ -516,7 +561,8 @@
       "code"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "replace_function_in_source",
@@ -529,7 +575,8 @@
       "new_code"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "generate_tags",
@@ -540,7 +587,8 @@
       "text"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   },
   {
     "id": "save_tags",
@@ -552,7 +600,8 @@
       "tags"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "load_ast_capabilities",
@@ -561,7 +610,8 @@
     "source_file": "core/capabilities_diff.py",
     "args": [],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "utility"
   },
   {
     "id": "enforce_rules",
@@ -572,6 +622,7 @@
       "action_context"
     ],
     "enabled": true,
-    "requires_confirm": false
+    "requires_confirm": false,
+    "type": "core"
   }
 ]
