@@ -105,7 +105,16 @@ def generate_needed_capabilities(role: str = "project_manager") -> Dict[str, Any
     )
 
     content = response.choices[0].message.content
+
+    # 🔍 DEBUG用：必要に応じて表示
+    print("🔎 GPT応答内容:\n", content)
+
     try:
         return json.loads(content)
-    except json.JSONDecodeError:
-        return {"role": role, "required_capabilities": []}
+    except json.JSONDecodeError as e:
+        print("⚠ JSON変換に失敗しました。元のcontentを返します。", e)
+        return {
+            "role": role,
+            "required_capabilities": [],
+            "raw_content": content  # ← 応答を残すことでデバッグしやすく
+        }
