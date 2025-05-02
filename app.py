@@ -507,6 +507,28 @@ if st.sidebar.button("🧠 Kai状態を同期"):
         st.success("✅ ルール違反なし（この文脈では）")
 
 # ──────────────────────────────────────────
+# A2: GPTに必要能力を再判定させる（T017.1）
+# ──────────────────────────────────────────
+from core.capabilities_suggester import generate_needed_capabilities
+
+if st.sidebar.button("🧠 GPTに必要能力を再判定させる（T017.1）"):
+    st.subheader("🧠 GPTによる必要能力の再生成")
+
+    with st.spinner("GPTに問い合わせ中..."):
+        try:
+            result = generate_needed_capabilities(role="project_manager")
+            os.makedirs(DATA_DIR, exist_ok=True)
+            save_path = os.path.join(DATA_DIR, "needed_capabilities_gpt.json")
+            with open(save_path, "w", encoding="utf-8") as f:
+                json.dump(result, f, ensure_ascii=False, indent=2)
+
+            st.success(f"✅ 再生成完了: {save_path}")
+            st.code(json.dumps(result, ensure_ascii=False, indent=2), language="json")
+
+        except Exception as e:
+            st.error(f"❌ 再生成中にエラーが発生しました: {e}")
+
+# ──────────────────────────────────────────
 # Kai状態同期（自己診断）
 # ──────────────────────────────────────────
 
@@ -535,3 +557,4 @@ if st.sidebar.button("🧠 Kai状態同期（自己診断）"):
             st.error(f"❌ 違反: `{v['id']}` - {v['description']}")
     else:
         st.success("✅ ルール違反は検出されませんでした。")
+
