@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 from typing import Dict, List, Any
 from openai import OpenAI 
 
@@ -106,15 +107,13 @@ def generate_needed_capabilities(role: str = "project_manager") -> Dict[str, Any
 
     content = response.choices[0].message.content
 
-    # 🔍 DEBUG用：必要に応じて表示
-    print("🔎 GPT応答内容:\n", content)
+    # コメントと末尾カンマを削除することでJSONとしてパース可能にする
+    content_cleaned = re.sub(r'//.*', '', content)           # 行コメント削除
+    content_cleaned = re.sub(r',\s*]', ']', content_cleaned) # 末尾カンマ削除
 
     try:
-        return json.loads(content)
-    except json.JSONDecodeError as e:
-        print("⚠ JSON変換に失敗しました。元のcontentを返します。", e)
-        return {
-            "role": role,
-            "required_capabilities": [],
-            "raw_content": content  # ← 応答を残すことでデバッグしやすく
-        }
+        parsed = json.loads(content_cleaned)
+        parsed["raw_content"] = content  # 元の文字列も保存しておくと便利
+        return parsed
+    except json.JSONDecodeError:
+        return {"role": role, "required_capabilities": [], "raw_content": content}
