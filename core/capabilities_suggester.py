@@ -1,14 +1,14 @@
 # core/capabilities_suggester.py
 
 import json
-from typing import Dict, List, Any
-
-import openai
 import os
-from dotenv import load_dotenv
+from typing import Dict, List, Any
+from openai import OpenAI 
 
+from dotenv import load_dotenv
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+
+client = OpenAI()  # .envから自動でAPIキー取得
 
 def generate_suggestions(diff_result: Dict[str, List[Dict[str, Any]]]) -> str:
     """
@@ -48,7 +48,6 @@ def generate_suggestions(diff_result: Dict[str, List[Dict[str, Any]]]) -> str:
 
     return "\n".join(lines)
 
-
 def generate_updated_capabilities(ast_caps: List[Dict[str, Any]], json_caps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     AST結果と既存JSONを突き合わせて、仮の新しいcapabilitiesリストを生成する。
@@ -87,12 +86,6 @@ def generate_updated_capabilities(ast_caps: List[Dict[str, Any]], json_caps: Lis
 def generate_needed_capabilities(role: str = "project_manager") -> Dict[str, Any]:
     """
     Kaiが担うロールに必要なcapability IDをGPTに判定させる。
-
-    Args:
-        role: Kaiの仮想ロール（例: "project_manager"）
-
-    Returns:
-        {"role": ..., "required_capabilities": [...]} という辞書
     """
     system_prompt = f"""
 あなたはAIエージェントKaiの能力設計補助AIです。
@@ -103,9 +96,9 @@ def generate_needed_capabilities(role: str = "project_manager") -> Dict[str, Any
 - 目的: AIによるプロジェクト管理の補助
 - 出力形式:
 {{"role": "{role}", "required_capabilities": ["能力ID1", "能力ID2", ...]}}
-    """
+"""
 
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4.1",
         messages=[
             {"role": "system", "content": system_prompt},
@@ -114,7 +107,7 @@ def generate_needed_capabilities(role: str = "project_manager") -> Dict[str, Any
         temperature=0.2
     )
 
-    content = response.choices[0].message["content"]
+    content = response.choices[0].message.content
     try:
         return json.loads(content)
     except json.JSONDecodeError:
