@@ -3,7 +3,7 @@
 from core.capabilities_registry import kai_capability  # ← もし未インポートなら追加
 
 @kai_capability(
-    id="append_to_log",
+    id="append_log",
     name="ログ追加",
     description="この関数は、指定されたメッセージをログファイルに追加します。ログファイルのパスは引数で指定できます。",
     requires_confirm=False,

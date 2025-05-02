@@ -423,7 +423,7 @@
     "type": "core"
   },
   {
-    "id": "append_to_log",
+    "id": "append_log",
     "name": "ログ追加",
     "description": "この関数は、指定されたメッセージをログファイルに追加します。ログファイルのパスは引数で指定できます。",
     "source_file": "core/append_to_log.py",
