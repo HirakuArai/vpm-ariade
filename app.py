@@ -19,11 +19,6 @@ from core.utils import read_file
 from core.self_introspection import run_kai_self_check
 
 # ──────────────────────────────────────────
-# パス構成（ドキュメント/データ保存先など）
-# ──────────────────────────────────────────
-DATA_DIR = os.path.join(BASE_DIR, "data")
-
-# ──────────────────────────────────────────
 # 開発モード設定
 # ──────────────────────────────────────────
 DEVELOPMENT_MODE = False  # 本番デプロイ時はFalseに変更
@@ -49,11 +44,14 @@ except Exception:
 
 openai.api_key = openai_api_key
 
-# パス類
+# ──────────────────────────────────────────
+# パス構成（ドキュメント/データ保存先など）
+# ──────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOCS_DIR = os.path.join(BASE_DIR, "docs")
 CONV_DIR = os.path.join(BASE_DIR, "conversations")
 FLAG_PATH = os.path.join(BASE_DIR, "check_flags", "processed_logs.json")
+DATA_DIR = os.path.join(BASE_DIR, "data")
 
 # 必須フォルダ作成
 os.makedirs(CONV_DIR, exist_ok=True)
