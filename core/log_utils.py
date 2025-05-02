@@ -55,3 +55,33 @@ def messages_to_text(messages):
         content = m.get("content", "")
         text += f"{role.upper()}: {content}\n"
     return text.strip()
+
+@kai_capability(
+    id="load_log",
+    name="会話ログを読み込む",
+    description="指定されたログファイル（またはデフォルトで昨日）を読み込み、Kaiが処理に使えるメッセージ形式に変換します。1行ごとのJSON構造である必要があります。",
+    requires_confirm=False,
+    enabled=True
+)
+def load_log(log_file_path: str = None) -> list:
+    """
+    指定されたログファイルからメッセージを読み込む。
+    存在しない・不正な場合は空リストを返す。
+    """
+    if not log_file_path:
+        yesterday = datetime.now().strftime("%Y-%m-%d")
+        log_file_path = os.path.join(LOG_DIR, f"{yesterday}.log")
+
+    if not os.path.exists(log_file_path):
+        return []
+
+    messages = []
+    with open(log_file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            try:
+                entry = json.loads(line)
+                if isinstance(entry, dict) and "role" in entry and "content" in entry:
+                    messages.append(entry)
+            except json.JSONDecodeError:
+                continue
+    return messages
