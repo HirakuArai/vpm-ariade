@@ -19,6 +19,11 @@ from core.utils import read_file
 from core.self_introspection import run_kai_self_check
 
 # ──────────────────────────────────────────
+# パス構成（ドキュメント/データ保存先など）
+# ──────────────────────────────────────────
+DATA_DIR = os.path.join(BASE_DIR, "data")
+
+# ──────────────────────────────────────────
 # 開発モード設定
 # ──────────────────────────────────────────
 DEVELOPMENT_MODE = False  # 本番デプロイ時はFalseに変更
@@ -422,7 +427,7 @@ if st.sidebar.button("✅ 提案を承認して仮保存（PoC）"):
     json_caps = load_json_capabilities()
     updated_caps = generate_updated_capabilities(ast_caps, json_caps)
 
-    save_path = os.path.join(DOCS_DIR, "kai_capabilities_proposed.json")
+    save_path = os.path.join(DATA_DIR, "kai_capabilities_proposed.json")
     with open(save_path, "w", encoding="utf-8") as f:
         json.dump(updated_caps, f, ensure_ascii=False, indent=2)
 
