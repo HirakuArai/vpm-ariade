@@ -3,6 +3,13 @@
 import json
 from typing import Dict, List, Any
 
+import openai
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
 def generate_suggestions(diff_result: Dict[str, List[Dict[str, Any]]]) -> str:
     """
     差分結果をもとに、日本語で修正提案文を生成する。
@@ -76,3 +83,39 @@ def generate_updated_capabilities(ast_caps: List[Dict[str, Any]], json_caps: Lis
             updated_caps.append(merged_cap)
 
     return updated_caps
+
+def generate_needed_capabilities(role: str = "project_manager") -> Dict[str, Any]:
+    """
+    Kaiが担うロールに必要なcapability IDをGPTに判定させる。
+
+    Args:
+        role: Kaiの仮想ロール（例: "project_manager"）
+
+    Returns:
+        {"role": ..., "required_capabilities": [...]} という辞書
+    """
+    system_prompt = f"""
+あなたはAIエージェントKaiの能力設計補助AIです。
+以下のような仮想エージェントにとって、どのような機能（関数ID）を備えるべきかを判断し、
+最も基本的かつ汎用的な能力IDリストをJSONで返してください。
+
+- ロール名: {role}
+- 目的: AIによるプロジェクト管理の補助
+- 出力形式:
+{{"role": "{role}", "required_capabilities": ["能力ID1", "能力ID2", ...]}}
+    """
+
+    response = openai.ChatCompletion.create(
+        model="gpt-4.1",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": "Kaiの基本機能に必要なcapability IDを列挙してください。"}
+        ],
+        temperature=0.2
+    )
+
+    content = response.choices[0].message["content"]
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        return {"role": role, "required_capabilities": []}

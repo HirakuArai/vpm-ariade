@@ -17,6 +17,11 @@ import shutil
 from core.capabilities_registry import kai_capability
 from core.utils import read_file
 from core.self_introspection import run_kai_self_check
+from core.capabilities_suggester import (
+    generate_suggestions,
+    generate_updated_capabilities,
+    generate_needed_capabilities
+)
 
 # ──────────────────────────────────────────
 # 開発モード設定
