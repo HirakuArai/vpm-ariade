@@ -10,19 +10,6 @@
     "type": "core"
   },
   {
-    "id": "append_to_log",
-    "name": "ログ追加能力",
-    "description": "この関数は特定の役割(role)と内容(content)を受け取り、それをシステムログに追加するKaiの能力を実現します。これにより、Kaiの行動履歴やエラーメッセージ、インフォメーションメッセージなどを記録し管理することができます。",
-    "source_file": "app.py",
-    "args": [
-      "role",
-      "content"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
     "id": "load_conversation_messages",
     "name": "会話メッセージの読み込み",
     "description": "この関数はKaiが過去の会話メッセージを読み込む能力を提供します。具体的には、過去の会話のログを取得し、分析や応答生成のためにそれを使用します。",
