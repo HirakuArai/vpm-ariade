@@ -5,8 +5,17 @@ import json
 from datetime import datetime
 import streamlit as st  # show_patch_log用に必要
 
+from core.capabilities_registry import kai_capability
+
 LOG_PATH = "patch_history.json"
 
+@kai_capability(
+    id="log_patch",
+    name="パッチログ記録",
+    description="Kaiが手がかりとなるファイル名、ユーザーの指示、マークダウンの差分情報から、パッチのログを生成します。これにより、どの指示がどのようにシステムに影響を与えたかを追跡しやすくなります。",
+    requires_confirm=False,
+    enabled=True
+)
 def log_patch(fn_name: str, user_instruction: str, markdown_diff: str):
     """関数修正履歴をpatch_history.jsonに保存する"""
     record = {
@@ -40,6 +49,13 @@ def log_patch(fn_name: str, user_instruction: str, markdown_diff: str):
     except Exception as e:
         print(f"❌ パッチ履歴の保存に失敗しました: {e}", flush=True)
 
+@kai_capability(
+    id="load_patch_history",
+    name="パッチ履歴読み込み",
+    description="この機能は、指定されたパスにあるパッチログを読み込む能力をKaiに提供します。これにより、Kaiは過去のシステム更新（パッチ）の履歴を確認できます。",
+    requires_confirm=False,
+    enabled=True
+)
 def load_patch_history(log_path=LOG_PATH):
     """patch_history.jsonから履歴を読み込む"""
     if not os.path.exists(log_path):
@@ -51,6 +67,13 @@ def load_patch_history(log_path=LOG_PATH):
         print(f"❌ 履歴読み込みに失敗しました: {e}", flush=True)
         return []
 
+@kai_capability(
+    id="show_patch_log",
+    name="パッチログの表示",
+    description="Kaiは、自身のアップデート履歴や変更点を追跡し管理するためにこの機能を使用します。\"show_patch_log\"関数を使って、Kaiの過去のパッチ（修正）ログ情報を取得し表示することが可能です。",
+    requires_confirm=False,
+    enabled=True
+)
 def show_patch_log():
     """patch_history.jsonから履歴をStreamlitで表示する"""
     st.subheader("📘 修正履歴ログ（ドキュメント）")

@@ -27,6 +27,13 @@ if not api_key:
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 DOCS_DIR = os.path.join(BASE_DIR, "docs")
 
+@kai_capability(
+    id="safe_load_text",
+    name="テキストファイル安全読み込み",
+    description="Kaiは、指定したパスにあるテキストファイルを安全に読み込むことができます。この機能は、ファイルが存在し読み込み可能な場合のみ実行され、エラーハンドリングも含まれています。",
+    requires_confirm=False,
+    enabled=True
+)
 def safe_load_text(path: str) -> str:
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as f:
@@ -34,12 +41,12 @@ def safe_load_text(path: str) -> str:
     return ""
 
 @kai_capability(
-    id="doc_update_proposal",
+    id="propose_doc_update",
     name="ドキュメント修正提案",
-    description="ユーザーとの会話内容をもとにドキュメント修正案を生成します。",
-    requires_confirm=False
+    description="ユーザーとの会話内容をもとにドキュメント修正案を生成します。指定されたドキュメントと会話ログに基づき、Kaiは修正文案をGPTに問い合わせて提案します。",
+    requires_confirm=False,
+    enabled=True
 )
-
 def propose_doc_update(doc_name: str, conversation_text: str, model="gpt-4.1") -> str:
     base_os = safe_load_text(os.path.join(DOCS_DIR, "base_os_rules_a.md"))
     proj_def = safe_load_text(os.path.join(DOCS_DIR, "project_definition_a.md"))
@@ -78,6 +85,13 @@ def propose_doc_update(doc_name: str, conversation_text: str, model="gpt-4.1") -
     )
     return response.choices[0].message.content
 
+@kai_capability(
+    id="update_doc_with_gpt",
+    name="文書自動更新",
+    description="Kaiが指定した文書名の文書を、会話テキストを用いて自動的に更新する能力を実現します。オプションの自動承認機能を用いて、更新内容の自動承認を行うことも可能です。",
+    requires_confirm=False,
+    enabled=True
+)
 def update_doc_with_gpt(doc_name: str, conversation_text: str, auto_approve=False):
     """
     GPTによる修正文提案 → ユーザー承認 → ファイル更新 → Gitコミット
@@ -101,7 +115,15 @@ def update_doc_with_gpt(doc_name: str, conversation_text: str, auto_approve=Fals
 
 import difflib
 import json
+from core.capabilities_registry import kai_capability  # 未追加ならファイル上部に追加
 
+@kai_capability(
+    id="apply_update",
+    name="ドキュメント更新機能",
+    description="この機能は指定されたドキュメント名（doc_name）の内容を新しい内容（new_content）で更新します。自動承認オプション（auto_approve）が設定されている場合、更新が即座に反映されます。",
+    requires_confirm=False,
+    enabled=True
+)
 def apply_update(doc_name: str, new_content: str, auto_approve=False):
     """
     GPTが生成したMarkdown内容をファイルに反映し、Gitコミット＋patch_log.jsonに差分履歴を記録する

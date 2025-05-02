@@ -1,5 +1,14 @@
 # core/append_to_log.py
 
+from core.capabilities_registry import kai_capability  # ← もし未インポートなら追加
+
+@kai_capability(
+    id="append_to_log",
+    name="ログ追加",
+    description="この関数は、指定されたメッセージをログファイルに追加します。ログファイルのパスは引数で指定できます。",
+    requires_confirm=False,
+    enabled=True
+)
 def append_to_log(message, log_file_path="default.log"):
     """
     指定されたログファイルにメッセージを追加する関数。

@@ -1,48 +1,57 @@
-# core/log_utils.py
-
-import os
 from datetime import datetime, timedelta
+import os
+import json
+from core.capabilities_registry import kai_capability
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-CONV_DIR = os.path.join(BASE_DIR, "conversations")
+LOG_DIR = "logs"
 
-def get_yesterday_log_filename() -> str:
+@kai_capability(
+    id="get_yesterday_log_filename",
+    name="昨日のログファイル取得",
+    description="この機能はKaiが前日のログファイルの名前を取得する能力を実現します。主にデバッグやトラブルシューティングに役立つ情報を提供します。",
+    requires_confirm=False,
+    enabled=True
+)
+def get_yesterday_log_filename():
     yesterday = datetime.now() - timedelta(days=1)
-    yday_str = yesterday.strftime("%Y%m%d")
-    os.makedirs(CONV_DIR, exist_ok=True)
-    return os.path.join(CONV_DIR, f"conversation_{yday_str}.md")
+    return yesterday.strftime("%Y-%m-%d") + ".log"
 
-def load_yesterdays_log_as_messages() -> list:
-    log_file = get_yesterday_log_filename()
-    messages = []
-    current_role = None
-    content_buffer = []
-
-    if not os.path.exists(log_file) or os.path.getsize(log_file) == 0:
+@kai_capability(
+    id="load_yesterdays_log_as_messages",
+    name="昨日のログをメッセージとして読み込む",
+    description="この関数は昨日のログを取得し、メッセージとして形成して読み込む能力を提供します。これにより、Kaiは過去のデータを利用してより適応的な対話を行うことが可能となります。",
+    requires_confirm=False,
+    enabled=True
+)
+def load_yesterdays_log_as_messages():
+    log_path = os.path.join(LOG_DIR, get_yesterday_log_filename())
+    if not os.path.exists(log_path):
         return []
 
-    with open(log_file, "r", encoding="utf-8") as f:
+    with open(log_path, "r", encoding="utf-8") as f:
         lines = f.readlines()
 
+    messages = []
     for line in lines:
-        line = line.rstrip("\n")
-        if line.startswith("## "):
-            if current_role and content_buffer:
-                role_for_chat = "user" if current_role in ["USER", "KAI"] else "assistant"
-                messages.append({"role": role_for_chat, "content": "\n".join(content_buffer)})
-            content_buffer = []
-            idx1, idx2 = line.find("["), line.find("]")
-            if idx1 != -1 and idx2 != -1:
-                role = line[idx1+1:idx2].replace("ROLE: ", "")
-                current_role = role
-        else:
-            content_buffer.append(line)
-
-    if current_role and content_buffer:
-        role_for_chat = "user" if current_role in ["USER", "KAI"] else "assistant"
-        messages.append({"role": role_for_chat, "content": "\n".join(content_buffer)})
-
+        try:
+            entry = json.loads(line)
+            if "role" in entry and "content" in entry:
+                messages.append(entry)
+        except json.JSONDecodeError:
+            continue
     return messages
 
-def messages_to_text(messages: list) -> str:
-    return "\n".join(f"[{msg['role'].upper()}] {msg['content']}" for msg in messages)
+@kai_capability(
+    id="messages_to_text",
+    name="メッセージのテキスト変換",
+    description="Kaiは、この機能を用いて引数として渡されたメッセージをテキスト形式に変換します。具体的には、インプットとして受け取ったメッセージを適切な形式のテキストデータに編集・変換する機能を持っています。",
+    requires_confirm=False,
+    enabled=True
+)
+def messages_to_text(messages):
+    text = ""
+    for m in messages:
+        role = m.get("role", "user")
+        content = m.get("content", "")
+        text += f"{role.upper()}: {content}\n"
+    return text.strip()

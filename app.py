@@ -16,6 +16,7 @@ import shutil
 
 from core.capabilities_registry import kai_capability
 from core.utils import read_file
+from core.self_introspection import run_kai_self_check
 
 # ──────────────────────────────────────────
 # 開発モード設定
@@ -496,3 +497,33 @@ if st.sidebar.button("🧠 Kai状態を同期"):
             st.warning(f"❌ 違反: {v['id']} - {v['description']}")
     else:
         st.success("✅ ルール違反なし（この文脈では）")
+
+# ──────────────────────────────────────────
+# Kai状態同期（自己診断）
+# ──────────────────────────────────────────
+
+if st.sidebar.button("🧠 Kai状態同期（自己診断）"):
+    st.subheader("🧠 Kai状態同期（Self-Introspection）")
+    with st.spinner("状態を確認中..."):
+        result = run_kai_self_check()
+
+    # 差分表示
+    st.markdown("### 🔍 登録とASTとの差分")
+    diff_output = format_diff_for_output(result["diff_result"])
+    st.markdown(diff_output)
+
+    # 必要能力 vs 未登録
+    st.markdown("### 📌 必要だが未登録な能力")
+    if result["missing_required"]:
+        for cap_id in result["missing_required"]:
+            st.error(f"❌ 未登録の必要能力: `{cap_id}`")
+    else:
+        st.success("✅ 必要能力はすべて登録済みです。")
+
+    # ルール違反
+    st.markdown("### ⚖ ルール違反チェック（テスト文脈）")
+    if result["violations"]:
+        for v in result["violations"]:
+            st.error(f"❌ 違反: `{v['id']}` - {v['description']}")
+    else:
+        st.success("✅ ルール違反は検出されませんでした。")

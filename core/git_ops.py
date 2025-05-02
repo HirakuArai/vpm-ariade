@@ -18,7 +18,6 @@ github_token = os.getenv("GITHUB_TOKEN") or ""
     description="安全な方法でリモートリポジトリから変更を取得（git pull）します。",
     requires_confirm=True
 )
-
 def try_git_pull_safe():
     try:
         subprocess.run(["git", "stash", "--include-untracked"], check=True,
@@ -38,7 +37,6 @@ def try_git_pull_safe():
     description="承認済み変更を git add / commit / push でリポジトリに反映する。",
     requires_confirm=True
 )
-
 def try_git_commit(file_path: str):
     if not github_token:
         return
@@ -53,6 +51,13 @@ def try_git_commit(file_path: str):
     )
 
 # ── 会話ログの確認
+@kai_capability(
+    id="check_unprocessed_logs",
+    name="未処理ログのチェック",
+    description="Kaiは、関数'check_unprocessed_logs'を通じて未処理のログをチェックする能力を有します。これにより、追跡されていない変更や問題がある場合にはすぐに識別され、対応が可能となります。",
+    requires_confirm=False,
+    enabled=True
+)
 def check_unprocessed_logs():
     print("🧪 check_unprocessed_logs() 開始", flush=True)
     try:
