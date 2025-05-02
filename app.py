@@ -434,19 +434,24 @@ if st.sidebar.button("✅ 提案を承認して仮保存（PoC）"):
 
 if st.sidebar.button("🚀 仮保存内容を本番反映する（慎重に）"):
     st.subheader("🚀 本番反映を実行しました")
-    
-    proposed_path = os.path.join(DOCS_DIR, "kai_capabilities_proposed.json")
-    target_path = os.path.join(DOCS_DIR, "kai_capabilities.json")
-    
+
+    # データディレクトリに変更
+    DATA_DIR = os.path.join(BASE_DIR, "data")
+    proposed_path = os.path.join(DATA_DIR, "kai_capabilities_proposed.json")
+    target_path = os.path.join(DATA_DIR, "kai_capabilities.json")
+
     if not os.path.exists(proposed_path):
         st.error("❌ 仮保存ファイルが存在しません！まず提案を仮保存してください。")
     else:
-        # バックアップを作成
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup_path = os.path.join(DOCS_DIR, f"kai_capabilities_backup_{timestamp}.json")
-        shutil.copy2(target_path, backup_path)
-        st.info(f"🗂️ バックアップ作成済み: {backup_path}")
-        
+        # バックアップを作成（target_pathが存在する場合のみ）
+        if os.path.exists(target_path):
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_path = os.path.join(DATA_DIR, f"kai_capabilities_backup_{timestamp}.json")
+            shutil.copy2(target_path, backup_path)
+            st.info(f"🗂️ バックアップ作成済み: {backup_path}")
+        else:
+            st.warning("⚠️ 元のcapabilities.jsonが存在しないため、バックアップはスキップしました。")
+
         # 本番ファイルを上書き
         shutil.copy2(proposed_path, target_path)
         st.success("✅ kai_capabilities.json に本番反映が完了しました！")
