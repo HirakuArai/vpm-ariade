@@ -3,18 +3,23 @@
   "required_capabilities": [
     "read_file",
     "write_file",
-    "append_to_log",
-    "propose_doc_update",
-    "handle_approval",
+    "get_system_prompt",
+    "append_log",
+    "get_today_log_path",
     "try_git_commit",
     "try_git_pull_safe",
-    "get_system_prompt",
-    "load_conversation_messages",
+    "propose_doc_update",
+    "handle_approval",
+    "apply_update",
     "list_tasks",
     "create_task",
     "update_task",
     "delete_task",
     "enforce_rules",
-    "check_unprocessed_logs"
+    "load_conversation_messages",
+    "messages_to_text",
+    "load_json",
+    "ensure_output_dir",
+    "generate_updated_capabilities"
   ]
 }
