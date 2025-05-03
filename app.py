@@ -563,3 +563,23 @@ if st.sidebar.button("🧠 Kai状態同期（自己診断）"):
     else:
         st.success("✅ ルール違反は検出されませんでした。")
 
+# ──────────────────────────────────────────
+# T1.1: Kai未登録関数一覧の表示（@kai_capabilityなし）
+# ──────────────────────────────────────────
+st.divider()
+st.subheader("🧭 Kai未登録関数一覧（登録候補）")
+
+from core.discover_capabilities import discover_capabilities
+
+if st.sidebar.button("📌 登録漏れ関数をチェック（T1.1）"):
+    st.subheader("📌 登録されていない関数一覧（@kai_capability未付与）")
+    full = discover_capabilities(full_scan=True)
+    undecorated = [c for c in full if not c.get("decorated")]
+
+    if not undecorated:
+        st.success("✅ すべての関数が登録済みです（@kai_capabilityあり）")
+    else:
+        for cap in undecorated:
+            with st.expander(f"🔧 {cap['name']} @ {cap.get('filepath', '')}:{cap.get('lineno', '?')}"):
+                st.markdown(f"**引数**: `{', '.join(cap.get('args', []))}`")
+                st.markdown(f"**説明候補**: {cap.get('description', '（なし）')}")
