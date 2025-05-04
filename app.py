@@ -386,25 +386,46 @@ elif mode == "ドキュメント更新":
 if mode == "🔧 開発者モード":
     st.header("🧪 開発者モード：Kai自己能力強化 PoC")
 
-    if st.button("🧠 Kai状態同期（自己診断）"):
-        st.subheader("🧠 Kai状態同期（Self-Introspection）")
-        with st.spinner("状態を確認中..."):
-            result = run_kai_self_check()
-        st.session_state["kai_self_check_result"] = result
-        st.markdown("### 🔍 登録とASTとの差分")
-        st.markdown(format_diff_for_output(result["diff_result"]))
-        st.markdown("### 📌 必要だが未登録な能力")
-        if result["missing_required"]:
-            for cap_id in result["missing_required"]:
-                st.error(f"❌ 未登録: `{cap_id}`")
-        else:
-            st.success("✅ 必要能力はすべて登録済みです。")
-        st.markdown("### ⚖ ルール違反チェック")
-        if result["violations"]:
-            for v in result["violations"]:
-                st.error(f"❌ 違反: `{v['id']}` - {v['description']}")
-        else:
-            st.success("✅ ルール違反は検出されませんでした。")
+if st.button("🧠 Kai状態同期（自己診断）"):
+    st.subheader("🧠 Kai状態同期（Self-Introspection）")
+    with st.spinner("状態を確認中..."):
+        result = run_kai_self_check()
+    st.session_state["kai_self_check_result"] = result
+
+    # 🟣 必要だが未定義な能力（GPTが必要と判断・まだcapabilities.jsonに記述なし）
+    st.markdown("### 🟣 必要だが未定義な能力（仕様未登録）")
+    undefined_caps = result.get("needed_but_not_defined", result.get("missing_required", []))  # 後方互換
+    if undefined_caps:
+        for cap_id in undefined_caps:
+            st.error(f"🔧 未定義: `{cap_id}`（GPTが必要と判定）")
+    else:
+        st.success("✅ GPTが必要と判定した未定義能力はありません")
+
+    # 🔵 定義済みだが未実装（capabilities.jsonに記述あるがAST上に存在しない）
+    st.markdown("### 🔵 定義済みだが未実装の能力（実体なし）")
+    defined_but_missing = [c for c in result.get("diff_result", []) if c.get("type") == "defined_but_not_found"]
+    if defined_but_missing:
+        for c in defined_but_missing:
+            st.warning(f"🚧 `{c['id']}` ← 定義済みだが未実装")
+    else:
+        st.success("✅ 未実装の定義済み能力はありません")
+
+    # 🟡 機能定義漏れ（ASTにあるがcapabilities.jsonに登録されていない）
+    st.markdown("### 🟡 機能定義漏れ（ASTに存在・capabilities.jsonに未登録）")
+    missing_defs = [c for c in result.get("diff_result", []) if c.get("type") == "missing_in_json"]
+    if missing_defs:
+        for c in missing_defs:
+            st.info(f"📌 `{c['id']}` ← 実装済みだがcapabilities.jsonに未登録")
+    else:
+        st.success("✅ ASTとの整合性に問題はありません")
+
+    # ⚖ ルール違反
+    st.markdown("### ⚖ ルール違反チェック")
+    if result.get("violations"):
+        for v in result["violations"]:
+            st.error(f"❌ 違反: `{v['id']}` - {v['description']}")
+    else:
+        st.success("✅ ルール違反は検出されませんでした。")
 
     if st.button("🧠 GPTに必要能力を再判定させる（T017.1）"):
         with st.spinner("GPTに問い合わせ中..."):
@@ -442,40 +463,6 @@ if mode == "🔧 開発者モード":
             st.success("✅ 本番反映が完了しました！")
 
     st.divider()
-    st.subheader("🧠 必要だが未登録な能力の定義・登録支援（PoC）")
-
-    result = st.session_state.get("kai_self_check_result", {})
-    if not result.get("missing_required"):
-        st.info("✅ 未登録の必要能力はありません")
-    else:
-        cap_to_define = st.selectbox("🔧 定義したい能力を選んでください", result["missing_required"])
-        spec_input = st.text_area("📝 その能力がKaiにとってどのような役割を果たすかを説明してください")
-        
-        if st.button("💡 GPTに定義案を提案させる"):
-            from core.capability_proposal import generate_capability_patch  # 必要に応じて作成・インポート
-            with st.spinner("GPTが定義案を生成中..."):
-                try:
-                    patch = generate_capability_patch(cap_to_define, spec_input)
-                    st.session_state["proposed_patch"] = patch
-                    st.code(json.dumps(patch, ensure_ascii=False, indent=2), language="json")
-                    st.success("✅ 提案生成完了！下記を確認してください")
-                except Exception as e:
-                    st.error(f"❌ GPT定義案の生成に失敗しました: {e}")
-
-        if "proposed_patch" in st.session_state:
-            if st.button("✅ この定義を承認して仮保存"):
-                proposed_path = os.path.join("data", "kai_capabilities_proposed.json")
-                if os.path.exists(proposed_path):
-                    with open(proposed_path, encoding="utf-8") as f:
-                        current = json.load(f)
-                else:
-                    current = []
-
-                current.append(st.session_state["proposed_patch"])
-                with open(proposed_path, "w", encoding="utf-8") as f:
-                    json.dump(current, f, ensure_ascii=False, indent=2)
-                st.success("✅ 仮保存ファイルに追記されました！")
-
     st.subheader("🔍 開発用ユーティリティ（確認・補助）")
 
     if st.button("📜 AST関数一覧（フルスキャン）"):
