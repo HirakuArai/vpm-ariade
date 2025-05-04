@@ -394,8 +394,14 @@ if mode == "🔧 開発者モード":
 
         # ① GPTが必要と判断・未定義（仕様未登録）
         st.markdown("### 🟣 必要だが未定義な能力（仕様未登録）")
-        gpt_required = set(result["needed_capabilities_gpt"])
-        json_defined = set(cap["id"] for cap in result["capabilities_json"])
+        try:
+            with open("data/needed_capabilities_gpt.json", encoding="utf-8") as f:
+                gpt_required = set(json.load(f)["required_capabilities"])
+        except Exception as e:
+            st.error(f"❌ needed_capabilities_gpt.jsonの読み込みエラー: {e}")
+            gpt_required = set()
+
+        json_defined = set(cap["id"] for cap in result.get("capabilities_json", []))
         undefined_caps = gpt_required - json_defined
         if undefined_caps:
             for cap_id in undefined_caps:
@@ -405,7 +411,7 @@ if mode == "🔧 開発者モード":
 
         # ② 定義済みだが未実装（実装待ち）
         st.markdown("### 🔵 定義済みだが未実装の能力（実装待ち）")
-        ast_defined = set(cap["id"] for cap in result["capabilities_ast"])
+        ast_defined = set(cap["id"] for cap in result.get("capabilities_ast", []))
         defined_but_not_implemented = json_defined - ast_defined
         if defined_but_not_implemented:
             for cap_id in defined_but_not_implemented:
