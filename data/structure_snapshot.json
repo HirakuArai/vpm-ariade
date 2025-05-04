@@ -1,0 +1,123 @@
+{
+  "": [
+    ".gitignore",
+    "app.py",
+    "dummy.txt",
+    "patch_history.json",
+    "requirements.txt",
+    "run_replace_test.py",
+    "test_doc_engine.py",
+    "test_env.py"
+  ],
+  "core": [
+    "__init__.py",
+    "append_to_log.py",
+    "capabilities_diff.py",
+    "capabilities_registry.py",
+    "capabilities_suggester.py",
+    "code_analysis.py",
+    "code_rewriter.py",
+    "discover_capabilities.py",
+    "doc_update_engine.py",
+    "enforcement.py",
+    "git_ops.py",
+    "handle_approval.py",
+    "kai_patch_applier.py",
+    "log_utils.py",
+    "manage_tasks.py",
+    "markdown_utils.py",
+    "patch_log.py",
+    "run_code_analysis.py",
+    "self_introspection.py",
+    "structure_scanner.py",
+    "stub_writer.py",
+    "tagging.py",
+    "task_selector.py",
+    "utils.py"
+  ],
+  "scripts": [
+    "add_capability_type.py",
+    "capability_diff.py",
+    "check_capability_overlap.py",
+    "compare_capabilities.py",
+    "extract_capabilities.py",
+    "file_catalog.py",
+    "frontmatter_scanner.py",
+    "generate_capability_patches.py",
+    "generate_kai_rules.py",
+    "gpt_generate_capability.py",
+    "kai_autogen_one.py",
+    "priority_proposer.py",
+    "propose_capability_code.py",
+    "register_capabilities.py",
+    "register_capability_patch.py",
+    "scan_required_capabilities.py",
+    "scan_required_capabilities_gpt.py",
+    "self_state_builder.py",
+    "sync_kai_state.py",
+    "test_core_functions.py",
+    "test_enforcement.py"
+  ],
+  "patches": [
+    "enforce_rules_capability.json",
+    "handle_approval_capability.json"
+  ],
+  "logs": [
+    "2025-04-25.log",
+    "2025-04-26.log",
+    "2025-04-28.log",
+    "2025-04-29.log",
+    "2025-05-01.log"
+  ],
+  "docs": [
+    "architecture_overview.md",
+    "base_os_rules.md",
+    "base_os_rules_a.md",
+    "ondemand_index.md",
+    "project_definition.md",
+    "project_definition.tags",
+    "project_definition_a.md",
+    "project_status.md"
+  ],
+  "output": [
+    "file_catalog.json",
+    "kai_capabilities_completion.json",
+    "kai_capabilities_generated.json",
+    "kai_capabilities_patch.json",
+    "kai_self_state.json",
+    "needed_capabilities_autogen.json",
+    "needed_capabilities_gpt.json"
+  ],
+  "check_flags": [
+    "processed_logs.json"
+  ],
+  ".streamlit": [
+    "secrets.toml"
+  ],
+  "archive": [
+    "step1_gitops_refactor.patch"
+  ],
+  "archive/kai_generated_scripts": [
+    "generate_report.py",
+    "test_capability.py"
+  ],
+  "archive/legacy_json": [
+    "generate_report_capability.json",
+    "kai_capabilities_backup_20250430_011852.json",
+    "kai_capabilities_manual_backup.json",
+    "kai_capabilities_proposed.json",
+    "test_capability_capability.json"
+  ],
+  "conversations": [
+    "conversation_20250419.md",
+    "conversation_20250420.md",
+    "conversation_20250421.md",
+    "conversation_20250424.md"
+  ],
+  "data": [
+    "capability_priorities.json",
+    "kai_capabilities.json",
+    "kai_rules.json",
+    "needed_capabilities.json"
+  ]
+}
