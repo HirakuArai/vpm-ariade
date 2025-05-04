@@ -386,46 +386,46 @@ elif mode == "ドキュメント更新":
 if mode == "🔧 開発者モード":
     st.header("🧪 開発者モード：Kai自己能力強化 PoC")
 
-if st.button("🧠 Kai状態同期（自己診断）"):
-    st.subheader("🧠 Kai状態同期（Self-Introspection）")
-    with st.spinner("状態を確認中..."):
-        result = run_kai_self_check()
-    st.session_state["kai_self_check_result"] = result
+    if st.button("🧠 Kai状態同期（自己診断）"):
+        st.subheader("🧠 Kai状態同期（Self-Introspection）")
+        with st.spinner("状態を確認中..."):
+            result = run_kai_self_check()
+        st.session_state["kai_self_check_result"] = result
 
-    # 🟣 必要だが未定義な能力（GPTが必要と判断・まだcapabilities.jsonに記述なし）
-    st.markdown("### 🟣 必要だが未定義な能力（仕様未登録）")
-    undefined_caps = result.get("needed_but_not_defined", result.get("missing_required", []))  # 後方互換
-    if undefined_caps:
-        for cap_id in undefined_caps:
-            st.error(f"🔧 未定義: `{cap_id}`（GPTが必要と判定）")
-    else:
-        st.success("✅ GPTが必要と判定した未定義能力はありません")
+        # 🟣 必要だが未定義な能力（GPTが必要と判断・まだcapabilities.jsonに記述なし）
+        st.markdown("### 🟣 必要だが未定義な能力（仕様未登録）")
+        undefined_caps = result.get("needed_but_not_defined", result.get("missing_required", []))  # 後方互換
+        if undefined_caps:
+            for cap_id in undefined_caps:
+                st.error(f"🔧 未定義: `{cap_id}`（GPTが必要と判定）")
+        else:
+            st.success("✅ GPTが必要と判定した未定義能力はありません")
 
-    # 🔵 定義済みだが未実装（capabilities.jsonに記述あるがAST上に存在しない）
-    st.markdown("### 🔵 定義済みだが未実装の能力（実体なし）")
-    defined_but_missing = [c for c in result.get("diff_result", []) if c.get("type") == "defined_but_not_found"]
-    if defined_but_missing:
-        for c in defined_but_missing:
-            st.warning(f"🚧 `{c['id']}` ← 定義済みだが未実装")
-    else:
-        st.success("✅ 未実装の定義済み能力はありません")
+        # 🔵 定義済みだが未実装（capabilities.jsonに記述あるがAST上に存在しない）
+        st.markdown("### 🔵 定義済みだが未実装の能力（実体なし）")
+        defined_but_missing = [c for c in result.get("diff_result", []) if c.get("type") == "defined_but_not_found"]
+        if defined_but_missing:
+            for c in defined_but_missing:
+                st.warning(f"🚧 `{c['id']}` ← 定義済みだが未実装")
+        else:
+            st.success("✅ 未実装の定義済み能力はありません")
 
-    # 🟡 機能定義漏れ（ASTにあるがcapabilities.jsonに登録されていない）
-    st.markdown("### 🟡 機能定義漏れ（ASTに存在・capabilities.jsonに未登録）")
-    missing_defs = [c for c in result.get("diff_result", []) if c.get("type") == "missing_in_json"]
-    if missing_defs:
-        for c in missing_defs:
-            st.info(f"📌 `{c['id']}` ← 実装済みだがcapabilities.jsonに未登録")
-    else:
-        st.success("✅ ASTとの整合性に問題はありません")
+        # 🟡 機能定義漏れ（ASTにあるがcapabilities.jsonに登録されていない）
+        st.markdown("### 🟡 機能定義漏れ（ASTに存在・capabilities.jsonに未登録）")
+        missing_defs = [c for c in result.get("diff_result", []) if c.get("type") == "missing_in_json"]
+        if missing_defs:
+            for c in missing_defs:
+                st.info(f"📌 `{c['id']}` ← 実装済みだがcapabilities.jsonに未登録")
+        else:
+            st.success("✅ ASTとの整合性に問題はありません")
 
-    # ⚖ ルール違反
-    st.markdown("### ⚖ ルール違反チェック")
-    if result.get("violations"):
-        for v in result["violations"]:
-            st.error(f"❌ 違反: `{v['id']}` - {v['description']}")
-    else:
-        st.success("✅ ルール違反は検出されませんでした。")
+        # ⚖ ルール違反
+        st.markdown("### ⚖ ルール違反チェック")
+        if result.get("violations"):
+            for v in result["violations"]:
+                st.error(f"❌ 違反: `{v['id']}` - {v['description']}")
+        else:
+            st.success("✅ ルール違反は検出されませんでした。")
 
     if st.button("🧠 GPTに必要能力を再判定させる（T017.1）"):
         with st.spinner("GPTに問い合わせ中..."):
