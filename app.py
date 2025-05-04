@@ -594,3 +594,9 @@ if st.sidebar.button("📂 Kai構造スナップショットを生成"):
     snapshot = get_structure_snapshot()
     st.success("✅ スナップショット生成完了（data/structure_snapshot.json）")
     st.code(json.dumps(snapshot, ensure_ascii=False, indent=2), language="json")
+
+    # 🆕 GitHubにPush
+    from core.git_ops import try_git_commit
+    try_git_commit("data/structure_snapshot.json", commit_message="Add Kai structure snapshot")
+    st.toast("📤 GitHubにスナップショットをPushしました", icon="🔄")
+
