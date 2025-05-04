@@ -390,10 +390,9 @@ if mode == "🔧 開発者モード":
         st.subheader("🧠 Kai状態同期（Self-Introspection）")
         with st.spinner("状態を確認中..."):
             result = run_kai_self_check()
+
         st.session_state["kai_self_check_result"] = result
 
-        # ① GPTが必要と判断・未定義（仕様未登録）
-        st.markdown("### 🟣 必要だが未定義な能力（仕様未登録）")
         try:
             with open("data/needed_capabilities_gpt.json", encoding="utf-8") as f:
                 gpt_required = set(json.load(f)["required_capabilities"])
@@ -402,6 +401,10 @@ if mode == "🔧 開発者モード":
             gpt_required = set()
 
         json_defined = set(cap["id"] for cap in result.get("capabilities_json", []))
+        ast_defined = set(cap["id"] for cap in result.get("capabilities_ast", []))
+
+        # ① 必要だが未定義（仕様未登録）
+        st.markdown("### 🟣 必要だが未定義な能力（仕様未登録）")
         undefined_caps = gpt_required - json_defined
         if undefined_caps:
             for cap_id in undefined_caps:
@@ -411,7 +414,6 @@ if mode == "🔧 開発者モード":
 
         # ② 定義済みだが未実装（実装待ち）
         st.markdown("### 🔵 定義済みだが未実装の能力（実装待ち）")
-        ast_defined = set(cap["id"] for cap in result.get("capabilities_ast", []))
         defined_but_not_implemented = json_defined - ast_defined
         if defined_but_not_implemented:
             for cap_id in defined_but_not_implemented:
