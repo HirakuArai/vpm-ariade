@@ -40,10 +40,19 @@ def try_git_pull_safe():
 def try_git_commit(file_path: str):
     if not github_token:
         return
+
+    # フルパスで明示的に処理
+    full_path = Path(file_path)
+    if not full_path.is_absolute():
+        full_path = PROJECT_ROOT / file_path
+
+    print(f"[DEBUG] try_git_commit() path = {full_path}", flush=True)
+    print(f"[DEBUG] exists = {full_path.exists()}", flush=True)
+
     subprocess.run(["git", "config", "--global", "user.name", "Kai Bot"], check=True)
     subprocess.run(["git", "config", "--global", "user.email", "kai@example.com"], check=True)
-    subprocess.run(["git", "add", file_path], check=True)
-    subprocess.run(["git", "commit", "-m", f"Update {Path(file_path).name}"], check=True)
+    subprocess.run(["git", "add", str(full_path)], check=True)
+    subprocess.run(["git", "commit", "-m", f"Update {full_path.name}"], check=True)
     subprocess.run(
         ["git", "push",
          f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"],
