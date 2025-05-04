@@ -392,34 +392,37 @@ if mode == "🔧 開発者モード":
             result = run_kai_self_check()
         st.session_state["kai_self_check_result"] = result
 
-        # 🟣 必要だが未定義な能力（GPTが必要と判断・まだcapabilities.jsonに記述なし）
+        # ① GPTが必要と判断・未定義（仕様未登録）
         st.markdown("### 🟣 必要だが未定義な能力（仕様未登録）")
-        undefined_caps = result.get("needed_but_not_defined", [])
+        gpt_required = set(result["needed_capabilities_gpt"])
+        json_defined = set(cap["id"] for cap in result["capabilities_json"])
+        undefined_caps = gpt_required - json_defined
         if undefined_caps:
             for cap_id in undefined_caps:
                 st.error(f"🔧 未定義: `{cap_id}`（GPTが必要と判定）")
         else:
             st.success("✅ GPTが必要と判定した未定義能力はありません")
 
-        # 🔵 定義済みだが未実装（capabilities.jsonに記述あるがAST上に存在しない）
-        st.markdown("### 🔵 定義済みだが未実装の能力（実体なし）")
-        defined_but_missing = result.get("diff_result", {}).get("defined_but_not_found", [])
-        if defined_but_missing:
-            for c in defined_but_missing:
-                st.warning(f"🚧 `{c['id']}` ← 定義済みだが未実装")
+        # ② 定義済みだが未実装（実装待ち）
+        st.markdown("### 🔵 定義済みだが未実装の能力（実装待ち）")
+        ast_defined = set(cap["id"] for cap in result["capabilities_ast"])
+        defined_but_not_implemented = json_defined - ast_defined
+        if defined_but_not_implemented:
+            for cap_id in defined_but_not_implemented:
+                st.warning(f"🚧 実装待ち: `{cap_id}` ← 定義済み・実装待ち")
         else:
-            st.success("✅ 未実装の定義済み能力はありません")
+            st.success("✅ 定義済み能力はすべて実装されています")
 
-        # 🟡 機能定義漏れ（ASTにあるがcapabilities.jsonに登録されていない）
+        # ③ 機能定義漏れ（ASTにあるがcapabilities.jsonに登録漏れ）
         st.markdown("### 🟡 機能定義漏れ（ASTに存在・capabilities.jsonに未登録）")
-        missing_defs = result.get("diff_result", {}).get("missing_in_json", [])
-        if missing_defs:
-            for c in missing_defs:
-                st.info(f"📌 `{c['id']}` ← 実装済みだがcapabilities.jsonに未登録")
+        ast_not_defined = ast_defined - json_defined
+        if ast_not_defined:
+            for cap_id in ast_not_defined:
+                st.info(f"📌 定義漏れ: `{cap_id}` ← 実装済み・capabilities.json未登録")
         else:
             st.success("✅ ASTとの整合性に問題はありません")
 
-        # 🔶 属性不一致
+        # ④ 属性不一致（定義の差異）
         st.markdown("### 🔶 属性不一致（定義の差異）")
         mismatched = result.get("diff_result", {}).get("mismatched", [])
         if mismatched:
