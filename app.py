@@ -242,10 +242,26 @@ st.write("プロジェクトについて何でも聞いてください。")
 from core.code_analysis import extract_functions
 from core.patch_log import load_patch_history, show_patch_log
 from core import log_utils, doc_update_engine
-from core.tagging import generate_tags  # 🆕 追加
+from core.tagging import generate_tags
+from core.discover_capabilities import discover_capabilities
+from core.capabilities_diff import (
+    load_ast_capabilities,
+    load_json_capabilities,
+    compare_capabilities,
+    format_diff_for_output
+)
+from core.capabilities_suggester import (
+    generate_suggestions,
+    generate_updated_capabilities,
+    generate_needed_capabilities
+)
+from core.structure_scanner import get_structure_snapshot
+from core.git_ops import try_git_commit
 
+# ──────────────────────────────────────────
 # モード切り替え
-mode = st.sidebar.radio("📂 モード選択", ["チャット", "関数修正", "ドキュメント更新"])
+# ──────────────────────────────────────────
+mode = st.sidebar.radio("📂 モード選択", ["チャット", "関数修正", "ドキュメント更新", "🔧 開発者モード"])
 
 if mode == "チャット":
     if not DEVELOPMENT_MODE:
@@ -367,237 +383,83 @@ elif mode == "ドキュメント更新":
             # ⬇ Gitに自動コミット！
             try_git_commit(os.path.join(DOCS_DIR, doc_name.replace(".md", ".tags")))
 
-# ──────────────────────────────────────────
-# 仮設：テスト用ボタン（discover_capabilities）
-# ──────────────────────────────────────────
-from core.discover_capabilities import discover_capabilities  # インポートも必須（まだならファイル頭で！）
+if mode == "🔧 開発者モード":
+    st.header("🧪 開発者モード：Kai自己能力強化 PoC")
 
-st.divider()
-st.subheader("🔍 Kai自己能力解析（テスト用）")
-
-if st.sidebar.button("🔍 Discover Kai Capabilities (テスト)"):
-    st.subheader("Kaiが自己解析した能力一覧（生データ）")
-    capabilities = discover_capabilities()
-    st.json(capabilities)
-
-# ──────────────────────────────────────────
-# 仮設：全関数AST走査ボタン
-# ──────────────────────────────────────────
-
-if st.sidebar.button("📜 AST 走査で関数一覧を出力"):
-    st.subheader("🔍 Kaiが検出した関数一覧（decorated=Trueがcapability）")
-    capabilities_full = discover_capabilities(full_scan=True)
-    st.json(capabilities_full)
-
-# ──────────────────────────────────────────
-# 仮設：自己能力差分チェック（capabilities_diff）
-# ──────────────────────────────────────────
-from core.capabilities_diff import (
-    load_ast_capabilities,
-    load_json_capabilities,
-    compare_capabilities,
-    format_diff_for_output
-)
-
-if st.sidebar.button("🧪 Kai能力差分チェック（AST vs JSON）"):
-    st.subheader("🧠 Kai 自己能力 差分チェック結果")
-    ast_caps = load_ast_capabilities()
-    json_caps = load_json_capabilities()
-    diff = compare_capabilities(ast_caps, json_caps)
-    formatted = format_diff_for_output(diff)
-    st.markdown(formatted)
-
-# ──────────────────────────────────────────
-# 仮設：自己更新提案生成（capabilities_suggester）
-# ──────────────────────────────────────────
-from core.capabilities_suggester import generate_suggestions, generate_updated_capabilities
-
-if st.sidebar.button("🧪 Kai自己更新提案を生成（PoC）"):
-    st.subheader("🧠 Kai 自己更新提案")
-    ast_caps = load_ast_capabilities()
-    json_caps = load_json_capabilities()
-    diff = compare_capabilities(ast_caps, json_caps)
-    suggestion = generate_suggestions(diff)
-    st.markdown(suggestion)
-
-# ──────────────────────────────────────────
-# 仮設：自己更新提案を仮保存する（proposedファイル生成）
-# ──────────────────────────────────────────
-
-if st.sidebar.button("✅ 提案を承認して仮保存（PoC）"):
-    st.subheader("✅ 提案内容を仮保存しました（proposedファイル）")
-    ast_caps = load_ast_capabilities()
-    json_caps = load_json_capabilities()
-    updated_caps = generate_updated_capabilities(ast_caps, json_caps)
-
-    save_path = os.path.join(DATA_DIR, "kai_capabilities_proposed.json")
-    with open(save_path, "w", encoding="utf-8") as f:
-        json.dump(updated_caps, f, ensure_ascii=False, indent=2)
-
-    st.success(f"✅ 仮保存完了: {save_path}")
-
-# ──────────────────────────────────────────
-# 仮設：自己更新提案を本番反映する（正式capabilities.jsonに上書き）
-# ──────────────────────────────────────────
-
-if st.sidebar.button("🚀 仮保存内容を本番反映する（慎重に）"):
-    st.subheader("🚀 本番反映を実行しました")
-
-    # データディレクトリに変更
-    DATA_DIR = os.path.join(BASE_DIR, "data")
-    proposed_path = os.path.join(DATA_DIR, "kai_capabilities_proposed.json")
-    target_path = os.path.join(DATA_DIR, "kai_capabilities.json")
-
-    if not os.path.exists(proposed_path):
-        st.error("❌ 仮保存ファイルが存在しません！まず提案を仮保存してください。")
-    else:
-        # バックアップを作成（target_pathが存在する場合のみ）
-        if os.path.exists(target_path):
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            backup_path = os.path.join(DATA_DIR, f"kai_capabilities_backup_{timestamp}.json")
-            shutil.copy2(target_path, backup_path)
-            st.info(f"🗂️ バックアップ作成済み: {backup_path}")
-        else:
-            st.warning("⚠️ 元のcapabilities.jsonが存在しないため、バックアップはスキップしました。")
-
-        # 本番ファイルを上書き
-        shutil.copy2(proposed_path, target_path)
-        st.success("✅ kai_capabilities.json に本番反映が完了しました！")
-
-# ──────────────────────────────────────────
-# A1: Kai自己状態同期（差分・不足・違反チェック）
-# ──────────────────────────────────────────
-
-if st.sidebar.button("🧠 Kai状態を同期"):
-    st.subheader("🧠 Kai状態同期（Self-Introspection）")
-    
-    from core.discover_capabilities import discover_capabilities
-    from core.capabilities_diff import load_json_capabilities, compare_capabilities, format_diff_for_output
-    from core.enforcement import enforce_rules
-    from core.utils import load_json  # もしくは独自のjson loader
-
-    # 1. ASTから自己能力を抽出
-    ast_caps = discover_capabilities(full_scan=True)
-
-    # 2. 登録済み能力をロード
-    json_caps = load_json_capabilities()
-
-    # 3. 差分比較（未登録など）
-    diff = compare_capabilities(ast_caps, json_caps)
-    formatted_diff = format_diff_for_output(diff)
-    st.markdown("### 🔍 登録とASTとの差分")
-    st.markdown(formatted_diff or "✅ 差分はありません。")
-
-    # 4. 必要能力との比較（必要だけど未登録）
-    try:
-        needed = load_json("output/needed_capabilities_gpt.json")["required_capabilities"]
-        registered_ids = [c["id"] for c in json_caps]
-        missing_needed = [cap for cap in needed if cap not in registered_ids]
+    if st.button("🧠 Kai状態同期（自己診断）"):
+        st.subheader("🧠 Kai状態同期（Self-Introspection）")
+        with st.spinner("状態を確認中..."):
+            result = run_kai_self_check()
+        st.markdown("### 🔍 登録とASTとの差分")
+        st.markdown(format_diff_for_output(result["diff_result"]))
         st.markdown("### 📌 必要だが未登録な能力")
-        if missing_needed:
-            st.error(f"❌ 未登録の必要能力: {', '.join(missing_needed)}")
+        if result["missing_required"]:
+            for cap_id in result["missing_required"]:
+                st.error(f"❌ 未登録: `{cap_id}`")
         else:
             st.success("✅ 必要能力はすべて登録済みです。")
-    except Exception as e:
-        st.warning(f"⚠ 必要能力ファイルの読み込みに失敗しました: {e}")
+        st.markdown("### ⚖ ルール違反チェック")
+        if result["violations"]:
+            for v in result["violations"]:
+                st.error(f"❌ 違反: `{v['id']}` - {v['description']}")
+        else:
+            st.success("✅ ルール違反は検出されませんでした。")
 
-    # 5. ルール違反の検出（仮に何かの文脈があれば）
-    st.markdown("### ⚖ ルール違反チェック（テスト文脈）")
-    dummy_ctx = {"action": "apply_update", "doc_type": "ondemand", "approved": False}
-    violations = enforce_rules(dummy_ctx)
-    if violations:
-        for v in violations:
-            st.warning(f"❌ 違反: {v['id']} - {v['description']}")
-    else:
-        st.success("✅ ルール違反なし（この文脈では）")
+    if st.button("🧠 GPTに必要能力を再判定させる（T017.1）"):
+        with st.spinner("GPTに問い合わせ中..."):
+            try:
+                result = generate_needed_capabilities(role="project_manager")
+                save_path = os.path.join("data", "needed_capabilities_gpt.json")
+                with open(save_path, "w", encoding="utf-8") as f:
+                    json.dump(result, f, ensure_ascii=False, indent=2)
+                st.success(f"✅ 再生成完了: {save_path}")
+                st.code(json.dumps(result, ensure_ascii=False, indent=2), language="json")
+            except Exception as e:
+                st.error(f"❌ エラー: {e}")
 
-# ──────────────────────────────────────────
-# A2: GPTに必要能力を再判定させる（T017.1）
-# ──────────────────────────────────────────
-from core.capabilities_suggester import generate_needed_capabilities
+    if st.button("✅ 提案を仮保存（proposedファイル）"):
+        ast_caps = load_ast_capabilities()
+        json_caps = load_json_capabilities()
+        updated_caps = generate_updated_capabilities(ast_caps, json_caps)
+        save_path = os.path.join("data", "kai_capabilities_proposed.json")
+        with open(save_path, "w", encoding="utf-8") as f:
+            json.dump(updated_caps, f, ensure_ascii=False, indent=2)
+        st.success(f"✅ 仮保存完了: {save_path}")
 
-if st.sidebar.button("🧠 GPTに必要能力を再判定させる（T017.1）"):
-    st.subheader("🧠 GPTによる必要能力の再生成")
+    if st.button("🚀 本番反映（proposed → capabilities.json）"):
+        proposed_path = os.path.join("data", "kai_capabilities_proposed.json")
+        target_path = os.path.join("data", "kai_capabilities.json")
+        if not os.path.exists(proposed_path):
+            st.error("❌ 仮保存ファイルが存在しません！")
+        else:
+            if os.path.exists(target_path):
+                ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+                backup_path = os.path.join("data", f"kai_capabilities_backup_{ts}.json")
+                shutil.copy2(target_path, backup_path)
+                st.info(f"🗂️ バックアップ作成: {backup_path}")
+            shutil.copy2(proposed_path, target_path)
+            st.success("✅ 本番反映が完了しました！")
 
-    with st.spinner("GPTに問い合わせ中..."):
-        try:
-            result = generate_needed_capabilities(role="project_manager")
-            os.makedirs(DATA_DIR, exist_ok=True)
-            save_path = os.path.join(DATA_DIR, "needed_capabilities_gpt.json")
-            with open(save_path, "w", encoding="utf-8") as f:
-                json.dump(result, f, ensure_ascii=False, indent=2)
+    st.divider()
+    st.subheader("🔍 開発用ユーティリティ（確認・補助）")
 
-            st.success(f"✅ 再生成完了: {save_path}")
-            st.code(json.dumps(result, ensure_ascii=False, indent=2), language="json")
+    if st.button("📜 AST関数一覧（フルスキャン）"):
+        capabilities = discover_capabilities(full_scan=True)
+        st.json(capabilities)
 
-        except Exception as e:
-            st.error(f"❌ 再生成中にエラーが発生しました: {e}")
+    if st.button("📌 登録漏れ関数をチェック（T1.1）"):
+        capabilities = discover_capabilities(full_scan=True)
+        undecorated = [c for c in capabilities if not c.get("decorated")]
+        if not undecorated:
+            st.success("✅ すべて登録済み（@kai_capabilityあり）")
+        else:
+            for cap in undecorated:
+                st.markdown(f"🔧 {cap['name']} ({cap.get('filepath')}:{cap.get('lineno')})")
 
-# ──────────────────────────────────────────
-# Kai状態同期（自己診断）
-# ──────────────────────────────────────────
-
-if st.sidebar.button("🧠 Kai状態同期（自己診断）"):
-    st.subheader("🧠 Kai状態同期（Self-Introspection）")
-    with st.spinner("状態を確認中..."):
-        result = run_kai_self_check()
-
-    # 差分表示
-    st.markdown("### 🔍 登録とASTとの差分")
-    diff_output = format_diff_for_output(result["diff_result"])
-    st.markdown(diff_output)
-
-    # 必要能力 vs 未登録
-    st.markdown("### 📌 必要だが未登録な能力")
-    if result["missing_required"]:
-        for cap_id in result["missing_required"]:
-            st.error(f"❌ 未登録の必要能力: `{cap_id}`")
-    else:
-        st.success("✅ 必要能力はすべて登録済みです。")
-
-    # ルール違反
-    st.markdown("### ⚖ ルール違反チェック（テスト文脈）")
-    if result["violations"]:
-        for v in result["violations"]:
-            st.error(f"❌ 違反: `{v['id']}` - {v['description']}")
-    else:
-        st.success("✅ ルール違反は検出されませんでした。")
-
-# ──────────────────────────────────────────
-# T1.1: Kai未登録関数一覧の表示（@kai_capabilityなし）
-# ──────────────────────────────────────────
-st.divider()
-st.subheader("🧭 Kai未登録関数一覧（登録候補）")
-
-from core.discover_capabilities import discover_capabilities
-
-if st.sidebar.button("📌 登録漏れ関数をチェック（T1.1）"):
-    st.subheader("📌 登録されていない関数一覧（@kai_capability未付与）")
-    full = discover_capabilities(full_scan=True)
-    undecorated = [c for c in full if not c.get("decorated")]
-
-    if not undecorated:
-        st.success("✅ すべての関数が登録済みです（@kai_capabilityあり）")
-    else:
-        for cap in undecorated:
-            with st.expander(f"🔧 {cap['name']} @ {cap.get('filepath', '')}:{cap.get('lineno', '?')}"):
-                st.markdown(f"**引数**: `{', '.join(cap.get('args', []))}`")
-                st.markdown(f"**説明候補**: {cap.get('description', '（なし）')}")
-
-# ──────────────────────────────────────────
-# Kai構造スナップショット生成（structure_scanner）
-# ──────────────────────────────────────────
-from core.structure_scanner import get_structure_snapshot
-
-if st.sidebar.button("📂 Kai構造スナップショットを生成"):
-    st.subheader("📂 Kai構造スナップショット")
-    snapshot = get_structure_snapshot()
-    st.success("✅ スナップショット生成完了（data/structure_snapshot.json）")
-    st.code(json.dumps(snapshot, ensure_ascii=False, indent=2), language="json")
-
-    # 🔁 GitHubにPush
-    from core.git_ops import try_git_commit
-    try_git_commit("data/structure_snapshot.json")
-    st.toast("📤 GitHubにスナップショットをPushしました", icon="🔄")
-
-
+    if st.button("📂 Kai構造スナップショットを生成＆Push"):
+        snapshot = get_structure_snapshot()
+        save_path = os.path.join("data", "structure_snapshot.json")
+        with open(save_path, "w", encoding="utf-8") as f:
+            json.dump(snapshot, f, ensure_ascii=False, indent=2)
+        try_git_commit(save_path)
+        st.success("✅ Kai構造スナップショットを保存・Pushしました")
