@@ -583,3 +583,14 @@ if st.sidebar.button("📌 登録漏れ関数をチェック（T1.1）"):
             with st.expander(f"🔧 {cap['name']} @ {cap.get('filepath', '')}:{cap.get('lineno', '?')}"):
                 st.markdown(f"**引数**: `{', '.join(cap.get('args', []))}`")
                 st.markdown(f"**説明候補**: {cap.get('description', '（なし）')}")
+
+# ──────────────────────────────────────────
+# Kai構造スナップショット生成（structure_scanner）
+# ──────────────────────────────────────────
+from core.structure_scanner import get_structure_snapshot
+
+if st.sidebar.button("📂 Kai構造スナップショットを生成"):
+    st.subheader("📂 Kai構造スナップショット")
+    snapshot = get_structure_snapshot()
+    st.success("✅ スナップショット生成完了（data/structure_snapshot.json）")
+    st.code(json.dumps(snapshot, ensure_ascii=False, indent=2), language="json")
