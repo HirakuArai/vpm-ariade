@@ -392,22 +392,25 @@ if mode == "🔧 開発者モード":
             result = run_kai_self_check()
         st.session_state["kai_self_check_result"] = result
 
-        # 🟣 必要だが未定義な能力
+        # 🟣 必要だが未定義な能力（GPTが必要と判断・まだcapabilities.jsonに記述なし）
         st.markdown("### 🟣 必要だが未定義な能力（仕様未登録）")
-        undefined_caps = result.get("needed_but_not_defined", result.get("missing_required", []))  # 後方互換
+        undefined_caps = result.get("needed_but_not_defined", [])
         if undefined_caps:
             for cap_id in undefined_caps:
                 st.error(f"🔧 未定義: `{cap_id}`（GPTが必要と判定）")
         else:
             st.success("✅ GPTが必要と判定した未定義能力はありません")
 
-        # 🔵 定義済みだが未実装の能力（AST上に存在しない）
+        # 🔵 定義済みだが未実装（capabilities.jsonに記述あるがAST上に存在しない）
         st.markdown("### 🔵 定義済みだが未実装の能力（実体なし）")
-        # 今回は該当なし、構造上 diff_result.defined_but_not_found が存在しない
-        # プレースホルダとして今後拡張時のために残す
-        st.success("✅ 未実装の定義済み能力はありません")
+        defined_but_missing = result.get("diff_result", {}).get("defined_but_not_found", [])
+        if defined_but_missing:
+            for c in defined_but_missing:
+                st.warning(f"🚧 `{c['id']}` ← 定義済みだが未実装")
+        else:
+            st.success("✅ 未実装の定義済み能力はありません")
 
-        # 🟡 機能定義漏れ（ASTにあるがcapabilities.jsonに未登録）
+        # 🟡 機能定義漏れ（ASTにあるがcapabilities.jsonに登録されていない）
         st.markdown("### 🟡 機能定義漏れ（ASTに存在・capabilities.jsonに未登録）")
         missing_defs = result.get("diff_result", {}).get("missing_in_json", [])
         if missing_defs:
@@ -416,18 +419,16 @@ if mode == "🔧 開発者モード":
         else:
             st.success("✅ ASTとの整合性に問題はありません")
 
-        # 🔶 属性不一致（name, description など）
+        # 🔶 属性不一致
         st.markdown("### 🔶 属性不一致（定義の差異）")
         mismatched = result.get("diff_result", {}).get("mismatched", [])
         if mismatched:
-            for m in mismatched:
-                st.warning(f"📝 `{m['id']}` の属性に差異があります")
-                for field, diff in m.get("differences", {}).items():
-                    st.markdown(f"- {field}:")
-                    st.markdown(f"  - JSON: `{diff.get('json')}`")
-                    st.markdown(f"  - AST: `{diff.get('ast')}`")
+            for c in mismatched:
+                st.markdown(f"📝 **{c['id']}** の属性に差異があります")
+                for attr, vals in c["differences"].items():
+                    st.markdown(f"- **{attr}**:\n  - JSON: {vals['json']}\n  - AST: {vals['ast']}")
         else:
-            st.success("✅ 定義内容の差異はありません")
+            st.success("✅ 属性の不一致はありません")
 
         # ⚖ ルール違反
         st.markdown("### ⚖ ルール違反チェック")
