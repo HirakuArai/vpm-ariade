@@ -1,123 +1,296 @@
-{
-  "": [
-    ".gitignore",
-    "app.py",
-    "dummy.txt",
-    "patch_history.json",
-    "requirements.txt",
-    "run_replace_test.py",
-    "test_doc_engine.py",
-    "test_env.py"
-  ],
-  "core": [
-    "__init__.py",
-    "append_to_log.py",
-    "capabilities_diff.py",
-    "capabilities_registry.py",
-    "capabilities_suggester.py",
-    "code_analysis.py",
-    "code_rewriter.py",
-    "discover_capabilities.py",
-    "doc_update_engine.py",
-    "enforcement.py",
-    "git_ops.py",
-    "handle_approval.py",
-    "kai_patch_applier.py",
-    "log_utils.py",
-    "manage_tasks.py",
-    "markdown_utils.py",
-    "patch_log.py",
-    "run_code_analysis.py",
-    "self_introspection.py",
-    "structure_scanner.py",
-    "stub_writer.py",
-    "tagging.py",
-    "task_selector.py",
-    "utils.py"
-  ],
-  "scripts": [
-    "add_capability_type.py",
-    "capability_diff.py",
-    "check_capability_overlap.py",
-    "compare_capabilities.py",
-    "extract_capabilities.py",
-    "file_catalog.py",
-    "frontmatter_scanner.py",
-    "generate_capability_patches.py",
-    "generate_kai_rules.py",
-    "gpt_generate_capability.py",
-    "kai_autogen_one.py",
-    "priority_proposer.py",
-    "propose_capability_code.py",
-    "register_capabilities.py",
-    "register_capability_patch.py",
-    "scan_required_capabilities.py",
-    "scan_required_capabilities_gpt.py",
-    "self_state_builder.py",
-    "sync_kai_state.py",
-    "test_core_functions.py",
-    "test_enforcement.py"
-  ],
-  "patches": [
-    "enforce_rules_capability.json",
-    "handle_approval_capability.json"
-  ],
-  "logs": [
-    "2025-04-25.log",
-    "2025-04-26.log",
-    "2025-04-28.log",
-    "2025-04-29.log",
-    "2025-05-01.log"
-  ],
-  "docs": [
-    "architecture_overview.md",
-    "base_os_rules.md",
-    "base_os_rules_a.md",
-    "ondemand_index.md",
-    "project_definition.md",
-    "project_definition.tags",
-    "project_definition_a.md",
-    "project_status.md"
-  ],
-  "output": [
-    "file_catalog.json",
-    "kai_capabilities_completion.json",
-    "kai_capabilities_generated.json",
-    "kai_capabilities_patch.json",
-    "kai_self_state.json",
-    "needed_capabilities_autogen.json",
-    "needed_capabilities_gpt.json"
-  ],
-  "check_flags": [
-    "processed_logs.json"
-  ],
-  ".streamlit": [
-    "secrets.toml"
-  ],
-  "archive": [
-    "step1_gitops_refactor.patch"
-  ],
-  "archive/kai_generated_scripts": [
-    "generate_report.py",
-    "test_capability.py"
-  ],
-  "archive/legacy_json": [
-    "generate_report_capability.json",
-    "kai_capabilities_backup_20250430_011852.json",
-    "kai_capabilities_manual_backup.json",
-    "kai_capabilities_proposed.json",
-    "test_capability_capability.json"
-  ],
-  "conversations": [
-    "conversation_20250419.md",
-    "conversation_20250420.md",
-    "conversation_20250421.md",
-    "conversation_20250424.md"
-  ],
-  "data": [
-    "capability_priorities.json",
-    "kai_capabilities.json",
-    "kai_rules.json",
-    "needed_capabilities.json"
-  ]
-}
+[
+  {
+    "path": ".gitignore"
+  },
+  {
+    "path": "app.py"
+  },
+  {
+    "path": "dummy.txt"
+  },
+  {
+    "path": "patch_history.json"
+  },
+  {
+    "path": "requirements.txt"
+  },
+  {
+    "path": "run_replace_test.py"
+  },
+  {
+    "path": "test_doc_engine.py"
+  },
+  {
+    "path": "test_env.py"
+  },
+  {
+    "path": "core/__init__.py"
+  },
+  {
+    "path": "core/append_to_log.py"
+  },
+  {
+    "path": "core/capabilities_diff.py"
+  },
+  {
+    "path": "core/capabilities_registry.py"
+  },
+  {
+    "path": "core/capabilities_suggester.py"
+  },
+  {
+    "path": "core/capability_proposal.py"
+  },
+  {
+    "path": "core/code_analysis.py"
+  },
+  {
+    "path": "core/code_rewriter.py"
+  },
+  {
+    "path": "core/discover_capabilities.py"
+  },
+  {
+    "path": "core/doc_update_engine.py"
+  },
+  {
+    "path": "core/enforcement.py"
+  },
+  {
+    "path": "core/git_ops.py"
+  },
+  {
+    "path": "core/handle_approval.py"
+  },
+  {
+    "path": "core/kai_patch_applier.py"
+  },
+  {
+    "path": "core/log_utils.py"
+  },
+  {
+    "path": "core/manage_tasks.py"
+  },
+  {
+    "path": "core/markdown_utils.py"
+  },
+  {
+    "path": "core/patch_log.py"
+  },
+  {
+    "path": "core/run_code_analysis.py"
+  },
+  {
+    "path": "core/self_introspection.py"
+  },
+  {
+    "path": "core/structure_scanner.py"
+  },
+  {
+    "path": "core/stub_writer.py"
+  },
+  {
+    "path": "core/tagging.py"
+  },
+  {
+    "path": "core/task_selector.py"
+  },
+  {
+    "path": "core/utils.py"
+  },
+  {
+    "path": "scripts/add_capability_type.py"
+  },
+  {
+    "path": "scripts/capability_diff.py"
+  },
+  {
+    "path": "scripts/check_capability_overlap.py"
+  },
+  {
+    "path": "scripts/compare_capabilities.py"
+  },
+  {
+    "path": "scripts/extract_capabilities.py"
+  },
+  {
+    "path": "scripts/file_catalog.py"
+  },
+  {
+    "path": "scripts/frontmatter_scanner.py"
+  },
+  {
+    "path": "scripts/generate_capability_patches.py"
+  },
+  {
+    "path": "scripts/generate_kai_rules.py"
+  },
+  {
+    "path": "scripts/gpt_generate_capability.py"
+  },
+  {
+    "path": "scripts/kai_autogen_one.py"
+  },
+  {
+    "path": "scripts/priority_proposer.py"
+  },
+  {
+    "path": "scripts/propose_capability_code.py"
+  },
+  {
+    "path": "scripts/register_capabilities.py"
+  },
+  {
+    "path": "scripts/register_capability_patch.py"
+  },
+  {
+    "path": "scripts/scan_required_capabilities.py"
+  },
+  {
+    "path": "scripts/scan_required_capabilities_gpt.py"
+  },
+  {
+    "path": "scripts/self_state_builder.py"
+  },
+  {
+    "path": "scripts/sync_kai_state.py"
+  },
+  {
+    "path": "scripts/test_core_functions.py"
+  },
+  {
+    "path": "scripts/test_enforcement.py"
+  },
+  {
+    "path": "patches/enforce_rules_capability.json"
+  },
+  {
+    "path": "patches/handle_approval_capability.json"
+  },
+  {
+    "path": "logs/2025-04-25.log"
+  },
+  {
+    "path": "logs/2025-04-26.log"
+  },
+  {
+    "path": "logs/2025-04-28.log"
+  },
+  {
+    "path": "logs/2025-04-29.log"
+  },
+  {
+    "path": "logs/2025-05-01.log"
+  },
+  {
+    "path": "docs/architecture_overview.md"
+  },
+  {
+    "path": "docs/base_os_rules.md"
+  },
+  {
+    "path": "docs/base_os_rules_a.md"
+  },
+  {
+    "path": "docs/ondemand_index.md"
+  },
+  {
+    "path": "docs/project_definition.md"
+  },
+  {
+    "path": "docs/project_definition.tags"
+  },
+  {
+    "path": "docs/project_definition_a.md"
+  },
+  {
+    "path": "docs/project_status.md"
+  },
+  {
+    "path": "output/file_catalog.json"
+  },
+  {
+    "path": "output/kai_capabilities_completion.json"
+  },
+  {
+    "path": "output/kai_capabilities_generated.json"
+  },
+  {
+    "path": "output/kai_capabilities_patch.json"
+  },
+  {
+    "path": "output/kai_self_state.json"
+  },
+  {
+    "path": "output/needed_capabilities_autogen.json"
+  },
+  {
+    "path": "output/needed_capabilities_gpt.json"
+  },
+  {
+    "path": "check_flags/processed_logs.json"
+  },
+  {
+    "path": ".streamlit/secrets.toml"
+  },
+  {
+    "path": "archive/step1_gitops_refactor.patch"
+  },
+  {
+    "path": "archive/kai_generated_scripts/generate_report.py"
+  },
+  {
+    "path": "archive/kai_generated_scripts/test_capability.py"
+  },
+  {
+    "path": "archive/legacy_json/generate_report_capability.json"
+  },
+  {
+    "path": "archive/legacy_json/kai_capabilities_backup_20250430_011852.json"
+  },
+  {
+    "path": "archive/legacy_json/kai_capabilities_manual_backup.json"
+  },
+  {
+    "path": "archive/legacy_json/kai_capabilities_proposed.json"
+  },
+  {
+    "path": "archive/legacy_json/test_capability_capability.json"
+  },
+  {
+    "path": "conversations/conversation_20250419.md"
+  },
+  {
+    "path": "conversations/conversation_20250420.md"
+  },
+  {
+    "path": "conversations/conversation_20250421.md"
+  },
+  {
+    "path": "conversations/conversation_20250424.md"
+  },
+  {
+    "path": "data/capability_priorities.json"
+  },
+  {
+    "path": "data/kai_capabilities.json"
+  },
+  {
+    "path": "data/kai_capabilities_backup_20250504_225145.json"
+  },
+  {
+    "path": "data/kai_capabilities_proposed.json"
+  },
+  {
+    "path": "data/kai_rules.json"
+  },
+  {
+    "path": "data/needed_capabilities.json"
+  },
+  {
+    "path": "data/needed_capabilities_gpt.json"
+  },
+  {
+    "path": "data/structure_snapshot.json"
+  }
+]
