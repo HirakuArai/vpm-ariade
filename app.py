@@ -403,7 +403,7 @@ if mode == "🔧 開発者モード":
 
         # 🔵 定義済みだが未実装（capabilities.jsonに記述あるがAST上に存在しない）
         st.markdown("### 🔵 定義済みだが未実装の能力（実体なし）")
-        defined_but_missing = [c for c in result.get("diff_result", []) if c.get("type") == "defined_but_not_found"]
+        defined_but_missing = [c for c in result.get("diff_result", []) if isinstance(c, dict) and c.get("type") == "defined_but_not_found"]
         if defined_but_missing:
             for c in defined_but_missing:
                 st.warning(f"🚧 `{c['id']}` ← 定義済みだが未実装")
