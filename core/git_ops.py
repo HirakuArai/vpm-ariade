@@ -38,24 +38,28 @@ def try_git_pull_safe():
     requires_confirm=True
 )
 def try_git_commit(file_path: str):
-    if not github_token:
+    from pathlib import Path
+    full_path = Path(file_path).resolve()
+
+    if not full_path.exists():
+        print(f"❌ ファイルが存在しません: {full_path}", flush=True)
         return
 
-    # フルパスで明示的に処理
-    full_path = Path(file_path)
-    if not full_path.is_absolute():
-        full_path = PROJECT_ROOT / file_path
-
-    print(f"[DEBUG] try_git_commit() path = {full_path}", flush=True)
-    print(f"[DEBUG] exists = {full_path.exists()}", flush=True)
+    print(f"📁 コミット対象ファイル: {full_path}", flush=True)
 
     subprocess.run(["git", "config", "--global", "user.name", "Kai Bot"], check=True)
     subprocess.run(["git", "config", "--global", "user.email", "kai@example.com"], check=True)
-    subprocess.run(["git", "add", str(full_path)], check=True)
+
+    # 🔍 add の成否を確認
+    result = subprocess.run(["git", "add", str(full_path)], capture_output=True, text=True)
+    if result.returncode != 0:
+        print("❌ git add エラー:", result.stderr, flush=True)
+        return
+
+    # 通常の commit / push
     subprocess.run(["git", "commit", "-m", f"Update {full_path.name}"], check=True)
     subprocess.run(
-        ["git", "push",
-         f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"],
+        ["git", "push", f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"],
         check=True
     )
 
