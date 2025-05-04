@@ -441,6 +441,39 @@ if mode == "🔧 開発者モード":
             st.success("✅ 本番反映が完了しました！")
 
     st.divider()
+    st.subheader("🧠 必要だが未登録な能力の定義・登録支援（PoC）")
+
+    if not result.get("missing_required"):
+        st.info("✅ 未登録の必要能力はありません")
+    else:
+        cap_to_define = st.selectbox("🔧 定義したい能力を選んでください", result["missing_required"])
+        spec_input = st.text_area("📝 その能力がKaiにとってどのような役割を果たすかを説明してください")
+        
+        if st.button("💡 GPTに定義案を提案させる"):
+            from core.capability_proposal import generate_capability_patch  # 必要に応じて作成・インポート
+            with st.spinner("GPTが定義案を生成中..."):
+                try:
+                    patch = generate_capability_patch(cap_to_define, spec_input)
+                    st.session_state["proposed_patch"] = patch
+                    st.code(json.dumps(patch, ensure_ascii=False, indent=2), language="json")
+                    st.success("✅ 提案生成完了！下記を確認してください")
+                except Exception as e:
+                    st.error(f"❌ GPT定義案の生成に失敗しました: {e}")
+
+        if "proposed_patch" in st.session_state:
+            if st.button("✅ この定義を承認して仮保存"):
+                proposed_path = os.path.join("data", "kai_capabilities_proposed.json")
+                if os.path.exists(proposed_path):
+                    with open(proposed_path, encoding="utf-8") as f:
+                        current = json.load(f)
+                else:
+                    current = []
+
+                current.append(st.session_state["proposed_patch"])
+                with open(proposed_path, "w", encoding="utf-8") as f:
+                    json.dump(current, f, ensure_ascii=False, indent=2)
+                st.success("✅ 仮保存ファイルに追記されました！")
+
     st.subheader("🔍 開発用ユーティリティ（確認・補助）")
 
     if st.button("📜 AST関数一覧（フルスキャン）"):
