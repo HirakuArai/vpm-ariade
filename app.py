@@ -412,7 +412,7 @@ if mode == "🔧 開発者モード":
 
         # 🟡 機能定義漏れ（ASTにあるがcapabilities.jsonに登録されていない）
         st.markdown("### 🟡 機能定義漏れ（ASTに存在・capabilities.jsonに未登録）")
-        missing_defs = [c for c in result.get("diff_result", []) if c.get("type") == "missing_in_json"]
+        missing_defs = [c for c in result.get("diff_result", []) if isinstance(c, dict) and c.get("type") == "missing_in_json"]
         if missing_defs:
             for c in missing_defs:
                 st.info(f"📌 `{c['id']}` ← 実装済みだがcapabilities.jsonに未登録")
