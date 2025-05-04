@@ -390,6 +390,7 @@ if mode == "🔧 開発者モード":
         st.subheader("🧠 Kai状態同期（Self-Introspection）")
         with st.spinner("状態を確認中..."):
             result = run_kai_self_check()
+        st.session_state["kai_self_check_result"] = result
         st.markdown("### 🔍 登録とASTとの差分")
         st.markdown(format_diff_for_output(result["diff_result"]))
         st.markdown("### 📌 必要だが未登録な能力")
@@ -443,6 +444,7 @@ if mode == "🔧 開発者モード":
     st.divider()
     st.subheader("🧠 必要だが未登録な能力の定義・登録支援（PoC）")
 
+    result = st.session_state.get("kai_self_check_result", {})
     if not result.get("missing_required"):
         st.info("✅ 未登録の必要能力はありません")
     else:
