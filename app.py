@@ -22,6 +22,7 @@ from core.capabilities_suggester import (
     generate_updated_capabilities,
     generate_needed_capabilities
 )
+from core.git_ops import push_all_important_files
 
 # ──────────────────────────────────────────
 # 開発モード設定
@@ -507,3 +508,10 @@ if mode == "🔧 開発者モード":
             json.dump(snapshot, f, ensure_ascii=False, indent=2)
         try_git_commit(save_path)
         st.success("✅ Kai構造スナップショットを保存・Pushしました")
+
+    st.subheader("📦 全重要ファイルを一括 Git Push")
+
+    if st.button("🚀 push_all_important_files を実行"):
+        with st.spinner("全重要ファイルをGitにPush中..."):
+            push_all_important_files()
+        st.success("✅ push_all_important_files 完了！")

@@ -94,3 +94,40 @@ def check_unprocessed_logs():
             print("✅ すべてのログが処理済みです", flush=True)
     except Exception as e:
         print("❌ check_unprocessed_logs エラー:", e, flush=True)
+
+@kai_capability(
+    id="push_all_files",
+    name="重要ファイル全体をGit Push",
+    description="docs/, core/, scripts/, data/, conversations/, logs/ などの重要ファイルを一括でGit pushします。",
+    requires_confirm=True
+)
+def push_all_important_files():
+    try:
+        subprocess.run(["git", "config", "--global", "user.name", "Kai Bot"], check=True)
+        subprocess.run(["git", "config", "--global", "user.email", "kai@example.com"], check=True)
+
+        # 対象パターン
+        include_paths = [
+            "data/*.json",
+            "data/structure_snapshot.json",
+            "output/*.json",
+            "conversations/*.md",
+            "logs/*.log",
+            "docs/*.md",
+            "core/**/*.py",
+            "scripts/*.py"
+        ]
+
+        for pattern in include_paths:
+            subprocess.run(["git", "add", pattern], shell=False)
+
+        subprocess.run(["git", "commit", "-m", "全重要ファイルを一括push"], check=True)
+        subprocess.run([
+            "git", "push",
+            f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"
+        ], check=True)
+
+        print("✅ 重要ファイルを全てpushしました", flush=True)
+
+    except subprocess.CalledProcessError as e:
+        print("❌ push_all_important_files エラー:", e, flush=True)
