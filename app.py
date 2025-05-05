@@ -23,6 +23,9 @@ from core.capabilities_suggester import (
     generate_needed_capabilities
 )
 from core.git_ops import push_all_important_files
+from core.code_analysis import extract_functions
+from core.patch_log import load_patch_history, show_patch_log
+from core.kai_patch_applier import apply_gpt_patch
 
 # ──────────────────────────────────────────
 # 開発モード設定
@@ -284,15 +287,20 @@ if mode == "チャット":
             st.markdown(reply)
         append_to_log("KAI", reply)
 
+# Kai UI - 関数修正モード 拡張版（@kai_capability補完対応）
+
 elif mode == "関数修正":
     st.divider()
-    st.subheader("🛠 Kai 自己改修：関数選択モード")
+    st.subheader("🛠 Kai 自己改修：関数選択モード（補完対応）")
+
     function_list = extract_functions("app.py") + extract_functions("core/doc_update_engine.py")
     function_labels = [f"{f['name']} ({', '.join(f['args'])}) @ L{f['lineno']}" for f in function_list]
     selected_func_label = st.selectbox("🔧 修正したい関数を選んでください", function_labels)
+    selected = function_list[function_labels.index(selected_func_label)]
+
     user_instruction = st.text_area("📝 修正したい内容を具体的に記入してください")
+
     if st.button("💡 GPTに修正案を生成させる"):
-        selected = function_list[function_labels.index(selected_func_label)]
         with open("app.py", encoding="utf-8") as f:
             lines = f.readlines()
         fn_source = "".join(lines[selected["lineno"] - 1 : selected.get("end_lineno", selected["lineno"] + 5)])
@@ -312,11 +320,31 @@ elif mode == "関数修正":
         st.markdown("### 💬 修正提案（Kaiから）")
         st.code(proposal, language="markdown")
 
+    # 🔧 Kai能力補完モード（decorated=False のときのみ）
+    if not selected.get("decorated") and selected.get("id") in (None, "null"):
+        if st.button("🧠 @kai_capability をKaiが補完提案する"):
+            def generate_kai_capability_proposal(fn: dict) -> str:
+                return f"""```python
+    @kai_capability(
+        id=\"{fn['name']}\",
+        name=\"{fn['name'].replace('_', ' ').title()}\",
+        description=\"Kaiが {fn['name']} に関連する能力を提供します。\",
+        requires_confirm=False
+    )
+    def {fn['name']}({', '.join(fn.get('args', []))}):
+        ...
+    ```"""
+            proposal = generate_kai_capability_proposal(selected)
+            st.session_state["fn_proposal"] = proposal
+            st.session_state["fn_selected"] = selected["name"]
+            st.session_state["fn_instruction"] = "Kaiによる能力補完"
+            st.markdown("### 💡 補完提案（Kaiより）")
+            st.code(proposal, language="markdown")
+
     fn_selected = st.session_state.get("fn_selected")
     if st.session_state.get("fn_proposal") and fn_selected:
         st.subheader("🔧 GPTの提案を適用する")
         if st.button("💾 修正をapp.pyに反映＋Gitコミット"):
-            from core.kai_patch_applier import apply_gpt_patch
             success = apply_gpt_patch(
                 markdown_text=st.session_state["fn_proposal"],
                 fn_name=fn_selected,
