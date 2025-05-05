@@ -1,0 +1,203 @@
+[
+  {
+    "id": "append_log",
+    "name": "ログ追加",
+    "description": "この関数は、指定されたメッセージをログファイルに追加します。ログファイルのパスは引数で指定できます。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "load_log",
+    "name": "会話ログを読み込む",
+    "description": "指定されたログファイル（またはデフォルトで昨日）を読み込み、Kaiが処理に使えるメッセージ形式に変換します。1行ごとのJSON構造である必要があります。",
+    "requires_confirm": false,
+    "enabled": true,
+    "decorated": true
+  },
+  {
+    "id": "safe_pull",
+    "name": "リモートリポジトリを最新化",
+    "description": "安全な方法でリモートリポジトリから変更を取得（git pull）します。",
+    "requires_confirm": true,
+    "enabled": true,
+    "decorated": true
+  },
+  {
+    "id": "git_commit",
+    "name": "Git コミット & プッシュ",
+    "description": "承認済み変更を git add / commit / push でリポジトリに反映する。",
+    "requires_confirm": true,
+    "enabled": true,
+    "decorated": true
+  },
+  {
+    "id": "check_unprocessed_logs",
+    "name": "未処理ログのチェック",
+    "description": "Kaiは、関数'check_unprocessed_logs'を通じて未処理のログをチェックする能力を有します。これにより、追跡されていない変更や問題がある場合にはすぐに識別され、対応が可能となります。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "push_all_files",
+    "name": "重要ファイル全体をGit Push",
+    "description": "docs/, core/, scripts/, data/, conversations/, logs/ などの重要ファイルを一括でGit pushします。",
+    "requires_confirm": true,
+    "enabled": true,
+    "decorated": true
+  },
+  {
+    "id": "load_json",
+    "name": "JSONファイルロード機能",
+    "description": "Kaiが指定したパスにあるJSONファイルを読み込む能力を提供します。データセットや設定ファイルなどの読み込みに利用します。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "read_file",
+    "name": "ファイル読み込み能力",
+    "description": "この関数を使用することで、指定されたパスのファイルを読み込むことができます。ファイルアクセスを通じて、データ解析や情報取得等に用いることが可能となります。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "write_file",
+    "name": "ファイル書き込み",
+    "description": "Kaiは、指定されたパスにファイルを生成し、その中に与えられたコンテンツを書き込むことができます。これにより、特定のデータをファイルとして保存する能力が実現されます。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "ensure_output_dir",
+    "name": "出力ディレクトリの確認・作成",
+    "description": "「ensure_output_dir」関数は、指定されたパスのディレクトリが存在するかを確認し、存在しない場合にはディレクトリを作成します。これにより、Kaiはファイルの出力や保存場所を管理するための能力を実現します。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "safe_mkdir",
+    "name": "ディレクトリ作成",
+    "description": "エージェントKaiは、「safe_mkdir」関数を使って指定したパスに安全にディレクトリを作成します。既存のディレクトリが存在しない場合に限り、新しいディレクトリを作ります。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "get_yesterday_log_filename",
+    "name": "昨日のログファイル取得",
+    "description": "この機能はKaiが前日のログファイルの名前を取得する能力を実現します。主にデバッグやトラブルシューティングに役立つ情報を提供します。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "load_yesterdays_log_as_messages",
+    "name": "昨日のログをメッセージとして読み込む",
+    "description": "この関数は昨日のログを取得し、メッセージとして形成して読み込む能力を提供します。これにより、Kaiは過去のデータを利用してより適応的な対話を行うことが可能となります。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "messages_to_text",
+    "name": "メッセージのテキスト変換",
+    "description": "Kaiは、この機能を用いて引数として渡されたメッセージをテキスト形式に変換します。具体的には、インプットとして受け取ったメッセージを適切な形式のテキストデータに編集・変換する機能を持っています。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "apply_patch",
+    "name": "GPT修正提案を適用",
+    "description": "GPTが提案したコード修正案をソースコードに適用します。",
+    "requires_confirm": true,
+    "enabled": true,
+    "decorated": true
+  },
+  {
+    "id": "log_patch",
+    "name": "パッチログ記録",
+    "description": "Kaiが手がかりとなるファイル名、ユーザーの指示、マークダウンの差分情報から、パッチのログを生成します。これにより、どの指示がどのようにシステムに影響を与えたかを追跡しやすくなります。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "load_patch_history",
+    "name": "パッチ履歴読み込み",
+    "description": "この機能は、指定されたパスにあるパッチログを読み込む能力をKaiに提供します。これにより、Kaiは過去のシステム更新（パッチ）の履歴を確認できます。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "show_patch_log",
+    "name": "パッチログの表示",
+    "description": "Kaiは、自身のアップデート履歴や変更点を追跡し管理するためにこの機能を使用します。\"show_patch_log\"関数を使って、Kaiの過去のパッチ（修正）ログ情報を取得し表示することが可能です。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "safe_load_text",
+    "name": "テキストファイル安全読み込み",
+    "description": "Kaiは、指定したパスにあるテキストファイルを安全に読み込むことができます。この機能は、ファイルが存在し読み込み可能な場合のみ実行され、エラーハンドリングも含まれています。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "propose_doc_update",
+    "name": "ドキュメント修正提案",
+    "description": "ユーザーとの会話内容をもとにドキュメント修正案を生成します。指定されたドキュメントと会話ログに基づき、Kaiは修正文案をGPTに問い合わせて提案します。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "update_doc_with_gpt",
+    "name": "文書自動更新",
+    "description": "Kaiが指定した文書名の文書を、会話テキストを用いて自動的に更新する能力を実現します。オプションの自動承認機能を用いて、更新内容の自動承認を行うことも可能です。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "apply_update",
+    "name": "ドキュメント更新機能",
+    "description": "この機能は指定されたドキュメント名（doc_name）の内容を新しい内容（new_content）で更新します。自動承認オプション（auto_approve）が設定されている場合、更新が即座に反映されます。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "create_task",
+    "name": "タスク作成",
+    "description": "Kaiは「タスク作成」の機能を持っています。これはタイトル、詳細、期限、優先度といった情報を基に新しいタスクを作成して管理することができます。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "update_task",
+    "name": "タスク更新機能",
+    "description": "Kaiは指定されたIDを持つタスクの各フィールド（タイトル、説明、期日、優先度）を更新する能力を持っています。これにより、タスクの詳細な情報変更が可能になります。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "delete_task",
+    "name": "タスク削除",
+    "description": "この機能は、特定のタスクを削除する能力をKaiに提供します。指定されたIDを持つタスクをKaiのタスクリストから削除することができます。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "list_tasks",
+    "name": "タスク一覧表示機能",
+    "description": "Kaiは、特定のフィルター条件や並び順に基づいて、タスクの一覧を表示する機能を持っています。これによりユーザーは必要なタスクを効率的に管理・把握することが可能です。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "generate_tags",
+    "name": "ドキュメントタグ生成",
+    "description": "ドキュメント内容を解析し、関連するキーワードタグを自動生成します。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "enforce_rules",
+    "name": "Kaiのルール適用チェック",
+    "description": "Kaiが操作中にベース人格OSやプロジェクトルールに違反していないかを検査します。",
+    "requires_confirm": false,
+    "enabled": true
+  }
+]
