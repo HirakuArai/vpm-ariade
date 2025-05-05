@@ -52,6 +52,7 @@ def generate_suggestions(diff_result: Dict[str, List[Dict[str, Any]]]) -> str:
 def generate_updated_capabilities(ast_caps: List[Dict[str, Any]], json_caps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     AST結果と既存JSONを突き合わせて、仮の新しいcapabilitiesリストを生成する。
+    また、needed_capabilities_gpt.json にあるが未定義なIDも補完的に提案に含める。
 
     Args:
         ast_caps: ASTから取得した@kai_capability関数群
@@ -69,10 +70,8 @@ def generate_updated_capabilities(ast_caps: List[Dict[str, Any]], json_caps: Lis
     for id_, ast_cap in ast_index.items():
         json_cap = json_index.get(id_)
         if not json_cap:
-            # もともと存在しない → 新規追加
-            updated_caps.append(ast_cap)
+            updated_caps.append(ast_cap)  # 新規追加
         else:
-            # 存在している場合は、AST側（最新情報）を信頼して更新
             merged_cap = {
                 "id": id_,
                 "name": ast_cap.get("name", json_cap.get("name")),
@@ -81,6 +80,26 @@ def generate_updated_capabilities(ast_caps: List[Dict[str, Any]], json_caps: Lis
                 "enabled": ast_cap.get("enabled", json_cap.get("enabled"))
             }
             updated_caps.append(merged_cap)
+
+    # 🔽 needed_capabilities_gpt.json からの補完を追加
+    needed_path = os.path.join("data", "needed_capabilities_gpt.json")
+    if os.path.exists(needed_path):
+        with open(needed_path, "r", encoding="utf-8") as f:
+            needed = json.load(f).get("required_capabilities", [])
+
+        # 既に定義・提案されているIDは除外
+        existing_ids = {cap["id"] for cap in json_caps}
+        proposed_ids = {cap["id"] for cap in updated_caps}
+
+        for cap_id in needed:
+            if cap_id not in existing_ids and cap_id not in proposed_ids:
+                updated_caps.append({
+                    "id": cap_id,
+                    "name": cap_id.replace("_", " ").title(),
+                    "description": f"{cap_id} 機能の定義が必要です（GPTによる必要判定）。",
+                    "enabled": True,
+                    "requires_confirm": False
+                })
 
     return updated_caps
 

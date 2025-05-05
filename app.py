@@ -387,6 +387,41 @@ elif mode == "ドキュメント更新":
 if mode == "🔧 開発者モード":
     st.header("🧪 開発者モード：Kai自己能力強化 PoC")
 
+    if st.button("🧠 GPTに必要能力を再判定させる（T017.1）"):
+        with st.spinner("GPTに問い合わせ中..."):
+            try:
+                result = generate_needed_capabilities(role="project_manager")
+                save_path = os.path.join("data", "needed_capabilities_gpt.json")
+                with open(save_path, "w", encoding="utf-8") as f:
+                    json.dump(result, f, ensure_ascii=False, indent=2)
+                st.success(f"✅ 再生成完了: {save_path}")
+                st.code(json.dumps(result, ensure_ascii=False, indent=2), language="json")
+            except Exception as e:
+                st.error(f"❌ エラー: {e}")
+
+    if st.button("✅ 提案を仮保存（proposedファイル）"):
+        ast_caps = load_ast_capabilities()
+        json_caps = load_json_capabilities()
+        updated_caps = generate_updated_capabilities(ast_caps, json_caps)
+        save_path = os.path.join("data", "kai_capabilities_proposed.json")
+        with open(save_path, "w", encoding="utf-8") as f:
+            json.dump(updated_caps, f, ensure_ascii=False, indent=2)
+        st.success(f"✅ 仮保存完了: {save_path}")
+
+    if st.button("🚀 本番反映（proposed → capabilities.json）"):
+        proposed_path = os.path.join("data", "kai_capabilities_proposed.json")
+        target_path = os.path.join("data", "kai_capabilities.json")
+        if not os.path.exists(proposed_path):
+            st.error("❌ 仮保存ファイルが存在しません！")
+        else:
+            if os.path.exists(target_path):
+                ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+                backup_path = os.path.join("data", f"kai_capabilities_backup_{ts}.json")
+                shutil.copy2(target_path, backup_path)
+                st.info(f"🗂️ バックアップ作成: {backup_path}")
+            shutil.copy2(proposed_path, target_path)
+            st.success("✅ 本番反映が完了しました！")
+
     if st.button("🧠 Kai状態同期（自己診断）"):
         st.subheader("🧠 Kai状態同期（Self-Introspection）")
         with st.spinner("状態を確認中..."):
@@ -449,41 +484,6 @@ if mode == "🔧 開発者モード":
                 st.error(f"❌ 違反: `{v['id']}` - {v['description']}")
         else:
             st.success("✅ ルール違反は検出されませんでした。")
-
-    if st.button("🧠 GPTに必要能力を再判定させる（T017.1）"):
-        with st.spinner("GPTに問い合わせ中..."):
-            try:
-                result = generate_needed_capabilities(role="project_manager")
-                save_path = os.path.join("data", "needed_capabilities_gpt.json")
-                with open(save_path, "w", encoding="utf-8") as f:
-                    json.dump(result, f, ensure_ascii=False, indent=2)
-                st.success(f"✅ 再生成完了: {save_path}")
-                st.code(json.dumps(result, ensure_ascii=False, indent=2), language="json")
-            except Exception as e:
-                st.error(f"❌ エラー: {e}")
-
-    if st.button("✅ 提案を仮保存（proposedファイル）"):
-        ast_caps = load_ast_capabilities()
-        json_caps = load_json_capabilities()
-        updated_caps = generate_updated_capabilities(ast_caps, json_caps)
-        save_path = os.path.join("data", "kai_capabilities_proposed.json")
-        with open(save_path, "w", encoding="utf-8") as f:
-            json.dump(updated_caps, f, ensure_ascii=False, indent=2)
-        st.success(f"✅ 仮保存完了: {save_path}")
-
-    if st.button("🚀 本番反映（proposed → capabilities.json）"):
-        proposed_path = os.path.join("data", "kai_capabilities_proposed.json")
-        target_path = os.path.join("data", "kai_capabilities.json")
-        if not os.path.exists(proposed_path):
-            st.error("❌ 仮保存ファイルが存在しません！")
-        else:
-            if os.path.exists(target_path):
-                ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-                backup_path = os.path.join("data", f"kai_capabilities_backup_{ts}.json")
-                shutil.copy2(target_path, backup_path)
-                st.info(f"🗂️ バックアップ作成: {backup_path}")
-            shutil.copy2(proposed_path, target_path)
-            st.success("✅ 本番反映が完了しました！")
 
     st.divider()
     st.subheader("🔍 開発用ユーティリティ（確認・補助）")
