@@ -527,7 +527,9 @@ if mode == "🔧 開発者モード":
     if "undecorated_bulk" in st.session_state:
         patch_results = []
         for cap in st.session_state["undecorated_bulk"]:
-            with st.expander(f"🔧 {cap['name']} ({cap['filepath']}:{cap['lineno']})"):
+            file = cap.get('filepath', '???')
+            line = cap.get('lineno', '?')
+            with st.expander(f"🔧 {cap['name']} ({file}:{line})"):
                 def generate_patch(c):
                     return f"""```python
     @kai_capability(
