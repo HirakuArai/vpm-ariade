@@ -9,7 +9,7 @@ import json
 
 CATALOG_PATH = "output/file_catalog.json"
 CAP_PATH = "data/kai_capabilities.json"
-NEEDED_PATH = "output/needed_capabilities_gpt.json"
+NEEDED_PATH = "data/needed_capabilities_gpt.json"
 OUTPUT_PATH = "output/kai_self_state.json"
 
 

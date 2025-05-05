@@ -15,7 +15,7 @@ def run_kai_self_check():
     json_caps = load_json_capabilities()
     diff = compare_capabilities(ast_caps, json_caps)
 
-    needed = load_json("output/needed_capabilities_gpt.json")
+    needed = load_json("data/needed_capabilities_gpt.json")
     needed_ids = set(needed.get("required_capabilities", []))
     registered_ids = set(cap["id"] for cap in json_caps)
 

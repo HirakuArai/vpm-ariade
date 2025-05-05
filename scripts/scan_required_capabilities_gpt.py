@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 DOCS_DIR = "docs"
 CAP_PATH = "data/kai_capabilities.json"
-OUTPUT_PATH = "output/needed_capabilities_gpt.json"
+OUTPUT_PATH = "data/needed_capabilities_gpt.json"
 MODEL = "gpt-4.1"
 
 load_dotenv()
