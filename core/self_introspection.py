@@ -2,90 +2,93 @@
 
 """Kai self‑introspection utilities.
 
-This module compares AST‑extracted @kai_capability decorators with the
-current JSON registry *and* the GPT‑generated needed_capabilities list.
-It returns a dictionary with:
-
-    diff_result      – detailed diff from compare_capabilities()
-    missing_required – IDs required by GPT but not present in JSON
-    violations       – rule‑enforcement results
+* Compares AST‑extracted ``@kai_capability`` decorators with the current
+  JSON registry (``kai_capabilities.json``).
+* Compares that set with GPT‑generated ``needed_capabilities_gpt.json``.
+* Returns a dictionary ``{diff_result, missing_required, violations}`` that
+  the Streamlit UI renders.
+* **Writes an INFO log line** that includes an 8‑char md5 hash + mtime of
+  *this* source file, so developers can verify that the latest code actually
+  ran **without touching the UI**.
 """
 
 from __future__ import annotations
 
+import copy
+import datetime as dt
+import hashlib
+import logging
 import pathlib
-from typing import Dict, Any, List, Set
+from typing import Any, Dict, List, Set
 
-from core.capabilities_diff import (
-    load_ast_capabilities,
-    compare_capabilities,
-)
+from core.capabilities_diff import compare_capabilities, load_ast_capabilities
 from core.enforcement import enforce_rules
 from core.utils import load_json
 
-# ---------------------------------------------------------------------------
-# Helpers & constants
-# ---------------------------------------------------------------------------
+logger = logging.getLogger("kai.selfcheck")  # Streamlit prints INFO by default
 
-PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent  # repo root
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
-
 JSON_CAPS_PATH = DATA_DIR / "kai_capabilities.json"
 NEEDED_CAPS_PATH = DATA_DIR / "needed_capabilities_gpt.json"
 
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _norm(raw: str | None) -> str | None:
+    """Normalise a capability ID for case‑/whitespace‑insensitive compare."""
+    return None if raw is None else raw.strip().lower()
+
+
+def _ids(lst: List[Dict[str, Any]]) -> Set[str]:
+    """Extract a set of normalised IDs from a list of capability dicts."""
+    return {_norm(c.get("id")) for c in lst if _norm(c.get("id"))}
+
+
+def _source_fingerprint() -> str:
+    """Return short md5 + mtime so we know *which* file ran."""
+    path = pathlib.Path(__file__)
+    digest = hashlib.md5(path.read_bytes()).hexdigest()[:8]
+    mtime = dt.datetime.fromtimestamp(path.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
+    return f"{digest}@{mtime}"
 
 # ---------------------------------------------------------------------------
-# Utility
-# ---------------------------------------------------------------------------
-
-def _normalise_id(raw: str | None) -> str | None:
-    """Strip whitespace/newlines and lower-case the ID for robust comparison."""
-    if raw is None:
-        return None
-    return raw.strip().lower()
-
-
-def _extract_ids(caps: List[Dict[str, Any]]) -> Set[str]:
-    """Return a set of normalised capability IDs from a JSON list."""
-    return {
-        norm_id
-        for cap in caps
-        if (norm_id := _normalise_id(cap.get("id")))
-    }
-
-
-# ---------------------------------------------------------------------------
-# Public API
+# Public
 # ---------------------------------------------------------------------------
 
 def run_kai_self_check() -> Dict[str, Any]:
-    """Run Kai self‑diagnostics and return a summary dict."""
+    """Run self‑diagnostics and emit a concise log fingerprint."""
 
-    # 1) Load capabilities
-    ast_caps: List[Dict[str, Any]] = load_ast_capabilities()
-    json_caps: List[Dict[str, Any]] = load_json(JSON_CAPS_PATH)
+    ast_caps = load_ast_capabilities()
+    json_caps = load_json(JSON_CAPS_PATH)
 
-    # 2) Compute diff – pass a *copy* so compare_capabilities can't mutate
-    diff = compare_capabilities(ast_caps, list(json_caps))
+    # 1) IDs already registered (before any mutation)
+    registered_ids = _ids(json_caps)
 
-    # 3) IDs GPT says we need (normalised)
+    # 2) Diff – pass a deep‑copy so original list isn’t mutated
+    diff = compare_capabilities(ast_caps, copy.deepcopy(json_caps))
+
+    # 3) GPT‑required IDs
     needed_data = load_json(NEEDED_CAPS_PATH)
-    needed_ids = {_normalise_id(x) for x in needed_data.get("required_capabilities", [])}
+    needed_ids = {_norm(x) for x in needed_data.get("required_capabilities", [])}
 
-    # 4) IDs already registered in JSON (normalised + skip blanks)
-    registered_ids = _extract_ids(json_caps)
-
-    # 5) Calculate still‑missing IDs (case/whitespace agnostic)
+    # 4) Missing IDs
     missing_required = sorted(needed_ids - registered_ids)
 
-    # 6) Rule enforcement (dummy context)
-    test_context = {
-        "action": "propose_doc_update",
-        "doc_type": "core",  # avoid on‑demand false positive
-        "approved": True,
-        "modified_docs": 0,
-    }
-    violations = enforce_rules(test_context)
+    # 5) Rule enforcement (dummy context for now)
+    violations = enforce_rules({"action": "noop", "doc_type": "core"})
+
+    # 6) Emit a single log line so devs can confirm *which* self_introspection ran
+    logger.info(
+        "[self-check] src=%s  missing=%d  violations=%d",
+        _source_fingerprint(),
+        len(missing_required),
+        len(violations),
+    )
 
     return {
         "diff_result": diff,
