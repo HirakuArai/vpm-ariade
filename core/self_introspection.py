@@ -5,14 +5,8 @@ from core.enforcement import enforce_rules
 from core.utils import load_json
 
 def run_kai_self_check():
-    """
-    Kaiの自己診断を実行：
-    - capabilities.jsonとの整合性確認（差分チェック）
-    - 必要能力（GPT or 自動）との差分チェック
-    - ルール違反の検出（仮コンテキスト）
-    """
     ast_caps = load_ast_capabilities()
-    json_caps = load_json_capabilities()
+    json_caps = load_json("data/kai_capabilities.json")  # ← 修正箇所
     diff = compare_capabilities(ast_caps, json_caps)
 
     needed = load_json("data/needed_capabilities_gpt.json")
@@ -21,7 +15,6 @@ def run_kai_self_check():
 
     missing_required = sorted(needed_ids - registered_ids)
 
-    # ルールチェック：仮のテスト文脈を使用
     test_context = {
         "action": "propose_doc_update",
         "doc_type": "ondemand",
