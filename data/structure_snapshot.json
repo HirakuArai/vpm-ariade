@@ -276,6 +276,15 @@
     "path": "data/kai_capabilities.json"
   },
   {
+    "path": "data/kai_capabilities_backup_20250505_163919.json"
+  },
+  {
+    "path": "data/kai_capabilities_backup_20250505_170944.json"
+  },
+  {
+    "path": "data/kai_capabilities_proposed.json"
+  },
+  {
     "path": "data/kai_rules.json"
   },
   {
