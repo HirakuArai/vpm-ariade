@@ -2,14 +2,20 @@
 
 """Kai self‑introspection utilities.
 
-* Compares AST‑extracted ``@kai_capability`` decorators with the current
-  JSON registry (``kai_capabilities.json``).
-* Compares that set with GPT‑generated ``needed_capabilities_gpt.json``.
-* Returns a dictionary ``{diff_result, missing_required, violations}`` that
-  the Streamlit UI renders.
-* **Writes an INFO log line** that includes an 8‑char md5 hash + mtime of
-  *this* source file, so developers can verify that the latest code actually
-  ran **without touching the UI**.
+* 比較対象
+  - AST から抽出した `@kai_capability` 関数
+  - JSON レジストリ `kai_capabilities.json`
+  - GPT が生成した `needed_capabilities_gpt.json`
+* 戻り値
+  ``{
+      diff_result,          # AST vs JSON の詳細 diff
+      missing_required,     # GPT が必要と判定したが JSON に無い ID
+      violations,           # ルール違反リスト
+      capabilities_json,    # JSON レジストリ全体
+      capabilities_ast      # AST 抽出結果
+  }``
+* 実行時に **fingerprint 行** を `print(..., flush=True)` で標準出力へ出力し、
+  Streamlit / Cloud のログから「どのソースが走ったか」を即確認できる。
 """
 
 from __future__ import annotations
@@ -17,7 +23,6 @@ from __future__ import annotations
 import copy
 import datetime as dt
 import hashlib
-import logging
 import pathlib
 from typing import Any, Dict, List, Set
 
@@ -25,10 +30,8 @@ from core.capabilities_diff import compare_capabilities, load_ast_capabilities
 from core.enforcement import enforce_rules
 from core.utils import load_json
 
-logger = logging.getLogger("kai.selfcheck")  # Streamlit prints INFO by default
-
 # ---------------------------------------------------------------------------
-# Paths
+# パス
 # ---------------------------------------------------------------------------
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
@@ -36,62 +39,61 @@ JSON_CAPS_PATH = DATA_DIR / "kai_capabilities.json"
 NEEDED_CAPS_PATH = DATA_DIR / "needed_capabilities_gpt.json"
 
 # ---------------------------------------------------------------------------
-# Helpers
+# ヘルパ
 # ---------------------------------------------------------------------------
 
-def _norm(raw: str | None) -> str | None:
-    """Normalise a capability ID for case‑/whitespace‑insensitive compare."""
-    return None if raw is None else raw.strip().lower()
+def _norm(val: str | None) -> str | None:
+    """大小文字・前後空白を無視した ID 正規化"""
+    return None if val is None else val.strip().lower()
 
 
-def _ids(lst: List[Dict[str, Any]]) -> Set[str]:
-    """Extract a set of normalised IDs from a list of capability dicts."""
+def _id_set(lst: List[Dict[str, Any]]) -> Set[str]:
     return {_norm(c.get("id")) for c in lst if _norm(c.get("id"))}
 
 
-def _source_fingerprint() -> str:
-    """Return short md5 + mtime so we know *which* file ran."""
+def _fingerprint() -> str:
     path = pathlib.Path(__file__)
-    digest = hashlib.md5(path.read_bytes()).hexdigest()[:8]
+    md5 = hashlib.md5(path.read_bytes()).hexdigest()[:8]
     mtime = dt.datetime.fromtimestamp(path.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
-    return f"{digest}@{mtime}"
+    return f"{md5}@{mtime}"
 
 # ---------------------------------------------------------------------------
-# Public
+# Public API
 # ---------------------------------------------------------------------------
 
 def run_kai_self_check() -> Dict[str, Any]:
-    """Run self‑diagnostics and emit a concise log fingerprint."""
+    """Run diagnostics; return diff/missing/violations + full caps lists."""
 
-    ast_caps = load_ast_capabilities()
-    json_caps = load_json(JSON_CAPS_PATH)
+    # 1. Load
+    ast_caps:  List[Dict[str, Any]] = load_ast_capabilities()
+    json_caps: List[Dict[str, Any]] = load_json(JSON_CAPS_PATH)
 
-    # 1) IDs already registered (before any mutation)
-    registered_ids = _ids(json_caps)
+    # 2. 事前に登録 ID を取得（compare_capabilities が弄っても影響しない）
+    registered_ids = _id_set(json_caps)
 
-    # 2) Diff – pass a deep‑copy so original list isn’t mutated
+    # 3. Diff (deep‑copy を渡して安全化)
     diff = compare_capabilities(ast_caps, copy.deepcopy(json_caps))
 
-    # 3) GPT‑required IDs
-    needed_data = load_json(NEEDED_CAPS_PATH)
-    needed_ids = {_norm(x) for x in needed_data.get("required_capabilities", [])}
+    # 4. GPT 必要 ID
+    needed_json = load_json(NEEDED_CAPS_PATH)
+    needed_ids = {_norm(x) for x in needed_json.get("required_capabilities", [])}
 
-    # 4) Missing IDs
+    # 5. 未登録 ID
     missing_required = sorted(needed_ids - registered_ids)
 
-    # 5) Rule enforcement (dummy context for now)
+    # 6. ルール違反（ダミー）
     violations = enforce_rules({"action": "noop", "doc_type": "core"})
 
-    # 6) Emit a single log line so devs can confirm *which* self_introspection ran
-    logger.info(
-        "[self-check] src=%s  missing=%d  violations=%d",
-        _source_fingerprint(),
-        len(missing_required),
-        len(violations),
+    # 7. fingerprint ログ
+    print(
+        f"[self-check] src={_fingerprint()}  missing={len(missing_required)}  violations={len(violations)}",
+        flush=True,
     )
 
     return {
         "diff_result": diff,
         "missing_required": missing_required,
         "violations": violations,
+        "capabilities_json": json_caps,
+        "capabilities_ast": ast_caps,
     }
