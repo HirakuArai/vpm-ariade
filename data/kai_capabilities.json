@@ -1,615 +1,203 @@
 [
   {
-    "id": "get_today_log_path",
-    "name": "今日のログパス取得機能",
-    "description": "この関数はAIエージェントKaiが今日の日付に基づいたログファイルのパスを取得する能力を実現します。具体的には、現在の日付をフォーマットし、それに基づいて特定のディレクトリ内のログファイルのパスを返します。",
-    "source_file": "app.py",
-    "args": [],
-    "enabled": true,
+    "id": "append_log",
+    "name": "ログ追加",
+    "description": "この関数は、指定されたメッセージをログファイルに追加します。ログファイルのパスは引数で指定できます。",
     "requires_confirm": false,
-    "type": "core"
+    "enabled": true
   },
   {
-    "id": "load_conversation_messages",
-    "name": "会話メッセージの読み込み",
-    "description": "この関数はKaiが過去の会話メッセージを読み込む能力を提供します。具体的には、過去の会話のログを取得し、分析や応答生成のためにそれを使用します。",
-    "source_file": "app.py",
-    "args": [],
-    "enabled": true,
+    "id": "load_log",
+    "name": "会話ログを読み込む",
+    "description": "指定されたログファイル（またはデフォルトで昨日）を読み込み、Kaiが処理に使えるメッセージ形式に変換します。1行ごとのJSON構造である必要があります。",
     "requires_confirm": false,
-    "type": "utility"
+    "enabled": true,
+    "decorated": true
   },
   {
-    "id": "check_unprocessed_logs",
-    "name": "未処理ログの確認",
-    "description": "Kaiは「check_unprocessed_logs」関数を実行することで、未処理のログ情報を確認します。その結果を元に、必要があれば適切な処理を行い、システムの安定性やパフォーマンスを維持します。",
-    "source_file": "app.py",
-    "args": [],
+    "id": "safe_pull",
+    "name": "リモートリポジトリを最新化",
+    "description": "安全な方法でリモートリポジトリから変更を取得（git pull）します。",
+    "requires_confirm": true,
     "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
+    "decorated": true
   },
   {
-    "id": "get_system_prompt",
-    "name": "システムプロンプト取得",
-    "description": "この関数は、システム上のプロンプトメッセージ（操作の指示など）を取得する能力をKaiに提供します。具体的な操作指示や情報が必要な場合、この関数でプロンプトメッセージを取得しユーザーに提示します。",
-    "source_file": "app.py",
-    "args": [],
+    "id": "git_commit",
+    "name": "Git コミット & プッシュ",
+    "description": "承認済み変更を git add / commit / push でリポジトリに反映する。",
+    "requires_confirm": true,
     "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "try_git_pull_safe",
-    "name": "安全なGit Pullの実行",
-    "description": "この能力を通じて、Kaiはソースコードリポジトリから安全に最新の変更を取得することができます。これは、コードの競合やエラーを防ぐための処理が含まれていると予想されます。",
-    "source_file": "app.py",
-    "args": [],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "try_git_commit",
-    "name": "Gitコミット実行機能",
-    "description": "この機能は、指定したファイルの変更内容をGitにコミットします。具体的には、引数で渡されたパスのファイルがGitの管理下か確認し、その上でコミットを試みます。",
-    "source_file": "app.py",
-    "args": [
-      "file_path"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "handle_approval",
-    "name": "承認処理機能",
-    "description": "Kaiは、指定されたリクエスターからの文書の承認ステータスを処理する機能を持っています。特定の文書に対する承認または否認を管理し、その結果をリクエスターに通知します。",
-    "source_file": "core/handle_approval.py",
-    "args": [
-      "requester",
-      "document",
-      "approval_status"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "select_next_task",
-    "name": "次のタスク選択",
-    "description": "AIエージェントKaiは自動的に次に実行すべきタスクを選択します。この関数は、現在の状況または優先度に基づいて最適なタスクを選択し、Kaiの効率と生産性を向上させる機能を実現します。",
-    "source_file": "core/task_selector.py",
-    "args": [],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "kai_capability",
-    "name": "Kaiの能力設定",
-    "description": "この関数はAIエージェントKaiの各種能力を登録・管理するためのもので、能力のID、名前、詳細説明、確認要否、利用可能状況などを設定します。",
-    "source_file": "core/capabilities_registry.py",
-    "args": [
-      "id",
-      "name",
-      "description",
-      "requires_confirm",
-      "enabled"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "decorator",
-    "name": "関数装飾能力",
-    "description": "Kaiは、この'decorator'関数を用いて既存の関数に新たな機能を追加することができます。これにより、Kaiの各種機能を効率的に拡張・修飾することが可能になります。",
-    "source_file": "core/capabilities_registry.py",
-    "args": [
-      "fn"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "log_patch",
-    "name": "パッチログ記録",
-    "description": "Kaiが手がかりとなるファイル名、ユーザの指示、マークダウンの差分情報から、パッチのログを生成します。これにより、どの指示がどのようにシステムに影響を与えたかを追跡しやすくなります。",
-    "source_file": "core/patch_log.py",
-    "args": [
-      "fn_name",
-      "user_instruction",
-      "markdown_diff"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "load_patch_history",
-    "name": "パッチ履歴読み込み",
-    "description": "この機能は、指定されたパスにあるパッチログを読み込む能力をKaiに提供します。これにより、Kaiは過去のシステム更新（パッチ）の履歴を確認できます。",
-    "source_file": "core/patch_log.py",
-    "args": [
-      "log_path"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "utility"
-  },
-  {
-    "id": "show_patch_log",
-    "name": "パッチログの表示",
-    "description": "Kaiは、自身のアップデート履歴や変更点を追跡し管理するためにこの機能を使用します。\"show_patch_log\"関数を使って、Kaiの過去のパッチ（修正）ログ情報を取得し表示することが可能です。",
-    "source_file": "core/patch_log.py",
-    "args": [],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "try_git_pull_safe",
-    "name": "安全なGit Pullの試行",
-    "description": "この機能は、Gitリポジトリからの最新の変更を安全にPull（取得）することを実現します。エラーが発生した場合でもコードの整合性を保つように設計されています。",
-    "source_file": "core/git_ops.py",
-    "args": [],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "try_git_commit",
-    "name": "Gitへのコミット能力",
-    "description": "関数try_git_commitは、特定のファイルをGitリポジトリにコミットするKaiの能力を実現します。指定したファイルパスのファイルをステージングエリアに追加し、その後コミットを行います。",
-    "source_file": "core/git_ops.py",
-    "args": [
-      "file_path"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
+    "decorated": true
   },
   {
     "id": "check_unprocessed_logs",
     "name": "未処理ログのチェック",
     "description": "Kaiは、関数'check_unprocessed_logs'を通じて未処理のログをチェックする能力を有します。これにより、追跡されていない変更や問題がある場合にはすぐに識別され、対応が可能となります。",
-    "source_file": "core/git_ops.py",
-    "args": [],
-    "enabled": true,
     "requires_confirm": false,
-    "type": "core"
+    "enabled": true
   },
   {
-    "id": "main",
-    "name": "コード分析能力",
-    "description": "KaiがPythonコードを解析し、潜在的なエラーや不具合を特定する際に使用する機能です。また、コードの理解を深めるためにも使われます。",
-    "source_file": "core/run_code_analysis.py",
-    "args": [],
+    "id": "push_all_files",
+    "name": "重要ファイル全体をGit Push",
+    "description": "docs/, core/, scripts/, data/, conversations/, logs/ などの重要ファイルを一括でGit pushします。",
+    "requires_confirm": true,
     "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "get_yesterday_log_filename",
-    "name": "昨日のログファイル取得",
-    "description": "この機能はKaiが前日のログファイルの名前を取得する能力を実現します。主にデバッグやトラブルシューティングに役立つ情報を提供します。",
-    "source_file": "core/log_utils.py",
-    "args": [],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "load_yesterdays_log_as_messages",
-    "name": "昨日のログをメッセージとして読み込む",
-    "description": "この関数は昨日のログを取得し、メッセージとして形成して読み込む能力を提供します。これにより、Kaiは過去のデータを利用してより適応的な対話を行うことが可能となります。",
-    "source_file": "core/log_utils.py",
-    "args": [],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "utility"
-  },
-  {
-    "id": "messages_to_text",
-    "name": "メッセージのテキスト変換",
-    "description": "Kaiは、この機能を用いて引数として渡されたメッセージをテキスト形式に変換します。具体的には、インプットとして受け取ったメッセージを適切な形式のテキストデータに編集・変換する機能を持っています。",
-    "source_file": "core/log_utils.py",
-    "args": [
-      "messages"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "create_task",
-    "name": "タスク作成",
-    "description": "Kaiは「タスク作成」の機能を持っています。これはタイトル、詳細、期限、優先度といった情報を基に新しいタスクを作成して管理することができます。",
-    "source_file": "core/manage_tasks.py",
-    "args": [
-      "title",
-      "description",
-      "due_date",
-      "priority"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "update_task",
-    "name": "タスク更新機能",
-    "description": "Kaiは指定されたIDを持つタスクの各フィールド（タイトル、説明、期日、優先度）を更新する能力を持っています。これにより、タスクの詳細な情報変更が可能になります。",
-    "source_file": "core/manage_tasks.py",
-    "args": [
-      "task_id",
-      "title",
-      "description",
-      "due_date",
-      "priority"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "delete_task",
-    "name": "タスク削除",
-    "description": "この機能は、特定のタスクを削除する能力をKaiに提供します。指定されたIDを持つタスクをKaiのタスクリストから削除することができます。",
-    "source_file": "core/manage_tasks.py",
-    "args": [
-      "task_id"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "list_tasks",
-    "name": "タスク一覧表示機能",
-    "description": "Kaiは、特定のフィルター条件や並び順に基づいて、タスクの一覧を表示する機能を持っています。これによりユーザーは必要なタスクを効率的に管理・把握することが可能です。",
-    "source_file": "core/manage_tasks.py",
-    "args": [
-      "filter_by",
-      "order_by"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "extract_code_from_markdown",
-    "name": "マークダウンテキストから特定言語のコード抽出",
-    "description": "この機能は、指定されたマークダウンテキストから指定した言語のソースコード部分を抽出する。これにより、文書内の特定言語のプログラムコードを直接取得できます。",
-    "source_file": "core/markdown_utils.py",
-    "args": [
-      "markdown_text",
-      "language"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "utility"
+    "decorated": true
   },
   {
     "id": "load_json",
     "name": "JSONファイルロード機能",
     "description": "Kaiが指定したパスにあるJSONファイルを読み込む能力を提供します。データセットや設定ファイルなどの読み込みに利用します。",
-    "source_file": "core/utils.py",
-    "args": [
-      "path"
-    ],
-    "enabled": true,
     "requires_confirm": false,
-    "type": "utility"
+    "enabled": true
   },
   {
     "id": "read_file",
     "name": "ファイル読み込み能力",
     "description": "この関数を使用することで、指定されたパスのファイルを読み込むことができます。ファイルアクセスを通じて、データ解析や情報取得等に用いることが可能となります。",
-    "source_file": "core/utils.py",
-    "args": [
-      "path"
-    ],
-    "enabled": true,
     "requires_confirm": false,
-    "type": "utility"
+    "enabled": true
   },
   {
     "id": "write_file",
     "name": "ファイル書き込み",
     "description": "Kaiは、指定されたパスにファイルを生成し、その中に与えられたコンテンツを書き込むことができます。これにより、特定のデータをファイルとして保存する能力が実現されます。",
-    "source_file": "core/utils.py",
-    "args": [
-      "path",
-      "content"
-    ],
-    "enabled": true,
     "requires_confirm": false,
-    "type": "utility"
+    "enabled": true
   },
   {
     "id": "ensure_output_dir",
     "name": "出力ディレクトリの確認・作成",
     "description": "「ensure_output_dir」関数は、指定されたパスのディレクトリが存在するかを確認し、存在しない場合にはディレクトリを作成します。これにより、Kaiはファイルの出力や保存場所を管理するための能力を実現します。",
-    "source_file": "core/utils.py",
-    "args": [
-      "path"
-    ],
-    "enabled": true,
     "requires_confirm": false,
-    "type": "utility"
+    "enabled": true
   },
   {
     "id": "safe_mkdir",
     "name": "ディレクトリ作成",
     "description": "エージェントKaiは、「safe_mkdir」関数を使って指定したパスに安全にディレクトリを作成します。既存のディレクトリが存在しない場合に限り、新しいディレクトリを作ります。",
-    "source_file": "core/utils.py",
-    "args": [
-      "path"
-    ],
-    "enabled": true,
     "requires_confirm": false,
-    "type": "utility"
+    "enabled": true
+  },
+  {
+    "id": "get_yesterday_log_filename",
+    "name": "昨日のログファイル取得",
+    "description": "この機能はKaiが前日のログファイルの名前を取得する能力を実現します。主にデバッグやトラブルシューティングに役立つ情報を提供します。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "load_yesterdays_log_as_messages",
+    "name": "昨日のログをメッセージとして読み込む",
+    "description": "この関数は昨日のログを取得し、メッセージとして形成して読み込む能力を提供します。これにより、Kaiは過去のデータを利用してより適応的な対話を行うことが可能となります。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "messages_to_text",
+    "name": "メッセージのテキスト変換",
+    "description": "Kaiは、この機能を用いて引数として渡されたメッセージをテキスト形式に変換します。具体的には、インプットとして受け取ったメッセージを適切な形式のテキストデータに編集・変換する機能を持っています。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "apply_patch",
+    "name": "GPT修正提案を適用",
+    "description": "GPTが提案したコード修正案をソースコードに適用します。",
+    "requires_confirm": true,
+    "enabled": true,
+    "decorated": true
+  },
+  {
+    "id": "log_patch",
+    "name": "パッチログ記録",
+    "description": "Kaiが手がかりとなるファイル名、ユーザーの指示、マークダウンの差分情報から、パッチのログを生成します。これにより、どの指示がどのようにシステムに影響を与えたかを追跡しやすくなります。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "load_patch_history",
+    "name": "パッチ履歴読み込み",
+    "description": "この機能は、指定されたパスにあるパッチログを読み込む能力をKaiに提供します。これにより、Kaiは過去のシステム更新（パッチ）の履歴を確認できます。",
+    "requires_confirm": false,
+    "enabled": true
+  },
+  {
+    "id": "show_patch_log",
+    "name": "パッチログの表示",
+    "description": "Kaiは、自身のアップデート履歴や変更点を追跡し管理するためにこの機能を使用します。\"show_patch_log\"関数を使って、Kaiの過去のパッチ（修正）ログ情報を取得し表示することが可能です。",
+    "requires_confirm": false,
+    "enabled": true
   },
   {
     "id": "safe_load_text",
     "name": "テキストファイル安全読み込み",
     "description": "Kaiは、指定したパスにあるテキストファイルを安全に読み込むことができます。この機能は、ファイルが存在し読み込み可能な場合のみ実行され、エラーハンドリングも含まれています。",
-    "source_file": "core/doc_update_engine.py",
-    "args": [
-      "path"
-    ],
-    "enabled": true,
     "requires_confirm": false,
-    "type": "utility"
+    "enabled": true
   },
   {
     "id": "propose_doc_update",
-    "name": "ドキュメンテーション更新提案機能",
-    "description": "AIエージェントKaiが、指定されたドキュメンテーションの名前（doc_name）と会話テキスト（conversation_text）、モデル（model）を用いてドキュメンテーションの更新を提案します。具体的には、ドキュメンテーションの内容と、会話テキストをどのように統合または修正すべきかを分析し、その結果を提案します。",
-    "source_file": "core/doc_update_engine.py",
-    "args": [
-      "doc_name",
-      "conversation_text",
-      "model"
-    ],
-    "enabled": true,
+    "name": "ドキュメント修正提案",
+    "description": "ユーザーとの会話内容をもとにドキュメント修正案を生成します。指定されたドキュメントと会話ログに基づき、Kaiは修正文案をGPTに問い合わせて提案します。",
     "requires_confirm": false,
-    "type": "core"
+    "enabled": true
   },
   {
     "id": "update_doc_with_gpt",
     "name": "文書自動更新",
-    "description": "関数\"update_doc_with_gpt\"は、Kaiが指定した文書名の文書を、会話テキストを用いて自動的に更新する能力を実現します。オプションの自動承認機能を用いて、更新内容の自動承認を行うことも可能です。",
-    "source_file": "core/doc_update_engine.py",
-    "args": [
-      "doc_name",
-      "conversation_text",
-      "auto_approve"
-    ],
-    "enabled": true,
+    "description": "Kaiが指定した文書名の文書を、会話テキストを用いて自動的に更新する能力を実現します。オプションの自動承認機能を用いて、更新内容の自動承認を行うことも可能です。",
     "requires_confirm": false,
-    "type": "core"
+    "enabled": true
   },
   {
     "id": "apply_update",
     "name": "ドキュメント更新機能",
     "description": "この機能は指定されたドキュメント名（doc_name）の内容を新しい内容（new_content）で更新します。自動承認オプション（auto_approve）が設定されている場合、更新が即座に反映されます。",
-    "source_file": "core/doc_update_engine.py",
-    "args": [
-      "doc_name",
-      "new_content",
-      "auto_approve"
-    ],
-    "enabled": true,
     "requires_confirm": false,
-    "type": "core"
+    "enabled": true
   },
   {
-    "id": "apply_gpt_patch",
-    "name": "GPTパッチの適用",
-    "description": "この機能は、指定したマークダウンテキストにGPTパッチを適用することが可能です。また、自動投入機能を介してソースパスにパッチを直接適用することも可能です。",
-    "source_file": "core/kai_patch_applier.py",
-    "args": [
-      "markdown_text",
-      "fn_name",
-      "source_path",
-      "auto_commit"
-    ],
-    "enabled": true,
+    "id": "create_task",
+    "name": "タスク作成",
+    "description": "Kaiは「タスク作成」の機能を持っています。これはタイトル、詳細、期限、優先度といった情報を基に新しいタスクを作成して管理することができます。",
     "requires_confirm": false,
-    "type": "core"
+    "enabled": true
   },
   {
-    "id": "append_log",
-    "name": "ログ追加",
-    "description": "この関数は、指定されたメッセージをログファイルに追加します。ログファイルのパスは引数で指定できます。",
-    "source_file": "core/append_to_log.py",
-    "args": [
-      "message",
-      "log_file_path"
-    ],
-    "enabled": true,
+    "id": "update_task",
+    "name": "タスク更新機能",
+    "description": "Kaiは指定されたIDを持つタスクの各フィールド（タイトル、説明、期日、優先度）を更新する能力を持っています。これにより、タスクの詳細な情報変更が可能になります。",
     "requires_confirm": false,
-    "type": "core"
+    "enabled": true
   },
   {
-    "id": "generate_suggestions",
-    "name": "提案生成能力",
-    "description": "この関数は、特定の違い（diff_result）を元に適切な提案を生成します。これにより、Kaiは解決策を模索する際に自動的に評価や提案を生成できる能力を持つことができます。",
-    "source_file": "core/capabilities_suggester.py",
-    "args": [
-      "diff_result"
-    ],
-    "enabled": true,
+    "id": "delete_task",
+    "name": "タスク削除",
+    "description": "この機能は、特定のタスクを削除する能力をKaiに提供します。指定されたIDを持つタスクをKaiのタスクリストから削除することができます。",
     "requires_confirm": false,
-    "type": "core"
+    "enabled": true
   },
   {
-    "id": "generate_updated_capabilities",
-    "name": "Kaiの能力更新生成",
-    "description": "この関数は、Kaiの既存の能力と新たに取り込んだ情報を基に、Kaiの更新された能力を生成します。ast_capsとjson_capsという入力を受け取り、最新の情報を反映したKaiの能力を出力する機能を備えています。",
-    "source_file": "core/capabilities_suggester.py",
-    "args": [
-      "ast_caps",
-      "json_caps"
-    ],
-    "enabled": true,
+    "id": "list_tasks",
+    "name": "タスク一覧表示機能",
+    "description": "Kaiは、特定のフィルター条件や並び順に基づいて、タスクの一覧を表示する機能を持っています。これによりユーザーは必要なタスクを効率的に管理・把握することが可能です。",
     "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "extract_functions",
-    "name": "コード解析機能",
-    "description": "称号されたファイルの中から関数定義を抽出する能力を持っています。これにより、任意のPythonソースコードファイルの全関数の解析や管理が可能になります。",
-    "source_file": "core/code_analysis.py",
-    "args": [
-      "source_path"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "utility"
-  },
-  {
-    "id": "extract_classes",
-    "name": "クラス抽出能力",
-    "description": "Kaiは指定されたソースコードからクラスを抽出することができます。具体的には、ファイルパスを引数として受け取り、その中のクラス定義を解析して返す機能を実現します。",
-    "source_file": "core/code_analysis.py",
-    "args": [
-      "source_path"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "utility"
-  },
-  {
-    "id": "extract_variables",
-    "name": "ソースコードからの変数抽出",
-    "description": "この機能は指定されたソースコードのパスから変数を抽出することができます。それはKaiがコードを解析し、特定の情報を把握するための重要なステップです。",
-    "source_file": "core/code_analysis.py",
-    "args": [
-      "source_path"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "utility"
-  },
-  {
-    "id": "discover_capabilities",
-    "name": "能力探知",
-    "description": "Kaiがbase_dirで指定したディレクトリ内の関数やリソースを検出し、自身の能力を更新します。full_scanは全てのサブディレクトリも探索するかどうかを制御します。",
-    "source_file": "core/discover_capabilities.py",
-    "args": [
-      "base_dir",
-      "full_scan"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "write_stub_file",
-    "name": "スタブファイル作成",
-    "description": "関数IDとコードを引数に受け取り、それらを基にスタブファイルを作成する機能を実現します。これは新しい機能を試すための機構を提供するためのものです。",
-    "source_file": "core/stub_writer.py",
-    "args": [
-      "id",
-      "code"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "utility"
-  },
-  {
-    "id": "write_metadata_file",
-    "name": "メタデータファイル作成能力",
-    "description": "この関数は、指定されたID、名前、説明を持つメタデータファイルを作成する能力をKaiに提供します。これはKaiが情報を整理し、それらを後で再利用するのを助けます。",
-    "source_file": "core/stub_writer.py",
-    "args": [
-      "id",
-      "name",
-      "description"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "utility"
-  },
-  {
-    "id": "save_capability_stub",
-    "name": "スタブ記録機能",
-    "description": "与えられた引数（id、name、description、code）を用いて未登録の関数定義を記録します。これにより、AIエージェントKaiは新たな能力を追加する際の情報管理を容易にします。",
-    "source_file": "core/stub_writer.py",
-    "args": [
-      "id",
-      "name",
-      "description",
-      "code"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "utility"
-  },
-  {
-    "id": "replace_function_in_source",
-    "name": "ソースコードの関数置換能力",
-    "description": "Kaiは指定されたPythonソースファイルの中から特定の関数を探し、それを新たに提供されたコードで置換する能力を持っています。これにより、プログラムの特定の部分を即座にアップデートしたり、不具合を修正したりすることが可能となります。",
-    "source_file": "core/code_rewriter.py",
-    "args": [
-      "source_path",
-      "fn_name",
-      "new_code"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "core"
+    "enabled": true
   },
   {
     "id": "generate_tags",
     "name": "ドキュメントタグ生成",
     "description": "ドキュメント内容を解析し、関連するキーワードタグを自動生成します。",
-    "source_file": "core/tagging.py",
-    "args": [
-      "text"
-    ],
-    "enabled": true,
     "requires_confirm": false,
-    "type": "core"
-  },
-  {
-    "id": "save_tags",
-    "name": "タグの保存",
-    "description": "`save_tags`関数は、特定のドキュメント名(`doc_name`)とその関連タグ(`tags`)を保存します。これにより、Kaiは特定の情報を構造化し、後で簡単に抽出できるようになります。",
-    "source_file": "core/tagging.py",
-    "args": [
-      "doc_name",
-      "tags"
-    ],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "utility"
-  },
-  {
-    "id": "load_ast_capabilities",
-    "name": "AST機能のロード",
-    "description": "この関数はKaiの抽象構文木（AST）機能をロードします。特に新しいまたは更新された能力を統合するために使用される可能性があります。",
-    "source_file": "core/capabilities_diff.py",
-    "args": [],
-    "enabled": true,
-    "requires_confirm": false,
-    "type": "utility"
+    "enabled": true
   },
   {
     "id": "enforce_rules",
     "name": "Kaiのルール適用チェック",
     "description": "Kaiが操作中にベース人格OSやプロジェクトルールに違反していないかを検査します。",
-    "source_file": "core/enforcement.py",
-    "args": [
-      "action_context"
-    ],
-    "enabled": true,
     "requires_confirm": false,
-    "type": "core"
+    "enabled": true
   }
 ]
