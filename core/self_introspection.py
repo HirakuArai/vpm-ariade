@@ -14,7 +14,7 @@ It returns a dictionary with:
 from __future__ import annotations
 
 import pathlib
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Set
 
 from core.capabilities_diff import (
     load_ast_capabilities,
@@ -35,6 +35,26 @@ NEEDED_CAPS_PATH = DATA_DIR / "needed_capabilities_gpt.json"
 
 
 # ---------------------------------------------------------------------------
+# Utility
+# ---------------------------------------------------------------------------
+
+def _normalise_id(raw: str | None) -> str | None:
+    """Strip whitespace/newlines and lower-case the ID for robust comparison."""
+    if raw is None:
+        return None
+    return raw.strip().lower()
+
+
+def _extract_ids(caps: List[Dict[str, Any]]) -> Set[str]:
+    """Return a set of normalised capability IDs from a JSON list."""
+    return {
+        norm_id
+        for cap in caps
+        if (norm_id := _normalise_id(cap.get("id")))
+    }
+
+
+# ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
@@ -45,24 +65,23 @@ def run_kai_self_check() -> Dict[str, Any]:
     ast_caps: List[Dict[str, Any]] = load_ast_capabilities()
     json_caps: List[Dict[str, Any]] = load_json(JSON_CAPS_PATH)
 
-    # 2) Compute diff between AST & JSON definitions – *use a copy* to avoid
-    #    accidental mutation inside compare_capabilities().
-    diff = compare_capabilities(ast_caps, list(json_caps))  # pass copy
+    # 2) Compute diff – pass a *copy* so compare_capabilities can't mutate
+    diff = compare_capabilities(ast_caps, list(json_caps))
 
-    # 3) Identify *required* capabilities GPT says we need
-    needed = load_json(NEEDED_CAPS_PATH)
-    needed_ids = set(needed.get("required_capabilities", []))
+    # 3) IDs GPT says we need (normalised)
+    needed_data = load_json(NEEDED_CAPS_PATH)
+    needed_ids = {_normalise_id(x) for x in needed_data.get("required_capabilities", [])}
 
-    # 4) Collect IDs already registered in JSON (skip entries w/o id)
-    registered_ids = {cap.get("id") for cap in json_caps if cap.get("id")}
+    # 4) IDs already registered in JSON (normalised + skip blanks)
+    registered_ids = _extract_ids(json_caps)
 
-    # 5) Calculate what is still missing
+    # 5) Calculate still‑missing IDs (case/whitespace agnostic)
     missing_required = sorted(needed_ids - registered_ids)
 
-    # 6) Run rule‑enforcement checks (dummy context for now)
+    # 6) Rule enforcement (dummy context)
     test_context = {
         "action": "propose_doc_update",
-        "doc_type": "core",  # avoid false positive for on‑demand docs
+        "doc_type": "core",  # avoid on‑demand false positive
         "approved": True,
         "modified_docs": 0,
     }
