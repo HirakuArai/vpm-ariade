@@ -26,6 +26,8 @@ from core.git_ops import push_all_important_files
 from core.code_analysis import extract_functions
 from core.patch_log import load_patch_history, show_patch_log
 from core.kai_patch_applier import apply_gpt_patch
+from core.discover_capabilities import discover_capabilities
+from core.kai_patch_applier import apply_gpt_patch
 
 # ──────────────────────────────────────────
 # 開発モード設定
@@ -512,6 +514,54 @@ if mode == "🔧 開発者モード":
                 st.error(f"❌ 違反: `{v['id']}` - {v['description']}")
         else:
             st.success("✅ ルール違反は検出されませんでした。")
+    
+    st.subheader("🧠 Kai能力補完：未登録関数を一括補完")
+
+    if st.button("📋 未登録関数をスキャンする"):
+        capabilities = discover_capabilities(full_scan=True)
+        undecorated = [c for c in capabilities if not c.get("decorated") and not c.get("id")]
+        st.session_state["undecorated_bulk"] = undecorated
+        st.success(f"✅ 未登録候補: {len(undecorated)} 件検出")
+
+    # ▼ 候補一覧と一括反映ボタン
+    if "undecorated_bulk" in st.session_state:
+        patch_results = []
+        for cap in st.session_state["undecorated_bulk"]:
+            with st.expander(f"🔧 {cap['name']} ({cap['filepath']}:{cap['lineno']})"):
+                def generate_patch(c):
+                    return f"""```python
+    @kai_capability(
+        id=\"{c['name']}\",
+        name=\"{c['name'].replace('_', ' ').title()}\",
+        description=\"Kaiが {c['name']} に関する能力を提供します。\",
+        requires_confirm=False
+    )
+    def {c['name']}({', '.join(c.get('args', []))}):
+        ...
+    ```"""
+                patch = generate_patch(cap)
+                st.code(patch, language="python")
+                patch_results.append({"name": cap["name"], "patch": patch})
+
+        if st.button("🚀 すべてに@kai_capabilityを補完＋Gitコミット"):
+            applied = []
+            for p in patch_results:
+                try:
+                    success = apply_gpt_patch(
+                        markdown_text=p["patch"],
+                        fn_name=p["name"],
+                        source_path="app.py",  # TODO: filepath 自動識別へ
+                        auto_commit=True
+                    )
+                    if success:
+                        applied.append(p["name"])
+                except Exception as e:
+                    st.error(f"❌ {p['name']} → 反映失敗: {e}")
+
+            if applied:
+                st.success(f"✅ 以下の関数を補完＆反映しました: {', '.join(applied)}")
+            else:
+                st.warning("補完対象は見つかりましたが、反映はありませんでした。")
 
     st.divider()
     st.subheader("🔍 開発用ユーティリティ（確認・補助）")
