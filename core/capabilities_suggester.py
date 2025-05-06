@@ -101,6 +101,15 @@ def generate_updated_capabilities(ast_caps: List[Dict[str, Any]], json_caps: Lis
                     "requires_confirm": False
                 })
 
+    # ------ 🔎 ここからデバッグログ --------------------------
+    if os.getenv("KAI_DEBUG") == "1":        # ← 環境変数フラグで ON/OFF 切替
+        print("[debug] needed_capabilities :", needed, flush=True)
+        print("[debug] existing_ids        :", sorted(existing_ids), flush=True)
+        print("[debug] proposed_ids        :", sorted(proposed_ids), flush=True)
+        print("[debug] will_append         :", [c['id'] for c in updated_caps
+                                                if c['id'] not in existing_ids], flush=True)
+    # ------ 🔎 ここまでデバッグログ --------------------------
+
     return updated_caps
 
 def generate_needed_capabilities(role: str = "project_manager") -> Dict[str, Any]:
