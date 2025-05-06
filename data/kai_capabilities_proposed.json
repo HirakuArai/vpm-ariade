@@ -4,8 +4,7 @@
     "name": "Get Today Log Path",
     "description": "Kaiが当日のログファイルパスを取得する能力です。",
     "requires_confirm": false,
-    "enabled": true,
-    "decorated": true
+    "enabled": true
   },
   {
     "id": "append_log",
@@ -202,5 +201,82 @@
     "description": "Kaiが操作中にベース人格OSやプロジェクトルールに違反していないかを検査します。",
     "requires_confirm": false,
     "enabled": true
+  },
+  {
+    "id": "create_project",
+    "name": "Create Project",
+    "description": "create_project 機能の定義が必要です（GPTによる必要判定）。",
+    "enabled": true,
+    "requires_confirm": false
+  },
+  {
+    "id": "list_projects",
+    "name": "List Projects",
+    "description": "list_projects 機能の定義が必要です（GPTによる必要判定）。",
+    "enabled": true,
+    "requires_confirm": false
+  },
+  {
+    "id": "update_project",
+    "name": "Update Project",
+    "description": "update_project 機能の定義が必要です（GPTによる必要判定）。",
+    "enabled": true,
+    "requires_confirm": false
+  },
+  {
+    "id": "delete_project",
+    "name": "Delete Project",
+    "description": "delete_project 機能の定義が必要です（GPTによる必要判定）。",
+    "enabled": true,
+    "requires_confirm": false
+  },
+  {
+    "id": "assign_task",
+    "name": "Assign Task",
+    "description": "assign_task 機能の定義が必要です（GPTによる必要判定）。",
+    "enabled": true,
+    "requires_confirm": false
+  },
+  {
+    "id": "track_progress",
+    "name": "Track Progress",
+    "description": "track_progress 機能の定義が必要です（GPTによる必要判定）。",
+    "enabled": true,
+    "requires_confirm": false
+  },
+  {
+    "id": "set_deadline",
+    "name": "Set Deadline",
+    "description": "set_deadline 機能の定義が必要です（GPTによる必要判定）。",
+    "enabled": true,
+    "requires_confirm": false
+  },
+  {
+    "id": "notify_member",
+    "name": "Notify Member",
+    "description": "notify_member 機能の定義が必要です（GPTによる必要判定）。",
+    "enabled": true,
+    "requires_confirm": false
+  },
+  {
+    "id": "generate_report",
+    "name": "Generate Report",
+    "description": "generate_report 機能の定義が必要です（GPTによる必要判定）。",
+    "enabled": true,
+    "requires_confirm": false
+  },
+  {
+    "id": "manage_member",
+    "name": "Manage Member",
+    "description": "manage_member 機能の定義が必要です（GPTによる必要判定）。",
+    "enabled": true,
+    "requires_confirm": false
+  },
+  {
+    "id": "comment_task",
+    "name": "Comment Task",
+    "description": "comment_task 機能の定義が必要です（GPTによる必要判定）。",
+    "enabled": true,
+    "requires_confirm": false
   }
 ]
