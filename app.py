@@ -72,7 +72,12 @@ os.makedirs(os.path.dirname(FLAG_PATH), exist_ok=True)
 # 会話ログ処理系 関数定義
 # ──────────────────────────────────────────
 
-@kai_capability(id="get_today_log_path", name="Get Today Log Path", requires_confirm=False)
+@kai_capability(
+    id="get_today_log_path",
+    name="Get Today Log Path",
+    description="Kaiが当日のログファイルパスを取得する能力です。",
+    requires_confirm=False
+)
 def get_today_log_path() -> tuple:
     try:
         tokyo = pytz.timezone('Asia/Tokyo')
@@ -92,7 +97,6 @@ def get_today_log_path() -> tuple:
     description="ユーザーとの会話内容をログファイルに記録します。",
     requires_confirm=False
 )
-
 def append_to_log(role: str, content: str) -> None:
     ts = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M:%S")
     _, path = get_today_log_path()
@@ -106,7 +110,6 @@ def append_to_log(role: str, content: str) -> None:
     description="保存された過去の会話ログを読み込みます。",
     requires_confirm=False
 )
-
 def load_conversation_messages():
     _, path = get_today_log_path()
     if not os.path.exists(path):
