@@ -72,6 +72,7 @@ os.makedirs(os.path.dirname(FLAG_PATH), exist_ok=True)
 # 会話ログ処理系 関数定義
 # ──────────────────────────────────────────
 
+@kai_capability(id="get_today_log_path", name="Get Today Log Path", requires_confirm=False)
 def get_today_log_path() -> tuple:
     try:
         tokyo = pytz.timezone('Asia/Tokyo')
