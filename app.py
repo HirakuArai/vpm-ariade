@@ -27,7 +27,20 @@ from core.code_analysis import extract_functions
 from core.patch_log import load_patch_history, show_patch_log
 from core.kai_patch_applier import apply_gpt_patch
 from core.discover_capabilities import discover_capabilities
-from core.kai_patch_applier import apply_gpt_patch
+
+
+from core import log_utils, doc_update_engine
+from core.tagging import generate_tags
+
+from core.capabilities_diff import (
+    load_ast_capabilities,
+    load_json_capabilities,
+    compare_capabilities,
+    format_diff_for_output
+)
+
+from core.structure_scanner import get_structure_snapshot
+from core.git_ops import try_git_commit
 
 # ──────────────────────────────────────────
 # 開発モード設定
@@ -249,25 +262,6 @@ st.title("🧵 Virtual Project Manager - Kai")
 st.caption("バージョン: 2025-04-25 Kai修正文提案機能をUI統合")
 st.write("プロジェクトについて何でも聞いてください。")
 
-from core.code_analysis import extract_functions
-from core.patch_log import load_patch_history, show_patch_log
-from core import log_utils, doc_update_engine
-from core.tagging import generate_tags
-from core.discover_capabilities import discover_capabilities
-from core.capabilities_diff import (
-    load_ast_capabilities,
-    load_json_capabilities,
-    compare_capabilities,
-    format_diff_for_output
-)
-from core.capabilities_suggester import (
-    generate_suggestions,
-    generate_updated_capabilities,
-    generate_needed_capabilities
-)
-from core.structure_scanner import get_structure_snapshot
-from core.git_ops import try_git_commit
-
 # ──────────────────────────────────────────
 # モード切り替え
 # ──────────────────────────────────────────
@@ -470,8 +464,9 @@ if mode == "🔧 開発者モード":
             st.error(f"❌ needed_capabilities_gpt.jsonの読み込みエラー: {e}")
             gpt_required = set()
 
-        json_defined = set(cap["id"] for cap in result.get("capabilities_json", []))
-        ast_defined = set(cap["id"] for cap in result.get("capabilities_ast", []))
+        undefined_caps = set(result.get("missing_required", []))
+        json_defined = {cap["id"] for cap in result.get("capabilities_json", []) if cap.get("id")}
+        ast_defined  = {cap["id"] for cap in result.get("capabilities_ast", []) if cap.get("id")}
 
         # ① 必要だが未定義（仕様未登録）
         st.markdown("### 🟣 必要だが未定義な能力（仕様未登録）")
