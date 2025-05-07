@@ -3,6 +3,7 @@ import os, subprocess, json, sys
 from pathlib import Path
 
 from core.capabilities_registry import kai_capability
+from core.snapshot_utils import regenerate_master_snapshot
 
 # プロジェクト直下を基点にパスを計算
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +28,7 @@ def try_git_pull_safe():
         subprocess.run(["git", "stash", "pop"], check=True,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         print("✅ Git pull 完了", flush=True)
+        regenerate_master_snapshot()
     except subprocess.CalledProcessError as e:
         print("❌ Git pull 失敗:", e, flush=True)
 
@@ -55,6 +57,8 @@ def try_git_commit(file_path: str):
     if result.returncode != 0:
         print("❌ git add エラー:", result.stderr, flush=True)
         return
+    
+    regenerate_master_snapshot()
 
     # 通常の commit / push
     subprocess.run(["git", "commit", "-m", f"Update {full_path.name}"], check=True)

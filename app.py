@@ -42,6 +42,13 @@ from core.capabilities_diff import (
 from core.structure_scanner import get_structure_snapshot
 from core.git_ops import try_git_commit
 
+from core.snapshot_utils import (
+    regenerate_master_snapshot,
+    load_master_snapshot,
+    get_function_snapshot_min,
+    get_structure_snapshot_min
+)
+
 # ──────────────────────────────────────────
 # 開発モード設定
 # ──────────────────────────────────────────
@@ -80,6 +87,11 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 # 必須フォルダ作成
 os.makedirs(CONV_DIR, exist_ok=True)
 os.makedirs(os.path.dirname(FLAG_PATH), exist_ok=True)
+
+# Streamlit初期起動時に snapshot が存在しなければ自動生成
+SNAPSHOT_PATH = os.path.join(BASE_DIR, "output", "master_snapshot.json")
+if not os.path.exists(SNAPSHOT_PATH):
+    regenerate_master_snapshot()
 
 # ──────────────────────────────────────────
 # 会話ログ処理系 関数定義
@@ -228,6 +240,31 @@ def get_system_prompt() -> str:
 }, indent=2, ensure_ascii=False)}
 ```
 """
+
+    # ── NEW: master_snapshot からの構成情報 ──────────────────────
+    try:
+        from core.snapshot_utils import load_master_snapshot, get_function_snapshot_min, get_structure_snapshot_min
+        master_snapshot = load_master_snapshot()
+        function_min = get_function_snapshot_min(master_snapshot)
+        structure_min = get_structure_snapshot_min(master_snapshot)
+
+        structure_text = json.dumps(structure_min, indent=2, ensure_ascii=False)
+        function_text = json.dumps(function_min, indent=2, ensure_ascii=False)
+
+        snapshot_section = f"""
+【Kai File Structure】
+```json
+{structure_text}
+```
+
+【Kai Function Signatures】
+```json
+{function_text}
+```
+"""
+    except Exception as e:
+        snapshot_section = f"【構成ビュー取得エラー】{str(e)}"
+
     # ────────────────────────────────────────────
 
     return f"""{overview}
@@ -244,6 +281,8 @@ def get_system_prompt() -> str:
 {caps_text}
 
 {access_meta_text}
+
+{snapshot_section}
 """
 
 # ──────────────────────────────────────────
