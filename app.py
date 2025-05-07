@@ -196,7 +196,6 @@ def get_system_prompt() -> str:
     caps_path = os.path.join(DOCS_DIR, "kai_capabilities.json")
     caps = []
     if os.path.exists(caps_path):
-        import json
         with open(caps_path, "r", encoding="utf-8") as f:
             caps = json.load(f)
 
