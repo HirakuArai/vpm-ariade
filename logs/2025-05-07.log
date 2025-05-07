@@ -431,3 +431,61 @@ if __name__ == "__main__":
 ## 2025-05-07 15:26:07 [ROLE: USER]
 「直接静的解析（ASTスキャン）」した結果はstructure_snapshot.jsonとして保存されていますが、その参照はできませんか？
 
+## 2025-05-07 15:26:23 [ROLE: KAI]
+優れたご指摘ありがとうございます。  
+はい、PoCのKaiは、**`data/structure_snapshot.json`** に保存されたAST静的解析（構造情報）の参照・活用が可能です。
+
+> Kaiが担当する自己診断系フローでは、「core/以下の実装関数・クラス・メソッド一覧と@kai_capabilityの有無・id」等が  
+> 自動抽出された**structure_snapshot.json**で常に最新状態として保持されています。
+
+---
+
+## 参照・活用方法（Kaiの知識フロー例）
+
+1. **structure_snapshot.jsonの内容例（抜粋・イメージ）**
+    ```json
+    [
+      {
+        "file": "core/foo.py",
+        "function": "append_to_log",
+        "decorator": "@kai_capability(id='append_to_log')",
+        "capability_id": "append_to_log"
+      },
+      {
+        "file": "core/bar.py",
+        "function": "undecorated_func",
+        "decorator": null,
+        "capability_id": null
+      }
+    ]
+    ```
+    - `"decorator"`や`"capability_id"`が**null**、または空欄の場合 → 未装飾/未登録関数
+
+2. **KaiはこのJSONを読み込み、「未付与またはid不完全な関数一覧」を構造的に検出できます。**
+    - すでに Kai の「自己診断」「分類」などで活用済みです。
+    - （例：run_kai_self_check(), compare_capabilities() などのロジック）
+
+---
+
+## 【実践的な使い方・作業例】
+
+1. Kaiに「structure_snapshot.jsonを参照し、未登録またはid欠落のcore配下関数を一覧化して」と指示
+2. KaiはこのJSONから該当関数・ファイル・行番号等を抽出し、  
+   - 必要に応じテーブルや一覧で提示
+   - その上で「どのidを付与するか？/説明文や命名案」など次工程を提案
+
+---
+
+### まとめ
+
+- **structure_snapshot.jsonの参照はKaiの能力範囲内**です。
+- ユーザー指示に応じ、Kaiはそのデータをもとに「未登録関数リストアップ→補完提案」等の作業が可能です。
+
+---
+
+#### 【ご要望あれば】
+
+>  
+「今のstructure_snapshot.jsonをもとに、未登録@kai_capability関数の一覧と修正案を詳しくまとめて」とご指示いただければ、Kaiがその仮想的な出力・次行動案まで提示します。  
+どうぞご希望の粒度・フォーマット等をお伝えください。
+
