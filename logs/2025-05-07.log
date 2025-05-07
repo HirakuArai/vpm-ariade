@@ -316,3 +316,115 @@ KaiはPMとして、
 core/ 以下のすべての関数・メソッドに対し「@kai_capability(id=...)」デコレーターが未付与・不完全なものを調査。
 これを実行してください。
 
+## 2025-05-07 15:24:23 [ROLE: KAI]
+承知しました。  
+現時点でKaiは「外部コード実行」や「直接静的解析（ASTスキャン）」といったリアルタイムの自動スクリプト実行はできませんが、  
+**core/** 以下の全 Python ファイルで「未登録（未装飾）/id=None/id不正」の関数を調査・リストアップする標準的な手順と、  
+**そのためのPythonスクリプト例**をご提供します。
+
+---
+
+# 【T1.1】@kai_capability(id=...)未付与関数の検出手順・スクリプト
+
+---
+
+## 1. 調査の標準手順
+
+1. **core/ ディレクトリ内の全 .py ファイルを取得**
+2. 各ファイル内の関数（def ...）・クラス・メソッド定義をAST解析
+3. @kai_capability デコレーターの有無・id属性をチェック
+    - 付与なし → 検出
+    - id引数未指定 or None/空文字/不正 → 検出
+4. 結果を表形式で一覧化
+
+---
+
+## 2. 推奨スクリプト例
+
+```python
+# run: python check_kai_capability.py
+
+import ast
+import os
+
+def extract_functions_with_capability(file_path):
+    with open(file_path, 'r', encoding='utf-8') as f:
+        tree = ast.parse(f.read(), filename=file_path)
+    results = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            cap_id = None
+            has_decorator = False
+            for decorator in node.decorator_list:
+                # デコレータ名判定
+                if isinstance(decorator, ast.Name) and decorator.id == "kai_capability":
+                    has_decorator = True
+                elif isinstance(decorator, ast.Call) and getattr(decorator.func, 'id', None) == "kai_capability":
+                    has_decorator = True
+                    # id=... の取得
+                    for kw in decorator.keywords:
+                        if kw.arg == 'id':
+                            try:
+                                cap_id = ast.literal_eval(kw.value)
+                            except Exception:
+                                cap_id = None
+            results.append({'name':node.name, 'has_decorator':has_decorator, 'cap_id':cap_id, 'lineno':node.lineno})
+    return results
+
+def scan_core():
+    base = "core"
+    all_results = []
+    for root, _, files in os.walk(base):
+        for fn in files:
+            if fn.endswith(".py"):
+                path = os.path.join(root, fn)
+                results = extract_functions_with_capability(path)
+                for item in results:
+                    # 未付与またはid不備の場合のみ抽出
+                    if (not item['has_decorator']) or (item['cap_id'] in [None, '', "None"]):
+                        all_results.append({
+                            "file": path,
+                            "function": item['name'],
+                            "decorator": item['has_decorator'],
+                            "cap_id": item['cap_id'],
+                            "line": item['lineno']
+                        })
+    return all_results
+
+if __name__ == "__main__":
+    results = scan_core()
+    print(f"{'file':32} | {'function':16} | {'decorator':9} | {'cap_id':10} | {'line'}")
+    print("-"*80)
+    for r in results:
+        print(f"{r['file'][:32]:32} | {r['function'][:16]:16} | {str(r['decorator']):9} | {str(r['cap_id']):10} | {r['line']}")
+    print(f"\n⚠️  {len(results)}件の未登録/不完全な能力関数が検出されました。")
+```
+
+---
+
+## 3. 実行結果の取り扱い
+
+- 上記スクリプトをローカルのリポジトリ直下で実行してください（`python check_kai_capability.py`）。
+- 結果は`ファイル名/関数名/行番号/デコレーター状態/cap_id` で一覧表示されます。
+- この一覧をベースに、次のステップ（id, docstring付与・Kai/Ariade_Aによる修正提案）に進みます。
+
+---
+
+## 4. 補足説明
+
+- **既存の能力名リスト（kai_capabilities.json等）との重複・命名揺れチェックも重要**です。  
+- 大規模化する場合は、結果をMD/CSV出力したり、CIで自動チェックを走らせるのも推奨します。
+- 上記の仕組みは今後「能力追加のたびにチェック」→「ギャップを自動提案サイクルへ」拡張できます。
+
+---
+
+## 5. 参考：「手動でも検査可能！」
+
+1. core/配下の.pyファイルをgrep等で「def 」「@kai_capability」「id=」で検索  
+2. 未付与関数・id不明瞭の関数を目視でピックアップ（小規模ならこれも現実的）
+
+---
+
+### > このあと検出結果の「id命名方針案」「docstring雛形」の自動生成・具体例提示も可能です。  
+「どこまで自動化したいか」「フォーマット」等、ご希望があれば指示してください！
+
