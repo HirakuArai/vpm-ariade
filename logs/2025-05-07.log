@@ -489,3 +489,6 @@ if __name__ == "__main__":
 「今のstructure_snapshot.jsonをもとに、未登録@kai_capability関数の一覧と修正案を詳しくまとめて」とご指示いただければ、Kaiがその仮想的な出力・次行動案まで提示します。  
 どうぞご希望の粒度・フォーマット等をお伝えください。
 
+## 2025-05-07 15:27:55 [ROLE: USER]
+core/ 以下のすべての関数・メソッドに対し「@kai_capability(id=...)」デコレーターが未付与・不完全なものを調査。 これを今のstructure_snapshot.jsonをもとに実行してください。
+
