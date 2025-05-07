@@ -243,7 +243,6 @@ def get_system_prompt() -> str:
 
     # ── NEW: master_snapshot からの構成情報 ──────────────────────
     try:
-        from core.snapshot_utils import load_master_snapshot, get_function_snapshot_min, get_structure_snapshot_min
         master_snapshot = load_master_snapshot()
         function_min = get_function_snapshot_min(master_snapshot)
         structure_min = get_structure_snapshot_min(master_snapshot)

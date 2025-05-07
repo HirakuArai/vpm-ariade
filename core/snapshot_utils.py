@@ -19,12 +19,14 @@ def load_master_snapshot():
 
 
 def get_function_snapshot_min(snapshot):
+    """各 .py ファイルに含まれる関数名だけを抽出（件数制限なし）"""
     return [
         {
             "path": item["path"],
-            "functions": item.get("ast", {}).get("functions", [])
+            "functions": [f["name"] for f in item.get("ast", {}).get("functions", [])]
         }
-        for item in snapshot if "ast" in item
+        for item in snapshot
+        if "ast" in item and item["ast"].get("functions")
     ]
 
 
