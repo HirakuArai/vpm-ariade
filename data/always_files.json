@@ -1,0 +1,13 @@
+[
+    "docs/architecture_overview.md",
+    "docs/base_os_rules.md",
+    "docs/project_definition.md",
+    "docs/project_status.md",
+  
+    "data/kai_capabilities.json",
+    "data/kai_rules.json",
+  
+    "data/dir_whitelist.json",
+    "data/always_files.json"
+  ]
+  

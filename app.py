@@ -182,16 +182,17 @@ def check_unprocessed_logs():
     except Exception as e:
         print(f"❌ check_unprocessed_logs エラー: {e}", flush=True)
 
-# ──────────────────────────────────────────
+# ────────────────────────────────────────────────────────
 # System プロンプト
-# ──────────────────────────────────────────
+# ────────────────────────────────────────────────────────
+
 def get_system_prompt() -> str:
     overview   = read_file(os.path.join(DOCS_DIR, "architecture_overview.md"))
     base_rules = read_file(os.path.join(DOCS_DIR, "base_os_rules.md"))
     definition = read_file(os.path.join(DOCS_DIR, "project_definition.md"))
     status     = read_file(os.path.join(DOCS_DIR, "project_status.md"))
 
-    # ── NEW: kai_capabilities.json ─────────────────
+    # ── NEW: kai_capabilities.json ─────────────────────────
     caps_path = os.path.join(DOCS_DIR, "kai_capabilities.json")
     caps = []
     if os.path.exists(caps_path):
@@ -204,7 +205,31 @@ def get_system_prompt() -> str:
         + (" (要承認)" if c.get('requires_confirm') else "")
         for c in caps if c.get("enabled", True)
     ) or "（能力リストがまだ登録されていません）"
-    # ──────────────────────────────────────────────
+
+    # ── NEW: dir_whitelist, always_files, kai_rules ───────────────────
+    try:
+        with open("data/dir_whitelist.json", "r", encoding="utf-8") as f:
+            dir_whitelist = json.load(f)
+        with open("data/always_files.json", "r", encoding="utf-8") as f:
+            always_files = json.load(f)
+        with open("data/kai_rules.json", "r", encoding="utf-8") as f:
+            kai_rules = json.load(f)
+    except Exception as e:
+        dir_whitelist = []
+        always_files = []
+        kai_rules = {"error": str(e)}
+
+    access_meta_text = f"""
+【Kai Access Rules】
+```json
+{json.dumps({
+    "dir_whitelist": dir_whitelist,
+    "always_files": always_files,
+    "kai_rules": kai_rules
+}, indent=2, ensure_ascii=False)}
+```
+"""
+    # ────────────────────────────────────────────
 
     return f"""{overview}
 
@@ -218,6 +243,8 @@ def get_system_prompt() -> str:
 
 【Kai Capabilities】
 {caps_text}
+
+{access_meta_text}
 """
 
 # ──────────────────────────────────────────

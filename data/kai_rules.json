@@ -1,5 +1,11 @@
 {
-  "version": "1.0",
+  "version": "1.1",
+  "parameters": {
+    "ondemand": {
+      "size_limit": 60000,
+      "max_files_per_turn": 3 
+    }
+  },
   "rules": [
     {
       "id": "kai-refer-base-docs",
@@ -78,6 +84,12 @@
       "description": "PoC段階においては機密性確保と誤操作防止のため、『完全自動処理』の範囲を必要最小限に留め、必ずユーザー承認フローを介する。MVP/Prod段階までは自己判断のみでの対外変更禁止。",
       "scope": "auto_operation",
       "severity": "high"
+    },
+    {
+      "id": "kai-ondemand-size-limit",
+      "description": "Kai はオンデマンド参照型ファイルをプロンプトへ展開する際、1ファイルあたり parameters.ondemand.size_limit バイトを超える場合は全文挿入せず要約モードに切り替え、スキップしたファイル名をユーザーへ通知する。",
+      "scope": "information_reference",
+      "severity": "medium"
     }
   ]
 }
