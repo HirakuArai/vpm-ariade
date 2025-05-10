@@ -61,23 +61,45 @@ DEVELOPMENT_MODE = False  # 本番デプロイ時はFalseに変更
 # 環境変数ロード
 load_dotenv()
 
-# 認証キー安全取得
+# 安全に認証キーを取得（secretsが無ければ無視）
 openai_api_key = os.getenv("OPENAI_API_KEY")
 github_token = os.getenv("GITHUB_TOKEN")
 
-# secrets.tomlが存在すれば読む（ローカル環境対策）
-try:
-    if hasattr(st, "secrets") and st.secrets:
-        openai_api_key = openai_api_key or st.secrets.get("OPENAI_API_KEY", None)
-        github_token = github_token or st.secrets.get("GITHUB_TOKEN", None)
-except Exception:
-    pass
+if not openai_api_key:
+    try:
+        openai_api_key = st.secrets["OPENAI_API_KEY"]
+    except Exception:
+        pass
+
+if not github_token:
+    try:
+        github_token = st.secrets["GITHUB_TOKEN"]
+    except Exception:
+        pass
 
 openai.api_key = openai_api_key
 
-# ──────────────────────────────────────────
-# パス構成（ドキュメント/データ保存先など）
-# ──────────────────────────────────────────
+# パス類
+
+# 安全に認証キーを取得（secretsが無ければ無視）
+openai_api_key = os.getenv("OPENAI_API_KEY")
+github_token = os.getenv("GITHUB_TOKEN")
+
+if not openai_api_key:
+    try:
+        openai_api_key = st.secrets["OPENAI_API_KEY"]
+    except Exception:
+        pass
+
+if not github_token:
+    try:
+        github_token = st.secrets["GITHUB_TOKEN"]
+    except Exception:
+        pass
+
+openai.api_key = openai_api_key
+
+# パス類
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOCS_DIR = os.path.join(BASE_DIR, "docs")
 CONV_DIR = os.path.join(BASE_DIR, "conversations")
