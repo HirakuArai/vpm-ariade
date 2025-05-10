@@ -58,10 +58,6 @@ DEVELOPMENT_MODE = False  # 本番デプロイ時はFalseに変更
 # 認証キー & パス
 # ──────────────────────────────────────────
 
-import os
-from dotenv import load_dotenv
-import streamlit as st
-
 # 環境変数ロード
 load_dotenv()
 
