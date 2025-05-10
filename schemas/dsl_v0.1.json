@@ -1,0 +1,15 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["id", "resource", "observed_state", "inferred_purpose", "confidence", "dsl_version"],
+    "properties": {
+      "id": {"type": "string"},
+      "resource": {"type": "string"},
+      "observed_state": {"type": "object"},
+      "inferred_purpose": {"type": "string"},
+      "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+      "dsl_version": {"type": "string"}
+    },
+    "additionalProperties": true
+  }
+  
