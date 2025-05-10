@@ -58,28 +58,12 @@ DEVELOPMENT_MODE = False  # 本番デプロイ時はFalseに変更
 # 認証キー & パス
 # ──────────────────────────────────────────
 
+import os
+from dotenv import load_dotenv
+import streamlit as st
+
 # 環境変数ロード
 load_dotenv()
-
-# 安全に認証キーを取得（secretsが無ければ無視）
-openai_api_key = os.getenv("OPENAI_API_KEY")
-github_token = os.getenv("GITHUB_TOKEN")
-
-if not openai_api_key:
-    try:
-        openai_api_key = st.secrets["OPENAI_API_KEY"]
-    except Exception:
-        pass
-
-if not github_token:
-    try:
-        github_token = st.secrets["GITHUB_TOKEN"]
-    except Exception:
-        pass
-
-openai.api_key = openai_api_key
-
-# パス類
 
 # 安全に認証キーを取得（secretsが無ければ無視）
 openai_api_key = os.getenv("OPENAI_API_KEY")
