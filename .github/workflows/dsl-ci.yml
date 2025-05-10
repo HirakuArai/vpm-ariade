@@ -1,0 +1,36 @@
+name: DSL Integrity Check
+
+on:
+  pull_request:
+    paths:
+      - 'dsl/**'
+      - 'schemas/**'
+      - 'core/**'
+      - 'scripts/check_dsl_integrity.py'
+  push:
+    branches: [main]
+    paths:
+      - 'dsl/**'
+      - 'schemas/**'
+      - 'core/**'
+      - 'scripts/check_dsl_integrity.py'
+
+jobs:
+  check-dsl:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install jsonschema
+
+      - name: Run DSL integrity check
+        run: |
+          python scripts/check_dsl_integrity.py
