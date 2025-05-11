@@ -3,14 +3,14 @@ import json
 from core import dsl_engine
 from pathlib import Path
 
+st.set_page_config(layout="wide")
+st.title("🧠 DSL Purpose Review (integrated_dsl.jsonl)")
+
 """🧠 DSL Purpose Review  –  confidence < 0.6 行を integrated_dsl.jsonl から直接レビュー
 
 ・integrated_dsl.jsonl = 唯一の真実
 ・confidence が低い行だけを順番に表示 → 編集 → confidence を上げて保存
 """
-
-st.set_page_config(layout="wide")
-st.title("🧠 DSL Purpose Review (integrated_dsl.jsonl)")
 
 # ------------------------------------------------------------------
 # データロード
