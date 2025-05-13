@@ -8,7 +8,9 @@ auto_review_low_confidence.py – integrated_dsl.jsonl の low-confidence 行を
 """
 import re, json, argparse, pathlib, hashlib, os, sys
 from core import dsl_engine
+from dotenv import load_dotenv
 
+load_dotenv()  
 DSL_PATH = dsl_engine.DSL_PATH
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 
