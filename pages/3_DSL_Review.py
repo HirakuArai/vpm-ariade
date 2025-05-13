@@ -15,7 +15,6 @@ st.title("🧠 DSL Purpose Review (integrated_dsl.jsonl)")
 # ------------------------------------------------------------------
 # データロード
 # ------------------------------------------------------------------
-@st.cache_data
 def load_low_conf_entries():
     dsl = dsl_engine.load_dsl()
     return [rec for rec in dsl if rec.get("confidence", 1.0) < 0.6]
