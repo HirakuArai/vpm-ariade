@@ -39,27 +39,31 @@ def plan(new_dsl):
     return diff
 
 def apply(new_dsl):
-    """PUT 全量＋Idempotency‐Key 検査付き"""
     validate_dsl(new_dsl)
-    applied = load_applied_keys()
 
-    new_cnt, skip_cnt = 0, 0
+    # 冪等キー履歴ロード
+    applied_path = ROOT / ".dsl" / "applied_keys.json"
+    applied_keys = json.load(open(applied_path)) if applied_path.exists() else {}
+
+    updated = 0
     for rec in new_dsl:
-        k = idempotency_key(rec)
-        if k in applied:
-            skip_cnt += 1
+        key = idempotency_key(rec)
+        # 以前と “まったく同じ内容” ならスキップ
+        if applied_keys.get(key) == hashlib.sha1(json.dumps(rec, sort_keys=True).encode()).hexdigest():
             continue
-        new_cnt += 1
-        applied[k] = int(time.time())
+        applied_keys[key] = hashlib.sha1(json.dumps(rec, sort_keys=True).encode()).hexdigest()
+        updated += 1
 
-    # ❶ DSL ファイルを全量置換
+    # ファイル保存
     DSL_PATH.parent.mkdir(exist_ok=True)
     DSL_PATH.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in new_dsl))
 
-    # ❷ 適用キーを保存
-    save_applied_keys(applied)
+    # 履歴更新
+    applied_path.parent.mkdir(exist_ok=True)
+    with open(applied_path, "w", encoding="utf-8") as f:
+        json.dump(applied_keys, f, ensure_ascii=False, indent=2)
 
-    return f"Applied {new_cnt} new / {skip_cnt} skipped"
+    return f"Applied {updated} updated record(s)"
 
 # ─── CLI エントリ ───────────────
 if __name__ == "__main__":
