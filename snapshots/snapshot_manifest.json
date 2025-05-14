@@ -1,6 +1,5 @@
 {
-    "intent_sha":  "PLEASE_SET_COMMIT_HASH",
-    "reality_sha": "PLEASE_SET_COMMIT_HASH",
-    "generated_at": "2025-05-14T00:00:00Z"
-  }
-  
+  "intent_sha": "0cc4a7c9eab22d83ef12823aee5076739be8910f",
+  "reality_sha": "0cc4a7c9eab22d83ef12823aee5076739be8910f",
+  "generated_at": "2025-05-14T00:00:00Z"
+}
