@@ -1,0 +1,2 @@
+# config/config.yml
+dsl_engine_version: "0.3.0"   # ← 上げるときは必ず Kai-Support へ通知
