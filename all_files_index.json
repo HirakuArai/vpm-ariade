@@ -1,0 +1,549 @@
+{
+  "generated_at": "2025-05-15T19:51:37Z",
+  "files": [
+    {
+      "path": ".dsl/applied_keys.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/.dsl/applied_keys.json"
+    },
+    {
+      "path": ".dslignore",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/.dslignore"
+    },
+    {
+      "path": ".github/workflows/dsl-ci.yml",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/.github/workflows/dsl-ci.yml"
+    },
+    {
+      "path": ".github/workflows/gen_file_index.yml",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/.github/workflows/gen_file_index.yml"
+    },
+    {
+      "path": ".gitignore",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/.gitignore"
+    },
+    {
+      "path": "app.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/app.py"
+    },
+    {
+      "path": "app_review.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/app_review.py"
+    },
+    {
+      "path": "archive/kai_generated_scripts/generate_report.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/archive/kai_generated_scripts/generate_report.py"
+    },
+    {
+      "path": "archive/kai_generated_scripts/test_capability.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/archive/kai_generated_scripts/test_capability.py"
+    },
+    {
+      "path": "archive/legacy_json/generate_report_capability.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/archive/legacy_json/generate_report_capability.json"
+    },
+    {
+      "path": "archive/legacy_json/kai_capabilities_backup_20250430_011852.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/archive/legacy_json/kai_capabilities_backup_20250430_011852.json"
+    },
+    {
+      "path": "archive/legacy_json/kai_capabilities_manual_backup.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/archive/legacy_json/kai_capabilities_manual_backup.json"
+    },
+    {
+      "path": "archive/legacy_json/kai_capabilities_proposed.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/archive/legacy_json/kai_capabilities_proposed.json"
+    },
+    {
+      "path": "archive/legacy_json/test_capability_capability.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/archive/legacy_json/test_capability_capability.json"
+    },
+    {
+      "path": "archive/step1_gitops_refactor.patch",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/archive/step1_gitops_refactor.patch"
+    },
+    {
+      "path": "check_flags/processed_logs.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/check_flags/processed_logs.json"
+    },
+    {
+      "path": "ci/last_ci_status.txt",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/ci/last_ci_status.txt"
+    },
+    {
+      "path": "config/config.yml",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/config/config.yml"
+    },
+    {
+      "path": "conversations/conversation_20250419.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/conversations/conversation_20250419.md"
+    },
+    {
+      "path": "conversations/conversation_20250420.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/conversations/conversation_20250420.md"
+    },
+    {
+      "path": "conversations/conversation_20250421.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/conversations/conversation_20250421.md"
+    },
+    {
+      "path": "conversations/conversation_20250424.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/conversations/conversation_20250424.md"
+    },
+    {
+      "path": "core/__init__.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/__init__.py"
+    },
+    {
+      "path": "core/append_to_log.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/append_to_log.py"
+    },
+    {
+      "path": "core/capabilities_diff.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/capabilities_diff.py"
+    },
+    {
+      "path": "core/capabilities_registry.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/capabilities_registry.py"
+    },
+    {
+      "path": "core/capabilities_suggester.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/capabilities_suggester.py"
+    },
+    {
+      "path": "core/capability_proposal.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/capability_proposal.py"
+    },
+    {
+      "path": "core/code_analysis.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/code_analysis.py"
+    },
+    {
+      "path": "core/code_rewriter.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/code_rewriter.py"
+    },
+    {
+      "path": "core/decorator_inserter.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/decorator_inserter.py"
+    },
+    {
+      "path": "core/discover_capabilities.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/discover_capabilities.py"
+    },
+    {
+      "path": "core/doc_update_engine.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/doc_update_engine.py"
+    },
+    {
+      "path": "core/dsl_builder/derive_intent_from_doc.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/dsl_builder/derive_intent_from_doc.py"
+    },
+    {
+      "path": "core/dsl_engine.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/dsl_engine.py"
+    },
+    {
+      "path": "core/enforcement.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/enforcement.py"
+    },
+    {
+      "path": "core/git_ops.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/git_ops.py"
+    },
+    {
+      "path": "core/handle_approval.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/handle_approval.py"
+    },
+    {
+      "path": "core/kai_patch_applier.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/kai_patch_applier.py"
+    },
+    {
+      "path": "core/log_utils.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/log_utils.py"
+    },
+    {
+      "path": "core/manage_tasks.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/manage_tasks.py"
+    },
+    {
+      "path": "core/markdown_utils.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/markdown_utils.py"
+    },
+    {
+      "path": "core/patch_log.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/patch_log.py"
+    },
+    {
+      "path": "core/run_code_analysis.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/run_code_analysis.py"
+    },
+    {
+      "path": "core/self_introspection.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/self_introspection.py"
+    },
+    {
+      "path": "core/snapshot_utils.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/snapshot_utils.py"
+    },
+    {
+      "path": "core/structure_scanner.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/structure_scanner.py"
+    },
+    {
+      "path": "core/stub_writer.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/stub_writer.py"
+    },
+    {
+      "path": "core/tagging.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/tagging.py"
+    },
+    {
+      "path": "core/task_selector.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/task_selector.py"
+    },
+    {
+      "path": "core/utils.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/utils.py"
+    },
+    {
+      "path": "data/always_files.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/always_files.json"
+    },
+    {
+      "path": "data/capability_priorities.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/capability_priorities.json"
+    },
+    {
+      "path": "data/dir_whitelist.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/dir_whitelist.json"
+    },
+    {
+      "path": "data/kai_capabilities.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/kai_capabilities.json"
+    },
+    {
+      "path": "data/kai_capabilities_backup_20250505_163919.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/kai_capabilities_backup_20250505_163919.json"
+    },
+    {
+      "path": "data/kai_capabilities_backup_20250505_170944.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/kai_capabilities_backup_20250505_170944.json"
+    },
+    {
+      "path": "data/kai_capabilities_backup_20250506_014258.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/kai_capabilities_backup_20250506_014258.json"
+    },
+    {
+      "path": "data/kai_capabilities_backup_20250506_184225.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/kai_capabilities_backup_20250506_184225.json"
+    },
+    {
+      "path": "data/kai_capabilities_proposed.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/kai_capabilities_proposed.json"
+    },
+    {
+      "path": "data/kai_rules.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/kai_rules.json"
+    },
+    {
+      "path": "data/needed_capabilities.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/needed_capabilities.json"
+    },
+    {
+      "path": "data/needed_capabilities_gpt.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/needed_capabilities_gpt.json"
+    },
+    {
+      "path": "data/structure_snapshot.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/structure_snapshot.json"
+    },
+    {
+      "path": "docs/architecture_overview.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/docs/architecture_overview.md"
+    },
+    {
+      "path": "docs/base_os_rules.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/docs/base_os_rules.md"
+    },
+    {
+      "path": "docs/base_os_rules_a.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/docs/base_os_rules_a.md"
+    },
+    {
+      "path": "docs/ondemand_index.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/docs/ondemand_index.md"
+    },
+    {
+      "path": "docs/project_definition.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/docs/project_definition.md"
+    },
+    {
+      "path": "docs/project_definition.tags",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/docs/project_definition.tags"
+    },
+    {
+      "path": "docs/project_definition_a.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/docs/project_definition_a.md"
+    },
+    {
+      "path": "docs/project_status.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/docs/project_status.md"
+    },
+    {
+      "path": "draft_dsl_filtered_v2_inferred.jsonl",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/draft_dsl_filtered_v2_inferred.jsonl"
+    },
+    {
+      "path": "dsl/dsl_schema.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/dsl/dsl_schema.json"
+    },
+    {
+      "path": "dsl/integrated_dsl.jsonl",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/dsl/integrated_dsl.jsonl"
+    },
+    {
+      "path": "dummy.txt",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/dummy.txt"
+    },
+    {
+      "path": "examples/sample_dsl.jsonl",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/examples/sample_dsl.jsonl"
+    },
+    {
+      "path": "inventory.jsonl",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/inventory.jsonl"
+    },
+    {
+      "path": "kai_capabilities_generated.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/kai_capabilities_generated.json"
+    },
+    {
+      "path": "logs/2025-04-25.log",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/logs/2025-04-25.log"
+    },
+    {
+      "path": "logs/2025-04-26.log",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/logs/2025-04-26.log"
+    },
+    {
+      "path": "logs/2025-04-28.log",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/logs/2025-04-28.log"
+    },
+    {
+      "path": "logs/2025-04-29.log",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/logs/2025-04-29.log"
+    },
+    {
+      "path": "logs/2025-05-01.log",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/logs/2025-05-01.log"
+    },
+    {
+      "path": "logs/2025-05-07.log",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/logs/2025-05-07.log"
+    },
+    {
+      "path": "logs/2025-05-08.log",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/logs/2025-05-08.log"
+    },
+    {
+      "path": "low_confidence_functions.jsonl",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/low_confidence_functions.jsonl"
+    },
+    {
+      "path": "output/file_catalog.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/output/file_catalog.json"
+    },
+    {
+      "path": "output/kai_capabilities_completion.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/output/kai_capabilities_completion.json"
+    },
+    {
+      "path": "output/kai_capabilities_generated.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/output/kai_capabilities_generated.json"
+    },
+    {
+      "path": "output/kai_capabilities_patch.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/output/kai_capabilities_patch.json"
+    },
+    {
+      "path": "output/kai_self_state.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/output/kai_self_state.json"
+    },
+    {
+      "path": "output/master_snapshot.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/output/master_snapshot.json"
+    },
+    {
+      "path": "output/needed_capabilities_autogen.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/output/needed_capabilities_autogen.json"
+    },
+    {
+      "path": "output/needed_capabilities_gpt.backup.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/output/needed_capabilities_gpt.backup.json"
+    },
+    {
+      "path": "pages/2_DSL.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/pages/2_DSL.py"
+    },
+    {
+      "path": "pages/3_DSL_Review.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/pages/3_DSL_Review.py"
+    },
+    {
+      "path": "patch_history.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/patch_history.json"
+    },
+    {
+      "path": "patches/enforce_rules_capability.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/patches/enforce_rules_capability.json"
+    },
+    {
+      "path": "patches/handle_approval_capability.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/patches/handle_approval_capability.json"
+    },
+    {
+      "path": "requirements.txt",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/requirements.txt"
+    },
+    {
+      "path": "reviewed_dsl.jsonl",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/reviewed_dsl.jsonl"
+    },
+    {
+      "path": "run_replace_test.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/run_replace_test.py"
+    },
+    {
+      "path": "schemas/dsl_v0.1.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/schemas/dsl_v0.1.json"
+    },
+    {
+      "path": "scripts/add_capability_type.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/add_capability_type.py"
+    },
+    {
+      "path": "scripts/auto_review_low_confidence.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/auto_review_low_confidence.py"
+    },
+    {
+      "path": "scripts/capability_diff.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/capability_diff.py"
+    },
+    {
+      "path": "scripts/check_capability_overlap.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/check_capability_overlap.py"
+    },
+    {
+      "path": "scripts/check_dsl_integrity.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/check_dsl_integrity.py"
+    },
+    {
+      "path": "scripts/check_tokens.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/check_tokens.py"
+    },
+    {
+      "path": "scripts/compare_capabilities.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/compare_capabilities.py"
+    },
+    {
+      "path": "scripts/extract_capabilities.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/extract_capabilities.py"
+    },
+    {
+      "path": "scripts/extract_inventory.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/extract_inventory.py"
+    },
+    {
+      "path": "scripts/file_catalog.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/file_catalog.py"
+    },
+    {
+      "path": "scripts/frontmatter_scanner.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/frontmatter_scanner.py"
+    },
+    {
+      "path": "scripts/gen_master_snapshot.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/gen_master_snapshot.py"
+    },
+    {
+      "path": "scripts/generate_all_files_index.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/generate_all_files_index.py"
+    },
+    {
+      "path": "scripts/generate_capability_patches.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/generate_capability_patches.py"
+    },
+    {
+      "path": "scripts/generate_kai_rules.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/generate_kai_rules.py"
+    },
+    {
+      "path": "scripts/gpt_generate_capability.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/gpt_generate_capability.py"
+    },
+    {
+      "path": "scripts/kai_autogen_one.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/kai_autogen_one.py"
+    },
+    {
+      "path": "scripts/low_confidence_extractor.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/low_confidence_extractor.py"
+    },
+    {
+      "path": "scripts/priority_proposer.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/priority_proposer.py"
+    },
+    {
+      "path": "scripts/propose_capability_code.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/propose_capability_code.py"
+    },
+    {
+      "path": "scripts/register_capabilities.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/register_capabilities.py"
+    },
+    {
+      "path": "scripts/register_capability_patch.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/register_capability_patch.py"
+    },
+    {
+      "path": "scripts/scan_required_capabilities.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/scan_required_capabilities.py"
+    },
+    {
+      "path": "scripts/scan_required_capabilities_gpt.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/scan_required_capabilities_gpt.py"
+    },
+    {
+      "path": "scripts/self_state_builder.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/self_state_builder.py"
+    },
+    {
+      "path": "scripts/sync_kai_state.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/sync_kai_state.py"
+    },
+    {
+      "path": "scripts/test_core_functions.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/test_core_functions.py"
+    },
+    {
+      "path": "scripts/test_enforcement.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/test_enforcement.py"
+    },
+    {
+      "path": "scripts/test_insert_decorator.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/test_insert_decorator.py"
+    },
+    {
+      "path": "snapshots/snapshot_manifest.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/snapshots/snapshot_manifest.json"
+    },
+    {
+      "path": "test_doc_engine.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/test_doc_engine.py"
+    },
+    {
+      "path": "test_env.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/test_env.py"
+    }
+  ]
+}
