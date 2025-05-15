@@ -3,7 +3,11 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '0 18 * * *'   # JST 03:00
+    - cron: '0 18 * * *'
+
+# ↓ これを追加（contents: write が必須）
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -13,13 +17,16 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with: { python-version: '3.12' }
+
       - run: python scripts/generate_all_files_index.py
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: all_files_index
           path: public/all_files_index.json
           if-no-files-found: error
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
