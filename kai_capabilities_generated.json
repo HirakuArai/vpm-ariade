@@ -1,0 +1,434 @@
+[
+  {
+    "file": "app.py",
+    "type": "function",
+    "name": "get_today_log_path",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "app.py",
+    "type": "function",
+    "name": "append_to_log",
+    "args": [
+      "role",
+      "content"
+    ],
+    "doc": null
+  },
+  {
+    "file": "app.py",
+    "type": "function",
+    "name": "load_conversation_messages",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "app.py",
+    "type": "function",
+    "name": "check_unprocessed_logs",
+    "args": [],
+    "doc": "未処理の会話ログファイルをチェックしてGit管理する"
+  },
+  {
+    "file": "app.py",
+    "type": "function",
+    "name": "get_system_prompt",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "app.py",
+    "type": "function",
+    "name": "try_git_pull_safe",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "app.py",
+    "type": "function",
+    "name": "try_git_commit",
+    "args": [
+      "file_path"
+    ],
+    "doc": null
+  },
+  {
+    "file": "app.py",
+    "type": "function",
+    "name": "generate_kai_capability_proposal",
+    "args": [
+      "fn"
+    ],
+    "doc": null
+  },
+  {
+    "file": "app.py",
+    "type": "function",
+    "name": "generate_patch",
+    "args": [
+      "c"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/handle_approval.py",
+    "type": "function",
+    "name": "handle_approval",
+    "args": [
+      "requester",
+      "document",
+      "approval_status"
+    ],
+    "doc": "指定されたドキュメントの承認処理を行います。"
+  },
+  {
+    "file": "core/task_selector.py",
+    "type": "function",
+    "name": "select_next_task",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/structure_scanner.py",
+    "type": "function",
+    "name": "scan_project_structure",
+    "args": [
+      "base_path"
+    ],
+    "doc": "プロジェクトのディレクトリ構造と主要ファイル一覧を辞書形式で返す。"
+  },
+  {
+    "file": "core/structure_scanner.py",
+    "type": "function",
+    "name": "get_structure_snapshot",
+    "args": [
+      "save_path"
+    ],
+    "doc": "プロジェクト構造を取得し、JSONに保存したうえで UI 用にリスト形式でも返す。"
+  },
+  {
+    "file": "core/dsl_engine.py",
+    "type": "function",
+    "name": "load_dsl",
+    "args": [
+      "path"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/dsl_engine.py",
+    "type": "function",
+    "name": "idempotency_key",
+    "args": [
+      "rec"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/dsl_engine.py",
+    "type": "function",
+    "name": "load_applied_keys",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/dsl_engine.py",
+    "type": "function",
+    "name": "save_applied_keys",
+    "args": [
+      "keys"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/dsl_engine.py",
+    "type": "function",
+    "name": "validate_dsl",
+    "args": [
+      "dsl"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/dsl_engine.py",
+    "type": "function",
+    "name": "plan",
+    "args": [
+      "new_dsl"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/dsl_engine.py",
+    "type": "function",
+    "name": "apply",
+    "args": [
+      "new_dsl"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/self_introspection.py",
+    "type": "function",
+    "name": "_norm",
+    "args": [
+      "val"
+    ],
+    "doc": "大小文字・前後空白を無視した ID 正規化"
+  },
+  {
+    "file": "core/self_introspection.py",
+    "type": "function",
+    "name": "_id_set",
+    "args": [
+      "lst"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/self_introspection.py",
+    "type": "function",
+    "name": "_fingerprint",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/self_introspection.py",
+    "type": "function",
+    "name": "run_kai_self_check",
+    "args": [],
+    "doc": "Run diagnostics; return diff/missing/violations + full caps lists."
+  },
+  {
+    "file": "core/capabilities_registry.py",
+    "type": "function",
+    "name": "kai_capability",
+    "args": [
+      "id",
+      "name",
+      "description",
+      "requires_confirm",
+      "enabled"
+    ],
+    "doc": "Kai の能力情報を関数に付与するためのデコレータ。"
+  },
+  {
+    "file": "core/capabilities_registry.py",
+    "type": "function",
+    "name": "decorator",
+    "args": [
+      "fn"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/patch_log.py",
+    "type": "function",
+    "name": "log_patch",
+    "args": [
+      "fn_name",
+      "user_instruction",
+      "markdown_diff"
+    ],
+    "doc": "関数修正履歴をpatch_history.jsonに保存する"
+  },
+  {
+    "file": "core/patch_log.py",
+    "type": "function",
+    "name": "load_patch_history",
+    "args": [
+      "log_path"
+    ],
+    "doc": "patch_history.jsonから履歴を読み込む"
+  },
+  {
+    "file": "core/patch_log.py",
+    "type": "function",
+    "name": "show_patch_log",
+    "args": [],
+    "doc": "patch_history.jsonから履歴をStreamlitで表示する"
+  },
+  {
+    "file": "core/git_ops.py",
+    "type": "function",
+    "name": "try_git_pull_safe",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/git_ops.py",
+    "type": "function",
+    "name": "try_git_commit",
+    "args": [
+      "file_path"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/git_ops.py",
+    "type": "function",
+    "name": "check_unprocessed_logs",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/git_ops.py",
+    "type": "function",
+    "name": "push_all_important_files",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/run_code_analysis.py",
+    "type": "function",
+    "name": "main",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/snapshot_utils.py",
+    "type": "function",
+    "name": "regenerate_master_snapshot",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/snapshot_utils.py",
+    "type": "function",
+    "name": "load_master_snapshot",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/snapshot_utils.py",
+    "type": "function",
+    "name": "get_function_snapshot_min",
+    "args": [
+      "snapshot"
+    ],
+    "doc": "各 .py ファイルに含まれる関数名だけを抽出（件数制限なし）"
+  },
+  {
+    "file": "core/snapshot_utils.py",
+    "type": "function",
+    "name": "get_structure_snapshot_min",
+    "args": [
+      "snapshot"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/log_utils.py",
+    "type": "function",
+    "name": "get_yesterday_log_filename",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/log_utils.py",
+    "type": "function",
+    "name": "load_yesterdays_log_as_messages",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/log_utils.py",
+    "type": "function",
+    "name": "messages_to_text",
+    "args": [
+      "messages"
+    ],
+    "doc": null
+  },
+  {
+    "file": "core/log_utils.py",
+    "type": "function",
+    "name": "load_log",
+    "args": [
+      "log_file_path"
+    ],
+    "doc": "指定されたログファイルからメッセージを読み込む。"
+  },
+  {
+    "file": "core/enforcement.py",
+    "type": "function",
+    "name": "load_rules",
+    "args": [],
+    "doc": null
+  },
+  {
+    "file": "core/enforcement.py",
+    "type": "function",
+    "name": "enforce_rules",
+    "args": [
+      "action_context"
+    ],
+    "doc": "与えられたコンテキストに対し、kai_rules.json に基づくルール違反を検出する。"
+  },
+  {
+    "file": "core/capability_proposal.py",
+    "type": "function",
+    "name": "generate_capability_patch",
+    "args": [
+      "cap_id",
+      "spec",
+      "model"
+    ],
+    "doc": "指定されたcap_idと仕様説明をもとに、Kaiのcapabilities定義パッチ（1件）をGPTに生成させる"
+  },
+  {
+    "file": "core/manage_tasks.py",
+    "type": "function",
+    "name": "create_task",
+    "args": [
+      "title",
+      "description",
+      "due_date",
+      "priority"
+    ],
+    "doc": "新しいタスクを作成し、保存する。"
+  },
+  {
+    "file": "core/manage_tasks.py",
+    "type": "function",
+    "name": "update_task",
+    "args": [
+      "task_id",
+      "title",
+      "description",
+      "due_date",
+      "priority"
+    ],
+    "doc": "既存のタスクを更新する。"
+  },
+  {
+    "file": "core/manage_tasks.py",
+    "type": "function",
+    "name": "delete_task",
+    "args": [
+      "task_id"
+    ],
+    "doc": "指定されたIDのタスクを削除する。"
+  },
+  {
+    "file": "core/manage_tasks.py",
+    "type": "function",
+    "name": "list_tasks",
+    "args": [
+      "filter_by",
+      "order_by"
+    ],
+    "doc": "保存されているタスクのリストを取得する。フィルターやソート順を指定できる。"
+  },
+  {
+    "file": "core/markdown_utils.py",
+    "type": "function",
+    "name": "extract_code_from_markdown",
+    "args": [
+      "markdown_text",
+      "language"
+    ],
+    "doc": "GPTから返されたMarkdown形式の提案から、指定言語のコードブロックを抽出する。"
+  }
+]
