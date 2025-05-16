@@ -7,6 +7,7 @@ Optimized Streamlit‑Kai entrypoint.
 from __future__ import annotations
 
 import json
+import streamlit as st
 from pathlib import Path
 from textwrap import dedent
 
@@ -95,3 +96,41 @@ def get_system_prompt() -> str:
 
 if __name__ == "__main__":  # local test
     print(get_system_prompt()[:1000])  # preview first 1k chars
+
+
+# ページ設定
+st.set_page_config(page_title="Kai Chat", page_icon="💬")
+st.title("💬 Kai - GPTチャット")
+
+# 入力履歴のセッション管理
+if "history" not in st.session_state:
+    st.session_state["history"] = []
+
+# ユーザー入力
+user_input = st.text_input("あなたの発言（送信でEnter）", "")
+
+# システムプロンプト生成
+system_prompt = get_system_prompt()
+
+# 入力があれば送信
+if user_input:
+    import openai  # 必要なら先頭でimport
+    # OpenAIキーをどこかでセットすること
+    messages = [{"role": "system", "content": system_prompt}]
+    for msg in st.session_state["history"]:
+        messages.append(msg)
+    messages.append({"role": "user", "content": user_input})
+    # GPT-4.1呼び出し（必要に応じてAPIキーをセット）
+    response = openai.chat.completions.create(
+        model="gpt-4.1",
+        messages=messages
+    )
+    reply = response.choices[0].message.content
+    st.session_state["history"].append({"role": "user", "content": user_input})
+    st.session_state["history"].append({"role": "assistant", "content": reply})
+    st.experimental_rerun()  # ページを再描画
+
+# 履歴表示
+for msg in st.session_state["history"]:
+    is_user = msg["role"] == "user"
+    st.chat_message("user" if is_user else "assistant").markdown(msg["content"])
