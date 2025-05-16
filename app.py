@@ -56,11 +56,18 @@ def get_system_prompt() -> str:
     arch = extract_section(DOCS / "architecture_overview.md", ["PoC構成", "運用フロー"])
 
     # 3) DSL – capabilities catalogue (name & description only)
-    lines = []
-    for raw in (DSL / "integrated_dsl.jsonl").read_text(encoding="utf‑8").splitlines():
-        item = json.loads(raw)
-        lines.append(f"- **{item['name']}**: {item['description']}")
-    dsl_block = "\n".join(lines)
+    dsl_lines = []
+    for raw in (DSL / "integrated_dsl.jsonl").read_text(encoding="utf-8").splitlines():
+        try:
+            item = json.loads(raw)
+            name = item.get('name')
+            desc = item.get('description')
+            if not name or not desc:
+                continue  # 必須項目欠落はスキップ
+            dsl_lines.append(f"- **{name}**: {desc}")
+        except Exception:
+            continue  # パースできない行もスキップ
+    dsl_block = "\n".join(dsl_lines)
 
     # 4) Compose
     prompt = dedent(
