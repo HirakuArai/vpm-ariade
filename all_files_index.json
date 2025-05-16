@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-05-15T19:51:37Z",
+  "generated_at": "2025-05-16T18:05:56Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -16,6 +16,10 @@
     {
       "path": ".github/workflows/gen_file_index.yml",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/.github/workflows/gen_file_index.yml"
+    },
+    {
+      "path": ".github/workflows/toggle_visibility.yml",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/.github/workflows/toggle_visibility.yml"
     },
     {
       "path": ".gitignore",
