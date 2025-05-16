@@ -1,0 +1,32 @@
+name: Toggle Repo Visibility
+permissions:            # ← GITHUB_TOKEN も使う場合は適宜
+  contents: read
+on:
+  workflow_dispatch:     # 手動実行ボタン
+    inputs:
+      mode:
+        description: "public / private"
+        required: true
+        type: choice
+        default: public
+        options:          # 2 択
+          - public
+          - private
+
+jobs:
+  toggle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Change visibility
+        env:
+          GH_TOKEN: ${{ secrets.REPO_PAT }}
+          MODE:     ${{ github.event.inputs.mode }}
+          OWNER:    ${{ github.repository_owner }}
+          REPO:     ${{ github.event.repository.name }}
+        run: |
+          curl -s -X PATCH \
+            -H "Authorization: token ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${OWNER}/${REPO} \
+            -d "{\"visibility\":\"${MODE}\"}"
+          echo "Repository visibility changed to ${MODE}"
