@@ -128,7 +128,6 @@ if user_input:
     reply = response.choices[0].message.content
     st.session_state["history"].append({"role": "user", "content": user_input})
     st.session_state["history"].append({"role": "assistant", "content": reply})
-    st.experimental_rerun()  # ページを再描画
 
 # 履歴表示
 for msg in st.session_state["history"]:
