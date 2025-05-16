@@ -10,3 +10,5 @@ config/.env
 # Mac OS用キャッシュファイル
 .DS_Store
 archive/
+
+gitleaks_report.json
