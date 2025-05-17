@@ -1,110 +1,82 @@
 ---
+
 doc_type: "architecture_overview"
 required_capabilities:
-  - "read_doc"
-  - "append_to_log"       # 会話ログ保存
-  - "git_push"            # 自動コミット／Push
-  - "embed_logs"          # RAG 用ベクトル化（将来）
----
 
-# アーキテクチャ概要 ― VPM‑Ariade PoC
-> **最終更新日**: 2025‑05‑06
+* "read_doc"
 
 ---
-## 1. 本ドキュメントの目的
-【本ドキュメントは Kai VPM システムの全体構成・フェーズ・運用フローを記述した補助ドキュメントです。
-Kaiの設計的な判断や背景説明にはここを参照しますが、能力説明の根拠はあくまで DSL/OSルールが優先です。】
+
+# architecture_overview.md
+
+【本ドキュメントは Kai VPM システムの**全体構成・フェーズ・運用フロー**を記述する補助ドキュメントです。Kai は設計判断や背景説明を行う際に本書を参照しますが、能力説明の根拠はあくまで base_os_rules.md と integrated_dsl.jsonl が優先されます。】
 
 ---
-## 2. システム全体図（テキスト版）
+
+## 1. 全体アーキテクチャ概要
+
+```mermaid
+flowchart TD
+  U[ユーザー] -->|Chat| ChatUI[Streamlit Kai Chat Core]
+  ChatUI -->|差分要求| Checker[ Kai Self-Checker ]
+  Checker -->|gap_report.json| Updater[ Kai Doc‑Updater ]
+  Updater -->|proposed_dsl.json| Approval[ handle_approval ✋ ]
+  Approval -->|merge| DSL[integrated_dsl.jsonl]
+  Updater -->|docs更新| Git[ GitHub Repo ]
+  Git --> Nightly[Nightly Reality Scan CI]
+  Nightly -->|差分ゼロ?|
+  ChatUI <-- Git
 ```
-User ─▶ Kai(UI) ─▶ OpenAI API
-       │  ▲
-       │  └── append_to_log → git add/commit/push → GitHub
-       │                                         ▲
-       │                                         │（Streamlit Cloud が自動デプロイ）
-       └── get_system_prompt() が docs/** を読込
+
+* **Kai Chat Core**: ユーザー対話、回答生成
+* **Kai Self-Checker**: AST ↔ DSL ↔ Docs ギャップ検出
+* **Kai Doc‑Updater**: GPT 提案 → 承認 → マージ
+* **handle_approval**: 人間承認機能
+* **Nightly Reality Scan**: GitHub Actions で差分ゼロ確認 & 自動PR
+
+## 2. ディレクトリ構成
+
 ```
-* **Kai** : ユーザーとのチャット UI。会話ログ保存・Git 操作も担当。
-* **Ariade_A** : 会話ログを解析し、ドキュメント更新案を生成・コミット（将来拡張）。
-* **Ariade_B** : Q&A／要約エンジン（将来拡張）。
-
----
-## 3. フェーズ別ロードマップ（Kai 全体戦略）
-
-| Phase | 目的 | 主な成果物・特徴 | 状態 |
-|-------|------|------------------|------|
-| **0. 準備** | ローカル環境構築・API連携 | `.env`, `app.py`, Streamlit 起動確認 | ✅ 完了 |
-| **1. Git連携** | GitHub操作自動化・会話ログ記録 | `append_to_log()`, `try_git_commit()` | ✅ 完了 |
-| **2. 会話UI PoC** | Kaiの初期UI＋会話保存・再現 | 会話履歴の復元、チャットUI | ✅ 完了 |
-| **3. 自己診断ロジック構築** | AST ⇄ JSON ⇄ GPT 比較と整合性分類 | `run_kai_self_check()`・🟣/🔵/🟡/🔶分類 | ✅ 完了 |
-| **4. UI整備** | ユーザー向け視認性・入力性強化 | 開発者モードUI、色・ラベル改善 | ⏳ 開始 |
-| **5. 自動ループ構築** | 差分 → 優先度 → 提案 → 実装の循環 | `task_selector`, `capability_proposal` | 🔜 5月中予定 |
-| **6. PoC完成** | 安定動作・成果評価・MVP判断 | 指名管理・バージョン復元・自律サイクル | 🗓 5月末目標 |
-
-
----
-## 4. ディレクトリ構成（ルート直下）
-| パス | 種別 | 役割 |
-|------|------|------|
-| **app.py** | 実行スクリプト | Kai の UI・会話処理・Git 自動 push |
-| **docs/** | 常時参照型 | プロジェクト定義・ベース OS・本ファイル など |
-| **conversations/** | 再構成型 | 会話ログ (conversation_YYYYMMDD.md) を自動保存 |
-| **data/** | 設定・自己診断 | kai_capabilities.json, needed_capabilities_gpt.json 等 |
-| **core/** | モジュール群 | Kai / Ariade A/B の各エンジン構成要素 |
-| **logs/** | 実行ログ | Kai のログ出力先（自己診断 fingerprint 含む） |
-| **.streamlit/** | 秘匿設定 | secrets.toml に API キーを格納 (Cloud 向け) |
-| **requirements.txt** | 依存 | streamlit, openai==0.28.0, python‑dotenv |
-
----
-## 5. 会話ログ → Git 自動連携フロー
-1. ユーザーが入力すると `append_to_log()` が呼ばれ、`conversations/` に追記。
-2. 同関数内で `try_git_commit()` を実行。
-   - `git add <当日ログ>`
-   - `git commit -m "Update log: conversation_YYYYMMDD.md"`
-   - `git push https://<GITHUB_TOKEN>@github.com/...`
-3. GitHub に push されると Streamlit Cloud が新イメージをビルドし、数十秒後に再起動。
-4. その後のリクエストからは最新ログがシステムプロンプトに含まれる。
-
----
-## 6. システムプロンプト生成ロジック
-```python
-texts = [
-    read('docs/architecture_overview.md'),
-    read('docs/base_os_rules.md'),
-    read('docs/project_definition.md'),
-    read('docs/project_status.md'),
-]
-return "\n\n".join(texts)
+/ (repo root)
+ ├─ app.py                         # Streamlit UI (Chat Core)
+ ├─ core/                          # 機能ライブラリ
+ │    ├─ self_checker.py          # 差分検出
+ │    ├─ doc_updater.py           # GPT提案→適用
+ │    └─ ...
+ ├─ docs/                          # OSルール・目的・構成 等
+ ├─ dsl/                           # integrated_dsl.jsonl + README
+ ├─ data/                          # gap_report.json / proposed_dsl.json
+ ├─ logs/                          # conversation_YYYYMMDD.md
+ └─ .github/workflows/             # CI/Nightly Scan
 ```
-> 重要: **architecture_overview.md** 自身も毎回読み込まれるため、内容を更新したら Git push で即反映。
 
----
-## 7. セキュリティ & 運用ルール
-| 項目 | 方針 |
-|------|------|
-| APIキー管理 | `.streamlit/secrets.toml` (Cloud) / `.env` (ローカル) で管理。リポジトリには含めない。 |
-| Git コミット | *1ドキュメント=1コミット* を徹底。Kai が自動で行う場合も同様。 |
-| トークン節約 | 常時参照は最小限 (本ファイル+主要4ドキュメント)。詳細はオンデマンド読み込み。 |
-| 誤更新防止 | ローカル作業前は `git pull origin main` を必須 (pre‑push hook でも警告)。 |
-| ソース追跡 | `run_kai_self_check()` のログに fingerprint (md5 + mtime) を出力し、Streamlit Cloud 側で実行コードを確認可能とする。 |
+## 3. 運用フロー
 
----
-## 8. 今後の拡張ポイント
-1. **Ariade_A 自動更新フロー** : Function Calling で差分生成→ユーザー承認→コミット。
-2. **RAG 連携** : 過去会話ログをベクトル DB へ投入し、高精度検索・要約。
-3. **UI 強化** : サイドバーでドキュメント閲覧、ログ日付フィルタ、テーマ別色分けなど。
-4. **複数ユーザー対応** : 認証・権限レイヤを追加、Slack / Teams連携も検討。
+1. **チャット対話** → Kai が回答 (OSルール＋DSL)
+2. **Self-Check要求**: ユーザー or Nightly → `dsl_gap_report.json` 出力
+3. **Doc-Updater**: GPT が差分をもとに `proposed_dsl.json` 生成
+4. **人間承認** (`handle_approval`) → OK なら自動 merge → Git Commit
+5. **Nightly Reality Scan**: 差分ゼロか確認。差分ありなら PR を自動作成
 
----
-## 9. 用語集
-| 用語 | 意味 |
-|------|------|
-| **Kai** | 本 UI / ブリッジ人格。Streaming UI + Git自動 push 担当。 |
-| **Ariade_A** | ドキュメント更新エンジン (PoC) |
-| **Ariade_B** | Q&A / 要約エンジン (PoC) |
-| **常時参照型** | 毎回プロンプトに読み込む静的ドキュメント群 |
-| **再構成型** | 会話ログなど、検索・要約して使うデータ群 |
+## 4. フェーズロードマップ（PoC → MVP → 拡張）
 
----
-> **備考** : 本ファイルを更新した場合は、必ず Git にコミット→Push して Cloud 側へ反映すること。Kai は新内容を直ちに常時参照に含める。
+| フェーズ         | 主要成果物                          | 状態                  |
+| ------------ | ------------------------------ | ------------------- |
+| **PoC**      | 最小チャットUI + OSルール + DSL 全文プロンプト | ✅ 完了 (2025‑05‑18)   |
+| **MVP-1**    | Self-Checker + gap_report UI  | ⬜ 進行中 (～2025‑06‑01) |
+| **MVP-2**    | Doc-Updater (GPT提案→承認→Merge)   | ⬜ 計画 (～2025‑06‑15)  |
+| **MVP-3**    | Nightly Reality Scan CI 完全自動化  | ⬜ 計画 (～2025‑07‑01)  |
+| **Extended** | ダッシュボード, RISKS 可視化, Hook API   | ⬜ 後続                |
+
+## 5. 依存サービス・ライブラリ
+
+* **OpenAI GPT‑4o/3.5** (LLM)
+* **GitHub** (リポジトリ / Actions CI)
+* **Streamlit Cloud** (UIホスティング)
+* **Mermaid.js** (構成図)
+
+## 6. 変更履歴
+
+| 日付         | 変更                             | 変更者     |
+| ---------- | ------------------------------ | ------- |
+| 2025‑05‑18 | Ariade A/B 人格記述を完全撤廃。機能ロール図へ刷新 | Kai チーム |
