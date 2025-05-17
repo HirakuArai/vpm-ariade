@@ -7,6 +7,8 @@ required_capabilities:
   - "manage_tasks"        # タスク一覧を扱う
 ---
 # project_definition.md (PoC 最小構成・Kai 統合)
+【本ドキュメントは Kai VPM プロジェクトの目的・ゴール・主要方針を定める唯一の公式説明書です。
+Kaiは会話・能力判断時、この内容を補助的根拠として必ず参照します。】
 
 ## 2. 全体目的
 AI ベースの仮想 PM (Ariade) を PoC として構築し、  

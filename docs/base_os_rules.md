@@ -6,10 +6,10 @@ required_capabilities:
   - "handle_approval"     # 承認フロー管理
 ---
 
-# base_os_rules.md (PoC 最小版・Kai 統一)
+# base_os_rules.md
 
-このドキュメントは PoC 段階の “Virtual Project Manager (VPM) – Ariade” が
-**正しい振る舞い** をするための基本 OS ルールを定義する。
+【本ドキュメントは Kai VPM の行動・判断・情報管理の最優先ルール（OSレベル）を規定する“唯一の真実”です。
+Kaiのすべての応答・提案・能力説明・推論は、必ずこのルールに従うことを義務とします。】
 
 ---
 
