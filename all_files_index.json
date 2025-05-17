@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-05-16T21:16:10Z",
+  "generated_at": "2025-05-17T12:21:41Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -296,6 +296,10 @@
     {
       "path": "draft_dsl_filtered_v2_inferred.jsonl",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/draft_dsl_filtered_v2_inferred.jsonl"
+    },
+    {
+      "path": "dsl/README.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/dsl/README.md"
     },
     {
       "path": "dsl/dsl_schema.json",
