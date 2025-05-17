@@ -76,18 +76,21 @@ for msg in st.session_state["history"]:
 # ② 入力欄を一番下に
 user_input = st.text_input("あなたの発言（送信でEnter）", "")
 
-# 入力があれば送信
 if user_input:
-    import openai
-    system_prompt = get_system_prompt()
-    messages = [{"role": "system", "content": system_prompt}]
-    for msg in st.session_state["history"]:
-        messages.append(msg)
-    messages.append({"role": "user", "content": user_input})
-    response = openai.chat.completions.create(
-        model="gpt-4.1",
-        messages=messages
-    )
-    reply = response.choices[0].message.content
-    st.session_state["history"].append({"role": "user", "content": user_input})
-    st.session_state["history"].append({"role": "assistant", "content": reply})
+    try:
+        import openai
+        system_prompt = get_system_prompt()
+        messages = [{"role": "system", "content": system_prompt}]
+        for msg in st.session_state["history"]:
+            messages.append(msg)
+        messages.append({"role": "user", "content": user_input})
+        response = openai.chat.completions.create(
+            model="gpt-4.1",
+            messages=messages
+        )
+        reply = response.choices[0].message.content
+        st.session_state["history"].append({"role": "user", "content": user_input})
+        st.session_state["history"].append({"role": "assistant", "content": reply})
+        # st.experimental_rerun() ← rerun不要
+    except Exception as e:
+        st.error(f"OpenAI API呼び出しでエラー: {e}")
