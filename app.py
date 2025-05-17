@@ -76,6 +76,8 @@ for msg in st.session_state["history"]:
 # ② 入力欄を一番下に
 user_input = st.text_input("あなたの発言（送信でEnter）", "")
 
+import traceback, sys
+
 if user_input:
     try:
         import openai
@@ -93,4 +95,5 @@ if user_input:
         st.session_state["history"].append({"role": "assistant", "content": reply})
         # st.experimental_rerun() ← rerun不要
     except Exception as e:
-        st.error(f"OpenAI API呼び出しでエラー: {e}")
+        st.error(f"❌ OpenAI 呼び出し失敗: {e}")
+        traceback.print_exc(file=sys.stdout) 
