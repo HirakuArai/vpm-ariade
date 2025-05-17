@@ -61,10 +61,10 @@ def get_system_prompt() -> str:
     dsl_block = "\n".join([dsl_readme.strip()] + dsl_lines if dsl_readme else dsl_lines)
 
     # C) Project Definition
-    proj = extract_section(DOCS / "project_definition.md", ["目的", "ゴール", "Kai Support の役割"])
+    proj = read(DOCS / "project_definition.md")
 
     # D) Architecture Overview
-    arch = extract_section(DOCS / "architecture_overview.md", ["PoC構成", "運用フロー"])
+    arch = read(DOCS / "architecture_overview.md")
 
     return "\n\n".join([rules, dsl_block, proj, arch])
 
