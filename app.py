@@ -80,23 +80,24 @@ for msg in st.session_state["history"]:
     st.chat_message("user" if msg["role"] == "user" else "assistant").markdown(msg["content"])
 
 # 入力欄（常に最下段）
-user_input = st.text_input("あなたの発言（送信でEnter）", "")
+user_input = st.chat_input("あなたの発言")  # ← ここだけ変更
 
 if user_input:
     try:
         system_prompt = get_system_prompt()
-        messages = [{"role": "system", "content": system_prompt}] + st.session_state["history"] + [{"role": "user", "content": user_input}]
-
-        # OpenAI v1.x 形式
-        response = openai.chat.completions.create(
+        msgs = [{"role": "system", "content": system_prompt}] + \
+               st.session_state["history"] + \
+               [{"role": "user", "content": user_input}]
+        reply = openai.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=messages,
-        )
-        reply = response.choices[0].message.content
+            messages=msgs
+        ).choices[0].message.content
 
-        st.session_state["history"].append({"role": "user", "content": user_input})
-        st.session_state["history"].append({"role": "assistant", "content": reply})
-        st.rerun()
+        st.session_state["history"].extend([
+            {"role": "user", "content": user_input},
+            {"role": "assistant", "content": reply},
+        ])
+        # rerun 不要。chat_input は送信後に自動クリアされる
     except Exception as e:
         st.error(f"❌ OpenAI 呼び出し失敗: {e}")
-        traceback.print_exc(file=sys.stdout)
+        traceback.print_exc()
