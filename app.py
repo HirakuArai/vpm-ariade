@@ -75,29 +75,33 @@ st.title("💬 Kai - GPTチャット")
 if "history" not in st.session_state:
     st.session_state["history"] = []
 
-# 履歴表示
+# ── 履歴表示 ───────────────────────
 for msg in st.session_state["history"]:
     st.chat_message("user" if msg["role"] == "user" else "assistant").markdown(msg["content"])
 
-# 入力欄（常に最下段）
-user_input = st.chat_input("あなたの発言")  # ← ここだけ変更
+user_input = st.chat_input("あなたの発言")
 
 if user_input:
     try:
         system_prompt = get_system_prompt()
-        msgs = [{"role": "system", "content": system_prompt}] + \
+        msgs = [{"role":"system","content":system_prompt}] + \
                st.session_state["history"] + \
-               [{"role": "user", "content": user_input}]
+               [{"role":"user","content":user_input}]
         reply = openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=msgs
         ).choices[0].message.content
 
+        # 先に画面へ即表示
+        st.chat_message("user").markdown(user_input)
+        st.chat_message("assistant").markdown(reply)
+
+        # 履歴を保存
         st.session_state["history"].extend([
-            {"role": "user", "content": user_input},
-            {"role": "assistant", "content": reply},
+            {"role":"user","content":user_input},
+            {"role":"assistant","content":reply}
         ])
-        # rerun 不要。chat_input は送信後に自動クリアされる
     except Exception as e:
         st.error(f"❌ OpenAI 呼び出し失敗: {e}")
         traceback.print_exc()
+
