@@ -1,4 +1,4 @@
-"""app.py – Kai (Minimal GPT Chat with Robust Prompt)"""
+"""app.py – Kai (Minimal GPT Chat with Robust Prompt, OpenAI v1.x)"""
 
 # ── Imports & Setup ─────────────────────────────────────────────
 from __future__ import annotations
@@ -6,16 +6,16 @@ import os, json, sys, traceback
 from pathlib import Path
 from textwrap import dedent
 import streamlit as st
-import openai
+import openai  # openai-python >=1.1.0 に対応
 
-# Read .env if present (local dev)
+# .env 読み込み（ローカル開発用）
 try:
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:
     pass
 
-# API‑KEY 設定（secrets.toml > env の順）
+# API キー設定（secrets.toml > 環境変数）
 openai.api_key = os.getenv("OPENAI_API_KEY", st.secrets.get("OPENAI_API_KEY", ""))
 if not openai.api_key:
     st.error("❌ OPENAI_API_KEY が設定されていません")
@@ -24,13 +24,13 @@ ROOT = Path(__file__).resolve().parent
 DOCS = ROOT / "docs"
 DSL  = ROOT / "dsl"
 
-# ── Utilities ──────────────────────────────────────────────────
+# ── Utilities ───────────────────────────────────────────────────
 
 def read(path: Path | str) -> str:
     return Path(path).read_text(encoding="utf-8")
 
 def extract_section(md_path: Path, headings: list[str]) -> str:
-    """Markdownから指定見出しのブロックだけ抽出"""
+    """Markdownから指定見出しのみ抽出"""
     lines = read(md_path).splitlines()
     keep, buf = False, []
     for line in lines:
@@ -41,14 +41,13 @@ def extract_section(md_path: Path, headings: list[str]) -> str:
             buf.append(line)
     return "\n".join(buf)
 
-# ── Prompt Generator ──────────────────────────────────────────
+# ── Prompt Generator ───────────────────────────────────────────
 
 def get_system_prompt() -> str:
-    """Kai が毎回使う System Prompt を生成"""
-    # A) 最優先 OS ルール
+    # A) OS ルール
     rules = read(DOCS / "base_os_rules.md")
 
-    # B) DSL (README + name/description)
+    # B) DSL
     dsl_readme = (DSL / "README.md").read_text(encoding="utf-8") if (DSL / "README.md").exists() else ""
     dsl_lines: list[str] = []
     for raw in (DSL / "integrated_dsl.jsonl").read_text(encoding="utf-8").splitlines():
@@ -61,15 +60,15 @@ def get_system_prompt() -> str:
             continue
     dsl_block = "\n".join([dsl_readme.strip()] + dsl_lines if dsl_readme else dsl_lines)
 
-    # C) Project Definition (主要見出しのみ)
+    # C) Project Definition
     proj = extract_section(DOCS / "project_definition.md", ["目的", "ゴール", "Kai Support の役割"])
 
-    # D) Architecture Overview (主要見出しのみ)
+    # D) Architecture Overview
     arch = extract_section(DOCS / "architecture_overview.md", ["PoC構成", "運用フロー"])
 
     return "\n\n".join([rules, dsl_block, proj, arch])
 
-# ── Streamlit UI ──────────────────────────────────────────────
+# ── Streamlit UI ───────────────────────────────────────────────
 st.set_page_config(page_title="Kai Chat", page_icon="💬")
 st.title("💬 Kai - GPTチャット")
 
@@ -80,7 +79,7 @@ if "history" not in st.session_state:
 for msg in st.session_state["history"]:
     st.chat_message("user" if msg["role"] == "user" else "assistant").markdown(msg["content"])
 
-# 入力欄 (最下段に来る)
+# 入力欄（常に最下段）
 user_input = st.text_input("あなたの発言（送信でEnter）", "")
 
 if user_input:
@@ -88,15 +87,15 @@ if user_input:
         system_prompt = get_system_prompt()
         messages = [{"role": "system", "content": system_prompt}] + st.session_state["history"] + [{"role": "user", "content": user_input}]
 
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # 利用可能モデルに合わせて変更
+        # OpenAI v1.x 形式
+        response = openai.chat.completions.create(
+            model="gpt-3.5-turbo",
             messages=messages,
         )
         reply = response.choices[0].message.content
 
         st.session_state["history"].append({"role": "user", "content": user_input})
         st.session_state["history"].append({"role": "assistant", "content": reply})
-        # ページ再描画は不要（入力欄が下に残り続ける）
         st.rerun()
     except Exception as e:
         st.error(f"❌ OpenAI 呼び出し失敗: {e}")
