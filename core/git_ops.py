@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
+import subprocess, sys
 from pathlib import Path
 from core.capabilities_registry import kai_capability
 from core.snapshot_utils import regenerate_master_snapshot
