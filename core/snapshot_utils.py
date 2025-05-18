@@ -1,14 +1,27 @@
 # core/snapshot_utils.py
+# core/snapshot_utils.py – use current interpreter for snapshot generation
+"""Utility: regenerate master_snapshot.json for Kai.
+This patch replaces hard‑coded 'python' with sys.executable so that the
+script runs inside the same virtual‑env (PyYAML import works).
+"""
+from __future__ import annotations
 
 import os
 import subprocess
+import sys
 import json
 
 SNAPSHOT_PATH = "output/master_snapshot.json"
 
-def regenerate_master_snapshot():
-    print("🛠 Generating master_snapshot.json ...")
-    subprocess.run(["python", "scripts/gen_master_snapshot.py"], check=True)
+def regenerate_master_snapshot() -> None:
+    """Generate master_snapshot.json using the active Python interpreter."""
+    print("🛠 Generating master_snapshot.json ...", flush=True)
+
+    # Use the exact interpreter running this process to guarantee the same venv
+    subprocess.run(
+        [sys.executable, "scripts/gen_master_snapshot.py"],
+        check=True,
+    )
 
 
 def load_master_snapshot():
