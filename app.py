@@ -10,18 +10,19 @@ import json
 import os
 import sys
 import traceback
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from textwrap import dedent
 from zoneinfo import ZoneInfo
-
-import openai  # openai-python >= 1.1.0
+import yaml, pandas as pd
 import streamlit as st
 
 # ────────────────────────────────────────────────────────────────────────────
 # Kai modules
 # ────────────────────────────────────────────────────────────────────────────
 from core.git_ops import commit_and_push_log  # ← NEW: auto‑push helper
+from core.minutes_utils import generate_daily_minutes, safe_push_minutes
+from utils.render_minutes import render_md
 
 # ────────────────────────────────────────────────────────────────────────────
 # Paths & basic setup
@@ -35,9 +36,44 @@ CONV_DIR.mkdir(parents=True, exist_ok=True)
 # ────────────────────────────────────────────────────────────────────────────
 # OpenAI API key (ENV > Streamlit secrets)
 # ────────────────────────────────────────────────────────────────────────────
-openai.api_key = os.getenv("OPENAI_API_KEY", st.secrets.get("OPENAI_API_KEY", ""))
-if not openai.api_key:
-    st.error("❌ OPENAI_API_KEY が設定されていません")
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+def get_openai_api_key():
+    # 1. 環境変数
+    key = os.getenv("OPENAI_API_KEY")
+    if key:
+        return key
+    # 2. Streamlit secrets
+    if st is not None:
+        try:
+            return st.secrets["OPENAI_API_KEY"]
+        except Exception:
+            pass
+    # 3. .env直読（開発用の最終保険）
+    try:
+        with open(".env") as f:
+            for line in f:
+                if line.strip().startswith("OPENAI_API_KEY="):
+                    return line.strip().split("=", 1)[1].strip().strip('"').strip("'")
+    except Exception:
+        pass
+    return None
+
+openai_api_key = get_openai_api_key()
+
+if not openai_api_key:
+    # この場所だけはstreamlitで出す
+    if st is not None:
+        st.error("❌ OpenAI API キーが見つかりません。")
+    else:
+        raise RuntimeError("OpenAI APIキーが見つかりません。")
+else:
+    import openai
+    openai.api_key = openai_api_key
 
 # ────────────────────────────────────────────────────────────────────────────
 # Conversation‑log helpers (JSON, 1‑day‑per‑file)
@@ -130,7 +166,7 @@ if user_input:
                   st.session_state["history"] + \
                   [{"role": "user", "content": user_input}]
         response = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4.1",
             messages=messages,
         )
         assistant_reply = response.choices[0].message.content.strip()
@@ -155,6 +191,38 @@ if user_input:
         commit_and_push_log(_today_log_path())
     except Exception as e:
         st.warning(f"⚠️ Git push failed: {e}")
+
+# --- サイドバーにタブを追加 ---
+with st.sidebar:
+    st.markdown("## 📑 議事録")
+    sel_day = st.date_input("対象日を選択", value=date.today())
+    if st.button("📝 minutes生成/再生成"):
+        minutes_path = generate_daily_minutes(sel_day, force=True)
+        st.success(f"minutes を再生成しました: {minutes_path.name}")
+
+# --- メイン領域に minutes 表示 ---
+if "minutes" not in st.session_state:
+    st.session_state["minutes"] = None
+
+minutes_path = Path(f"docs/minutes/{sel_day.year}/minutes_{sel_day:%Y%m%d}.yaml")
+if minutes_path.exists():
+    minutes_yaml = yaml.safe_load(minutes_path.read_text())
+    st.session_state["minutes"] = minutes_yaml
+
+    st.markdown(render_md(minutes_path), unsafe_allow_html=True)
+
+    # Decisions 編集
+    df = pd.DataFrame(minutes_yaml["decisions"])
+    edited = st.data_editor(df,
+        column_config={"status": st.column_config.SelectboxColumn(
+            options=["AUTO", "CONFIRMED", "CANCELLED"])},
+        use_container_width=True,
+        key="minutes_edit")
+    if st.button("💾 Save & Commit"):
+        minutes_yaml["decisions"] = edited.to_dict("records")
+        minutes_path.write_text(yaml.safe_dump(minutes_yaml, sort_keys=False))
+        safe_push_minutes(f"docs: update minutes {sel_day:%Y-%m-%d}")
+        st.success("minutes saved & pushed")
 
 # ────────────────────────────────────────────────────────────────────────────
 # Footer / debug info (optional)
