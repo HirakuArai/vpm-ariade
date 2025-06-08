@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-08T01:07:28Z",
+  "generated_at": "2025-06-08T14:56:22Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -198,6 +198,14 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/run_code_analysis.py"
     },
     {
+      "path": "core/self_checker/__init__.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/self_checker/__init__.py"
+    },
+    {
+      "path": "core/self_checker/scan_capabilities.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/self_checker/scan_capabilities.py"
+    },
+    {
       "path": "core/self_introspection.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/self_introspection.py"
     },
@@ -226,8 +234,20 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/utils.py"
     },
     {
+      "path": "core/v2/charter_schema.yaml",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/v2/charter_schema.yaml"
+    },
+    {
       "path": "core/v2/persona_core.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/v2/persona_core.py"
+    },
+    {
+      "path": "core/v2/persona_prompt.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/v2/persona_prompt.md"
+    },
+    {
+      "path": "core/v2/planning_core.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/v2/planning_core.py"
     },
     {
       "path": "data/always_files.json",
@@ -236,6 +256,10 @@
     {
       "path": "data/capability_priorities.json",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/capability_priorities.json"
+    },
+    {
+      "path": "data/charter_questions.yaml",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/charter_questions.yaml"
     },
     {
       "path": "data/charters/test_charter.yaml",
@@ -428,6 +452,22 @@
     {
       "path": "patches/handle_approval_capability.json",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/patches/handle_approval_capability.json"
+    },
+    {
+      "path": "prompts/fix_page_config_order.txt",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/prompts/fix_page_config_order.txt"
+    },
+    {
+      "path": "prompts/prompt_fix_set_page_config.txt",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/prompts/prompt_fix_set_page_config.txt"
+    },
+    {
+      "path": "prompts/prompt_translate_ui_to_japanese.txt",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/prompts/prompt_translate_ui_to_japanese.txt"
+    },
+    {
+      "path": "prompts/ui_refactor_prompt.txt",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/prompts/ui_refactor_prompt.txt"
     },
     {
       "path": "requirements.txt",
