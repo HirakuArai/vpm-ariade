@@ -7,7 +7,7 @@ import streamlit as st
 
 # Set page config as the very first Streamlit command
 st.set_page_config(
-    page_title="Kai VPM v2 - AI Project Manager",
+    page_title="Kai VPM v2 - AIプロジェクトマネージャー",
     page_icon="🌟",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -15,62 +15,61 @@ st.set_page_config(
 
 # Main landing page content
 st.title("🌟 Kai VPM v2")
-st.markdown("## AI Project Manager")
+st.markdown("## AIプロジェクトマネージャー")
 
 st.markdown("""
-Welcome to **Kai VPM v2** - an intelligent project management system that transforms 
-your ideas into structured, actionable project plans.
+**Kai VPM v2**へようこそ - あなたのアイデアを構造化された実行可能なプロジェクト計画に変換するインテリジェントなプロジェクト管理システムです。
 
-### 🚀 Getting Started
+### 🚀 はじめに
 
-Use the sidebar to navigate through the project workflow:
+サイドバーを使用してプロジェクトワークフローを進めてください：
 
-1. **📝 New Project** - Create a project charter through guided questions
-2. **✏️ Preview Charter** - Review and edit your charter details  
-3. **🧠 Analysis & WBS** - AI-powered analysis and work breakdown structure
+1. **📝 新規プロジェクト** - ガイド付きの質問を通じてプロジェクトチャーターを作成
+2. **✏️ チャーター確認** - チャーターの詳細を確認・編集  
+3. **🧠 分析とWBS** - AI による分析と作業分解構造の生成
 
-### ✨ Key Features
+### ✨ 主要機能
 
-- **Charter-Driven Approach**: Every project starts with a clear charter
-- **AI Persona Analysis**: Intelligent prioritization and risk assessment
-- **Work Breakdown Structure**: Automated task generation with dependencies
-- **Interactive Editing**: Rich data editors for all project components
-- **Export & Save**: Complete project data export for external use
+- **チャーター駆動アプローチ**: すべてのプロジェクトが明確なチャーターから始まります
+- **AI ペルソナ分析**: インテリジェントな優先順位付けとリスク評価
+- **作業分解構造**: 依存関係を持つ自動タスク生成
+- **インタラクティブ編集**: すべてのプロジェクト要素に対応したリッチデータエディター
+- **エクスポート・保存**: 外部利用のための完全なプロジェクトデータエクスポート
 
-### 🔄 Workflow Overview
+### 🔄 ワークフロー概要
 
 ```
-Charter Creation → Review & Edit → AI Analysis → WBS Generation → Export
+チャーター作成 → 確認・編集 → AI分析 → WBS生成 → エクスポート
 ```
 
-### 🎯 Benefits
+### 🎯 メリット
 
-- **Structured Planning**: Ensures all projects have clear scope and objectives
-- **Risk Awareness**: AI identifies potential issues early in the process
-- **Task Organization**: Generates realistic timelines with proper dependencies
-- **Collaborative**: Easy review and editing of all project components
+- **構造化された計画**: すべてのプロジェクトが明確な範囲と目標を持つことを保証
+- **リスク認識**: AIがプロセスの早い段階で潜在的な問題を特定
+- **タスク組織化**: 適切な依存関係を持つ現実的なタイムラインを生成
+- **コラボレーション**: すべてのプロジェクト要素の簡単な確認と編集
 
 ---
 
-**Ready to start?** Select a page from the sidebar menu to begin your project journey!
+**始める準備はできましたか？** サイドバーメニューからページを選択してプロジェクトの旅を始めましょう！
 """)
 
 # Show system status
-with st.expander("🔧 System Status", expanded=False):
+with st.expander("🔧 システム状態", expanded=False):
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.metric("Core Modules", "✅ Active")
+        st.metric("コアモジュール", "✅ 稼働中")
         st.caption("persona_core, planning_core")
     
     with col2:
-        st.metric("Data Storage", "✅ Ready")
+        st.metric("データストレージ", "✅ 準備完了")
         st.caption("charters/, results/")
     
     with col3:
-        st.metric("UI Framework", "✅ Multipage")
+        st.metric("UIフレームワーク", "✅ マルチページ")
         st.caption("Native Streamlit routing")
 
 # Footer
 st.markdown("---")
-st.markdown("*Kai VPM v2 - Idempotent, Self-evolving AI Project Manager*")
+st.markdown("*Kai VPM v2 - 冪等性・自己進化型AIプロジェクトマネージャー*")
