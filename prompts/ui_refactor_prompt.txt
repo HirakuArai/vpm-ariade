@@ -1,0 +1,29 @@
+Refactor the current single-file Streamlit app (streamlit_v2.py) into a multipage layout
+with sidebar navigation.  Implement the following:
+
+1. Move common layout and helper functions to libs/ui_layout.py.
+2. Create a main entry app.py that shows a sidebar menu and routes to pages in /pages.
+3. Split existing functionality into three pages:
+
+   pages/1_new_project.py
+     - Q&A chat to generate charter.yaml (reuse scripts/gen_charter.py logic)
+     - Save generated charter to data/charters/ and place its filename into st.session_state.
+
+   pages/2_preview_charter.py
+     - Load selected charter from session_state.
+     - Show editable preview with st.data_editor, allow save.
+
+   pages/3_persona_and_wbs.py
+     - Run analyze_charter() and generate_wbs() on the selected charter.
+     - Display persona analysis in expanders.
+     - Display WBS as editable st.data_editor with save to data/results/.
+
+4. Each page should include:
+   - st.page_config with appropriate title and icon.
+   - Proper error handling if prerequisites are missing.
+   - Navigation buttons (“Next”, “Back”) that update st.session_state["page"].
+
+5. Update requirements.txt if new dependencies (e.g. plotly) are needed.
+6. Add docs/ui_migration.md explaining how to run the new multipage app.
+
+Do not remove the original streamlit_v2.py; just create new files in this branch.

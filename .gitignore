@@ -12,3 +12,9 @@ config/.env
 archive/
 
 gitleaks_report.json
+# runtime artifacts
+.coverage
+coverage.json
+data/charters/
+data/results/
+

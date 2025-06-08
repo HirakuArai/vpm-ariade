@@ -1,0 +1,22 @@
+Fix improper placement of `st.set_page_config()` in the Streamlit multipage app.
+
+Problem:
+- `st.set_page_config()` must be the first Streamlit command on each page.
+- Currently it is being called too late (after other Streamlit elements like st.sidebar).
+
+Fix:
+- In each of the following files:
+  - pages/page_1_new_project.py
+  - pages/page_2_preview_charter.py
+  - pages/page_3_persona_and_wbs.py
+
+Make sure:
+1. `import streamlit as st` is at the top.
+2. `from libs.ui_layout import setup_page_config` follows.
+3. `setup_page_config()` is called immediately after imports, before any other st commands.
+
+Also:
+- Do not change the existing logic or layout functions unless necessary.
+- Only fix the `set_page_config` call order to prevent runtime errors.
+
+After changes, test by running `streamlit run app_multipage.py`.

@@ -1,0 +1,38 @@
+Translate the visible UI elements in the Streamlit multipage app to Japanese, while keeping all internal code structures, variable names, and data keys in English.
+
+Scope:
+
+* Only translate **user-facing elements** such as:
+
+  * Page titles
+  * Section headers
+  * Button labels
+  * Table column headers (as displayed in the UI)
+  * Info boxes, tooltips, alert texts, and chart labels
+* Do **not** translate:
+
+  * Variable names, function names, data keys (e.g. "task\_name", "due\_date")
+  * YAML keys, JSON export fields, internal comments
+
+Target Files:
+
+* `pages/1_📝_New_Project.py`
+* `pages/2_✏️_Preview_Charter.py`
+* `pages/3_🧠_Analysis_and_WBS.py`
+* `libs/ui_layout.py` (UI-related components only)
+
+Examples:
+
+* `st.title("New Project")` → `st.title("新規プロジェクト")`
+* Table headers like `"Task Name"` → `"タスク名"`
+* Button text `"Save"` → `"保存する"`
+
+Additional Notes:
+
+* Keep emoji and icon placement consistent where present.
+* Format long Japanese labels to fit reasonably within UI width (avoid overflow).
+* Retain any `st.set_page_config()` settings like `page_title` and `page_icon`, but localize their text if displayed.
+
+Do not introduce any new features or redesigns. Just update the language of visible UI components to Japanese.
+
+After changes, run the app locally (`streamlit run app.py`) to verify that layout and interactions still function correctly with the translated labels.

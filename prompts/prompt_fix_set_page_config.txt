@@ -1,0 +1,30 @@
+Fix a Streamlit multipage layout error related to improper use of `st.set_page_config()`.
+
+Problem:
+
+* The current `app_multipage.py` imports `pages/page_1_new_project.py` directly, which causes Streamlit to run `st.set_page_config()` outside of the main page execution.
+* This violates Streamlit’s requirement that `set_page_config()` be the first Streamlit command *per page script*.
+
+Fix:
+
+* Remove all `import pages.page_*.py` statements from `app_multipage.py`.
+* Use standard Streamlit multipage layout: place page scripts directly under `pages/` and let Streamlit route them automatically.
+* Ensure that each `pages/page_*.py` starts with:
+
+  ```python
+  import streamlit as st
+  st.set_page_config(page_title="...", page_icon="...", layout="wide")
+  ```
+
+Also:
+
+* Add a new minimal `app.py` with only a title or landing page.
+* Rename `app_multipage.py` to `app_debug.py` if needed for legacy use.
+
+Goal: The app should run correctly via:
+
+```bash
+streamlit run app.py
+```
+
+and present a sidebar menu for all pages without import errors.

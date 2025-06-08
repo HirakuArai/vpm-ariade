@@ -1,0 +1,27 @@
+# Kai VPM プロジェクトチャーター（最小スキーマ）
+
+name: string                # プロジェクト名
+purpose: string             # なぜやるのか（背景・動機）
+outcomes:                  # 成果物 or 達成状態
+  - string
+scope:
+  in:                      # 含める対象
+    - string
+  out:                     # 除外する範囲（明示）
+    - string
+stakeholders:              # 関係者とその役割
+  - name: string
+    role: string
+constraints:
+  budget: string           # 金額 or \"n/a\"
+  deadline: string         # YYYY-MM-DD or \"n/a\"
+  tools:
+    - string               # 使いたい／使えるツール
+milestones:                # 重要な節目（日付＋説明）
+  - date: string           # YYYY-MM-DD
+    title: string
+success_metrics:           # 成功指標（定量・定性）
+  - string
+risks:                     # 想定リスクと対策
+  - risk: string
+    mitigation: string
