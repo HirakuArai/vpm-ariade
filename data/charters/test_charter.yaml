@@ -1,0 +1,35 @@
+name: "テストプロジェクト"
+purpose: "新しいWebアプリケーションを開発して、ユーザー体験を向上させる"
+outcomes:
+  - "ユーザー登録システムの完成"
+  - "商品検索機能の実装"
+  - "モバイル対応の完了"
+scope:
+  in:
+    - "フロントエンド開発"
+    - "バックエンドAPI開発"
+    - "データベース設計"
+  out:
+    - "決済機能"
+    - "管理者画面"
+stakeholders:
+  - name: "田中"
+    role: "プロジェクトマネージャー"
+  - name: "佐藤"
+    role: "開発者"
+constraints:
+  budget: "500万円"
+  deadline: "2025-08-31"
+  tools:
+    - "React"
+    - "Node.js"
+    - "PostgreSQL"
+milestones:
+  - date: "2025-07-15"
+    title: "プロトタイプ完成"
+success_metrics:
+  - "ユーザー登録率80%以上"
+  - "ページ読み込み時間2秒以内"
+risks:
+  - risk: "技術選定の遅れ"
+    mitigation: "早期にPoC実施"
