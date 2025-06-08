@@ -17,4 +17,5 @@ gitleaks_report.json
 coverage.json
 data/charters/
 data/results/
+data/conversations/
 
