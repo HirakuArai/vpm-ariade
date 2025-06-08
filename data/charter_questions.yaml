@@ -1,0 +1,25 @@
+questions:
+  - id: name
+    prompt: "このプロジェクトに名前をつけるとしたら？"
+  - id: purpose
+    prompt: "なぜこのプロジェクトをやりたいのですか？背景や動機を教えてください。"
+  - id: outcomes
+    prompt: "最終的に達成したいこと（成果物や状態）をリストアップしてください。"
+  - id: scope.in
+    prompt: "このプロジェクトでやるべきこと・含めたい範囲は？"
+  - id: scope.out
+    prompt: "逆に、今回のプロジェクトでは除外するものは？"
+  - id: stakeholders
+    prompt: "関係者は誰で、どんな役割ですか？（名前と役割）"
+  - id: constraints.budget
+    prompt: "予算はありますか？金額 or \"n/a\" で答えてください。"
+  - id: constraints.deadline
+    prompt: "理想的な締切日（YYYY-MM-DD形式 or \"n/a\"）を教えてください。"
+  - id: constraints.tools
+    prompt: "使いたいツールや必須のツールはありますか？"
+  - id: milestones
+    prompt: "重要な節目（マイルストーン）を、日付と内容で教えてください。"
+  - id: success_metrics
+    prompt: "プロジェクトが成功したと判断できる基準は？（KPIなど）"
+  - id: risks
+    prompt: "リスクと、その対策をセットで挙げてください。"
