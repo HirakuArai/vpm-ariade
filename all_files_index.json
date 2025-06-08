@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-08T18:20:27Z",
+  "generated_at": "2025-06-08T19:20:12Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -382,6 +382,10 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/kai_capabilities_generated.json"
     },
     {
+      "path": "libs/knowledge_rag.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/libs/knowledge_rag.py"
+    },
+    {
       "path": "libs/openai_helper.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/libs/openai_helper.py"
     },
@@ -578,6 +582,10 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/propose_capability_code.py"
     },
     {
+      "path": "scripts/purge_drafts.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/purge_drafts.py"
+    },
+    {
       "path": "scripts/register_capabilities.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/register_capabilities.py"
     },
@@ -632,6 +640,18 @@
     {
       "path": "tests/test_convo_mode.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/tests/test_convo_mode.py"
+    },
+    {
+      "path": "tests/test_persist_background.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/tests/test_persist_background.py"
+    },
+    {
+      "path": "tests/test_rag_cache.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/tests/test_rag_cache.py"
+    },
+    {
+      "path": "tests/test_two_layer_flow.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/tests/test_two_layer_flow.py"
     },
     {
       "path": "utils/render_minutes.py",
