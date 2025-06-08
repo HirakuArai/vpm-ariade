@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-08T14:56:22Z",
+  "generated_at": "2025-06-08T15:43:28Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -382,6 +382,10 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/kai_capabilities_generated.json"
     },
     {
+      "path": "libs/openai_helper.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/libs/openai_helper.py"
+    },
+    {
       "path": "libs/ui_layout.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/libs/ui_layout.py"
     },
@@ -456,6 +460,10 @@
     {
       "path": "prompts/fix_page_config_order.txt",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/prompts/fix_page_config_order.txt"
+    },
+    {
+      "path": "prompts/prompt_conversational_charter_v2.txt",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/prompts/prompt_conversational_charter_v2.txt"
     },
     {
       "path": "prompts/prompt_fix_set_page_config.txt",
@@ -620,6 +628,10 @@
     {
       "path": "test_env.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/test_env.py"
+    },
+    {
+      "path": "tests/test_convo_mode.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/tests/test_convo_mode.py"
     },
     {
       "path": "utils/render_minutes.py",
