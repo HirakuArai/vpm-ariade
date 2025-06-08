@@ -1,0 +1,60 @@
+Rewrite **pages/1\_📝\_New\_Project.py** so the project charter is gathered via a *natural bilingual conversation* (Japanese UI, English keys) powered exclusively by OpenAI ChatCompletion.
+
+---
+
+## Goals
+
+1. 人間が曖昧な目的を入力 → Kai が対話で深掘りし **すべての charter 項目** を埋める
+2. 会話ログ `{role, content, ts}` を保存し、次フェーズで再利用
+3. 既存 YAML charter スキーマ・ファイルパスを変更しない
+4. Down‑stream (persona / WBS) との互換性を壊さない
+
+---
+
+## Functional spec
+
+### 1. Conversation engine (OpenAI *mandatory*)
+
+* `OPENAI_API_KEY` が必須。未設定ならページ側でエラーメッセージを出して処理を止める。
+* System prompt:
+
+  ```
+  You are Kai, an expert project manager.
+  Your job is to guide the user to define a project charter.
+  Ask ONE question at a time in Japanese.
+  When enough info is gathered, reply with <charter_complete/> followed by a JSON block that exactly matches our charter schema.
+  ```
+* AI 質問は `st.chat_message("assistant")` でリアルタイム表示。
+* ユーザー回答は `st.chat_input()` で取得し、`st.session_state.convo` に追記。
+
+### 2. 重複質問バグの修正
+
+* 旧コードは Markdown 装飾を含む文字列比較で重複チェック失敗。
+* **対策**: チャットメッセージに `qid` フィールドを保持し、`qid == question["id"]` で重複を判定。
+
+### 3. 完了判定 & 保存
+
+* モデルが `<charter_complete/>` トークンを返したら JSON を抽出→`save_charter()` で YAML 保存。
+* 会話ログを `data/conversations/{charter_filename}.json` に保存。
+* 完了後はプレビュー & 保存 UI (既存コード) を再利用。
+
+### 4. ファイル作成・更新
+
+* **pages/1\_📝\_New\_Project.py** – *全面リライト* (対話エンジン/重複修正)
+* **libs/openai\_helper.py** – `ask_gpt(messages: list[dict]) -> str` を実装。
+* **requirements.txt** – `openai>=1.14.0` を追記（重複チェック込み）。
+* **.gitignore** – `data/conversations/` を除外。
+
+### 5. 日本語 UI
+
+* ページタイトル: "📝 新規プロジェクト – 会話モード"
+* ボタン: "回答を送信", "会話を保存", "会話を再開"
+* 進捗バー: "進捗: {answered}/{expected}"
+
+---
+
+## Tests & Deliverables
+
+* `tests/test_convo_mode.py` – `monkeypatch` で OpenAI をモックし、2ターンで \<charter\_complete/> を返すケースをテスト。
+* `pytest -q` を走らせ、結果 (Passed/Failed) と 変更ファイル一覧を Markdown 表で出力。
+* Claude Code は自動で PR Description を生成し、上記サマリーを含める。
