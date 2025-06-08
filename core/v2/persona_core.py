@@ -284,6 +284,41 @@ def _generate_persona_comment(charter: Dict[str, Any], priorities: List[str], ri
     return " ".join(comments)
 
 
+def get_persona_prompt(charter_path: str) -> str:
+    """
+    Get persona system prompt with background information from charter
+    
+    Args:
+        charter_path: Path to charter YAML file
+        
+    Returns:
+        Enhanced system prompt with background information
+    """
+    base_prompt = """You are an expert AI project manager persona.
+Analyze the provided project charter and give practical, actionable recommendations.
+Focus on prioritization, risk mitigation, and realistic milestone planning."""
+    
+    try:
+        charter = _load_charter(charter_path)
+        background = charter.get('background')
+        
+        if background:
+            enhanced_prompt = f"""{base_prompt}
+
+<background>
+{background}
+</background>
+
+Use this background information to provide more contextually relevant analysis and recommendations."""
+            return enhanced_prompt
+        
+    except Exception:
+        # If charter loading fails, return base prompt
+        pass
+    
+    return base_prompt
+
+
 if __name__ == "__main__":
     # Example usage
     import sys

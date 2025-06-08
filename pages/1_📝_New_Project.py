@@ -1,5 +1,5 @@
 """
-📝 New Project - Conversational Charter Generation with AI
+📝 New Project - RAG-Enhanced Conversational Charter Generation with Draft Lifecycle
 """
 
 import streamlit as st
@@ -14,6 +14,8 @@ st.set_page_config(
 
 import json
 import os
+import uuid
+import asyncio
 from pathlib import Path
 from datetime import datetime
 import sys
@@ -22,69 +24,120 @@ import sys
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from libs.openai_helper import check_openai_key, ask_gpt, get_system_prompt, extract_charter_json
+from libs.openai_helper import (
+    check_openai_key, ask_gpt, get_system_prompt_with_background, 
+    extract_charter_json, generate_next_question
+)
+from libs.knowledge_rag import get_domain_info
 from libs.ui_layout import generate_charter_filename, save_charter_data
 
 
-def save_conversation(conversation: list, charter_filename: str):
-    """Save conversation log to file"""
+def save_draft(draft_id: str, charter_data: dict, conversation: list, domain_info: str = None):
+    """Save draft charter and conversation"""
     try:
-        conversations_dir = Path("data/conversations")
-        conversations_dir.mkdir(parents=True, exist_ok=True)
+        drafts_dir = Path("data/drafts")
+        drafts_dir.mkdir(parents=True, exist_ok=True)
         
-        conversation_file = conversations_dir / f"{Path(charter_filename).stem}.json"
+        draft_data = {
+            "draft_id": draft_id,
+            "timestamp": datetime.now().isoformat(),
+            "charter": charter_data,
+            "conversation": conversation,
+            "domain_info": domain_info
+        }
         
-        with open(conversation_file, 'w', encoding='utf-8') as f:
-            json.dump({
-                "timestamp": datetime.now().isoformat(),
-                "charter_file": charter_filename,
-                "conversation": conversation
-            }, f, ensure_ascii=False, indent=2)
+        draft_file = drafts_dir / f"draft_{draft_id}.json"
+        with open(draft_file, 'w', encoding='utf-8') as f:
+            json.dump(draft_data, f, ensure_ascii=False, indent=2)
         
-        return str(conversation_file)
+        return str(draft_file)
     except Exception as e:
-        st.error(f"会話ログの保存に失敗しました: {str(e)}")
+        st.error(f"ドラフト保存エラー: {str(e)}")
         return None
 
 
-def save_charter(charter_data: dict, filename: str, conversation: list):
-    """Save charter to file and update session state"""
+def load_draft(draft_id: str) -> dict:
+    """Load draft data"""
     try:
+        draft_file = Path("data/drafts") / f"draft_{draft_id}.json"
+        if draft_file.exists():
+            with open(draft_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return {}
+
+
+def delete_draft(draft_id: str):
+    """Delete draft files"""
+    try:
+        draft_file = Path("data/drafts") / f"draft_{draft_id}.json"
+        if draft_file.exists():
+            draft_file.unlink()
+    except Exception:
+        pass
+
+
+def finalize_charter(draft_data: dict, filename: str):
+    """Move draft to formal charter and conversation logs"""
+    try:
+        charter_data = draft_data.get("charter", {})
+        conversation = draft_data.get("conversation", [])
+        domain_info = draft_data.get("domain_info")
+        
+        # Add background info to charter if available
+        if domain_info:
+            charter_data["background"] = domain_info
+        
         # Ensure filename has .yaml extension
         if not filename.endswith('.yaml'):
             filename += '.yaml'
         
-        # Create charters directory if needed
+        # Create directories
         charters_dir = Path("data/charters")
+        conversations_dir = Path("data/conversations")
         charters_dir.mkdir(parents=True, exist_ok=True)
+        conversations_dir.mkdir(parents=True, exist_ok=True)
         
         # Save charter
         charter_path = charters_dir / filename
         if save_charter_data(str(charter_path), charter_data):
             # Save conversation log
-            conversation_file = save_conversation(conversation, filename)
+            conversation_file = conversations_dir / f"{Path(filename).stem}.json"
+            with open(conversation_file, 'w', encoding='utf-8') as f:
+                json.dump({
+                    "timestamp": datetime.now().isoformat(),
+                    "charter_file": str(charter_path),
+                    "conversation": conversation,
+                    "domain_info": domain_info
+                }, f, ensure_ascii=False, indent=2)
             
             # Update session state
             st.session_state.selected_charter_file = str(charter_path)
             st.session_state.charter_created = True
             
-            st.success(f"✅ チャーターが正常に保存されました: {charter_path}")
-            if conversation_file:
-                st.info(f"📝 会話ログも保存されました: {conversation_file}")
-            st.info("次のステップに進むことができます: ✏️ チャーター確認")
+            # Delete draft
+            draft_id = draft_data.get("draft_id")
+            if draft_id:
+                delete_draft(draft_id)
             
-            # Auto-navigate to next page after a short delay
-            st.balloons()
-        else:
-            st.error("❌ チャーターの保存に失敗しました")
-    
+            return True
     except Exception as e:
-        st.error(f"❌ チャーター保存エラー: {str(e)}")
+        st.error(f"チャーター確定エラー: {str(e)}")
+    
+    return False
+
+
+def parse_user_answer(user_input: str, context: str) -> dict:
+    """Parse user answer and update charter data incrementally"""
+    # This is a simplified parser - in practice, you might want more sophisticated NLP
+    # For now, we'll let the AI handle the parsing through the conversation
+    return {"raw_answer": user_input, "context": context}
 
 
 # Main page content
-st.title("📝 新規プロジェクト – 会話モード")
-st.markdown("AIアシスタント Kai との自然な対話を通じてプロジェクトチャーターを作成します")
+st.title("📝 新規プロジェクト – RAG強化会話モード")
+st.markdown("AIアシスタント Kai との自然な対話を通じて、背景情報を活用したプロジェクトチャーターを作成します")
 
 # Check OpenAI API key
 if not check_openai_key():
@@ -93,36 +146,32 @@ if not check_openai_key():
     st.code("export OPENAI_API_KEY='your-api-key-here'")
     st.stop()
 
-# Initialize conversation state
+# Initialize session state
+if "draft_id" not in st.session_state:
+    st.session_state.draft_id = None
 if "conversation" not in st.session_state:
     st.session_state.conversation = []
-if "charter_data" not in st.session_state:
-    st.session_state.charter_data = None
+if "draft_charter" not in st.session_state:
+    st.session_state.draft_charter = {}
+if "domain_info" not in st.session_state:
+    st.session_state.domain_info = None
 if "conversation_complete" not in st.session_state:
     st.session_state.conversation_complete = False
+if "turn_count" not in st.session_state:
+    st.session_state.turn_count = 0
 
-# If conversation is empty, start with system prompt and first question
+# Start conversation if empty
 if not st.session_state.conversation:
-    try:
-        with st.spinner("🤖 Kai を起動中..."):
-            # Get initial response from AI
-            messages = [
-                {"role": "system", "content": get_system_prompt()},
-                {"role": "user", "content": "新しいプロジェクトを始めたいのですが、チャーターを作成するのを手伝ってください。"}
-            ]
-            
-            ai_response = ask_gpt(messages)
-            
-            # Add to conversation
-            st.session_state.conversation = [
-                {"role": "user", "content": "新しいプロジェクトを始めたいのですが、チャーターを作成するのを手伝ってください。", "timestamp": datetime.now().isoformat()},
-                {"role": "assistant", "content": ai_response, "timestamp": datetime.now().isoformat()}
-            ]
-            st.rerun()
+    # Generate new draft ID
+    st.session_state.draft_id = str(uuid.uuid4())
+    st.session_state.turn_count = 0
     
-    except Exception as e:
-        st.error(f"❌ AI との接続に失敗しました: {str(e)}")
-        st.stop()
+    # Add initial greeting
+    st.session_state.conversation = [{
+        "role": "assistant",
+        "content": "こんにちは！新しいプロジェクトのチャーター作成をお手伝いします。まず、どのようなプロジェクトを始めたいか、簡単に教えてください。",
+        "timestamp": datetime.now().isoformat()
+    }]
 
 # Display conversation
 st.markdown("### 💬 Kai との対話")
@@ -138,6 +187,16 @@ for message in st.session_state.conversation:
         with st.chat_message("assistant"):
             st.write(content)
 
+# Show draft status
+if st.session_state.draft_id:
+    with st.sidebar:
+        st.write("**ドラフト状態**")
+        st.write(f"ID: {st.session_state.draft_id[:8]}...")
+        st.write(f"ターン数: {st.session_state.turn_count}")
+        if st.session_state.domain_info:
+            with st.expander("🔍 背景情報"):
+                st.write(st.session_state.domain_info[:200] + "..." if len(st.session_state.domain_info) > 200 else st.session_state.domain_info)
+
 # Chat input (only if conversation not complete)
 if not st.session_state.conversation_complete:
     user_input = st.chat_input("回答を入力してください...")
@@ -150,14 +209,46 @@ if not st.session_state.conversation_complete:
             "timestamp": datetime.now().isoformat()
         })
         
+        st.session_state.turn_count += 1
+        
         try:
             with st.spinner("🤖 Kai が考えています..."):
+                # First turn: Get domain info via RAG
+                if st.session_state.turn_count == 1:
+                    domain_info = get_domain_info(user_input)
+                    st.session_state.domain_info = domain_info
+                
+                # Two-layer approach:
+                # Pass #1: Generate next question (invisible)
+                next_question = None
+                try:
+                    # Use asyncio to handle the async function
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    next_question = loop.run_until_complete(
+                        generate_next_question(st.session_state.conversation, st.session_state.draft_charter)
+                    )
+                    loop.close()
+                except Exception:
+                    # Fallback if async fails
+                    next_question = "次の質問をお聞かせください。"
+                
+                # Pass #2: Get AI response with background
+                system_prompt = get_system_prompt_with_background(st.session_state.domain_info)
+                
                 # Prepare messages for OpenAI (exclude timestamps)
-                openai_messages = [{"role": "system", "content": get_system_prompt()}]
+                openai_messages = [{"role": "system", "content": system_prompt}]
                 for msg in st.session_state.conversation:
                     openai_messages.append({
                         "role": msg["role"],
                         "content": msg["content"]
+                    })
+                
+                # Add the generated question as context (not visible to user)
+                if next_question and next_question != "すべての情報が揃いました。":
+                    openai_messages.append({
+                        "role": "system",
+                        "content": f"Focus on this aspect: {next_question}"
                     })
                 
                 # Get AI response
@@ -173,8 +264,20 @@ if not st.session_state.conversation_complete:
                 # Check if charter is complete
                 charter_data = extract_charter_json(ai_response)
                 if charter_data:
-                    st.session_state.charter_data = charter_data
+                    st.session_state.draft_charter = charter_data
                     st.session_state.conversation_complete = True
+                else:
+                    # Update draft charter incrementally (simplified)
+                    # In a real implementation, you'd parse the user input more carefully
+                    pass
+                
+                # Save draft after each turn
+                save_draft(
+                    st.session_state.draft_id,
+                    st.session_state.draft_charter,
+                    st.session_state.conversation,
+                    st.session_state.domain_info
+                )
                 
                 st.rerun()
         
@@ -182,11 +285,11 @@ if not st.session_state.conversation_complete:
             st.error(f"❌ AI応答エラー: {str(e)}")
 
 # Show charter completion and save options
-if st.session_state.conversation_complete and st.session_state.charter_data:
+if st.session_state.conversation_complete and st.session_state.draft_charter:
     st.markdown("---")
     st.success("🎉 チャーター作成完了！")
     
-    charter_data = st.session_state.charter_data
+    charter_data = st.session_state.draft_charter
     
     # Show preview
     with st.expander("📋 チャータープレビュー", expanded=True):
@@ -209,14 +312,6 @@ if st.session_state.conversation_complete and st.session_state.charter_data:
                     st.write(f"- {name} ({role})")
                 else:
                     st.write(f"- {stakeholder}")
-        
-        constraints = charter_data.get('constraints', {})
-        if constraints:
-            st.write("**制約条件:**")
-            if constraints.get('budget'):
-                st.write(f"- 予算: {constraints['budget']}")
-            if constraints.get('deadline'):
-                st.write(f"- 期限: {constraints['deadline']}")
     
     # Save section
     col1, col2 = st.columns([2, 1])
@@ -229,19 +324,26 @@ if st.session_state.conversation_complete and st.session_state.charter_data:
         )
     
     with col2:
-        if st.button("💾 チャーター保存", type="primary", use_container_width=True):
-            save_charter(charter_data, charter_filename, st.session_state.conversation)
+        if st.button("💾 保存して次へ", type="primary", use_container_width=True):
+            draft_data = load_draft(st.session_state.draft_id)
+            if finalize_charter(draft_data, charter_filename):
+                st.success(f"✅ チャーターが正常に保存されました！")
+                st.info("次のステップに進むことができます: ✏️ チャーター確認")
+                st.balloons()
 
-# Reset button
+# Action buttons
 st.markdown("---")
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    if st.button("🔄 会話を最初からやり直し", help="会話をクリアして新しいチャーターを開始"):
+    if st.button("🗑️ 破棄", help="現在のドラフトを削除して最初からやり直し"):
+        if st.session_state.draft_id:
+            delete_draft(st.session_state.draft_id)
+        
+        # Reset session state
         keys_to_reset = [
-            "conversation",
-            "charter_data",
-            "conversation_complete"
+            "draft_id", "conversation", "draft_charter", 
+            "domain_info", "conversation_complete", "turn_count"
         ]
         
         for key in keys_to_reset:
@@ -251,16 +353,23 @@ with col1:
 
 with col2:
     if st.session_state.conversation and not st.session_state.conversation_complete:
-        if st.button("💾 会話を保存", help="現在の会話ログを保存"):
-            filename = f"conversation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.yaml"
-            conversation_file = save_conversation(st.session_state.conversation, filename)
-            if conversation_file:
-                st.success(f"会話ログを保存しました: {conversation_file}")
+        if st.button("💾 ドラフト保存", help="現在の状態を保存"):
+            draft_file = save_draft(
+                st.session_state.draft_id,
+                st.session_state.draft_charter,
+                st.session_state.conversation,
+                st.session_state.domain_info
+            )
+            if draft_file:
+                st.success(f"ドラフトを保存しました")
 
 # Progress indicator
 if st.session_state.conversation and not st.session_state.conversation_complete:
-    # Estimate progress based on conversation length and typical charter requirements
-    conversation_length = len([msg for msg in st.session_state.conversation if msg["role"] == "user"])
-    estimated_progress = min(conversation_length / 8, 0.9)  # Assume ~8 exchanges needed
-    
-    st.progress(estimated_progress, text=f"進捗推定: {int(estimated_progress * 100)}% (対話回数: {conversation_length})")
+    # Estimate progress based on conversation length
+    estimated_progress = min(st.session_state.turn_count / 10, 0.9)  # Assume ~10 exchanges needed
+    st.progress(estimated_progress, text=f"進捗推定: {int(estimated_progress * 100)}% (ターン: {st.session_state.turn_count})")
+
+# Show background info if available
+if st.session_state.domain_info:
+    with st.expander("🔍 プロジェクト背景情報", expanded=False):
+        st.markdown(st.session_state.domain_info)
