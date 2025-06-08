@@ -18,7 +18,7 @@ def check_openai_key() -> bool:
     return True
 
 
-def ask_gpt(messages: List[Dict[str, str]], model: str = "gpt-3.5-turbo") -> str:
+def ask_gpt(messages: List[Dict[str, str]], model: str = "gpt-4.1") -> str:
     """
     Send messages to OpenAI ChatCompletion and return response
     
