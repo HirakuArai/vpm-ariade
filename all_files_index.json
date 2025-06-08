@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-08T00:47:53Z",
+  "generated_at": "2025-06-08T01:07:28Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -32,6 +32,10 @@
     {
       "path": "app.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/app.py"
+    },
+    {
+      "path": "app_chat.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/app_chat.py"
     },
     {
       "path": "app_debug.py",
@@ -486,6 +490,10 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/frontmatter_scanner.py"
     },
     {
+      "path": "scripts/gen_charter.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/gen_charter.py"
+    },
+    {
       "path": "scripts/gen_master_snapshot.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/scripts/gen_master_snapshot.py"
     },
@@ -560,6 +568,10 @@
     {
       "path": "snapshots/snapshot_manifest.json",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/snapshots/snapshot_manifest.json"
+    },
+    {
+      "path": "streamlit_v2.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/streamlit_v2.py"
     },
     {
       "path": "test_doc_engine.py",
