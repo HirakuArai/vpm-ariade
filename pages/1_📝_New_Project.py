@@ -6,7 +6,7 @@ import streamlit as st
 
 # Set page config first, before any other Streamlit commands
 st.set_page_config(
-    page_title="Kai VPM v2 - New Project",
+    page_title="Kai VPM v2 - 新規プロジェクト",
     page_icon="📝",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -26,8 +26,8 @@ from libs.ui_layout import (
 )
 
 # Main page content
-st.title("📝 New Project Charter")
-st.markdown("Create a new project charter through guided questions")
+st.title("📝 新規プロジェクトチャーター")
+st.markdown("ガイド付きの質問を通じて新しいプロジェクトチャーターを作成します")
 
 # Initialize chat state for this page
 if "charter_chat_messages" not in st.session_state:
@@ -42,12 +42,12 @@ if "charter_complete" not in st.session_state:
 # Load questions
 questions = get_charter_questions()
 if not questions:
-    st.error("❌ Failed to load charter questions")
+    st.error("❌ チャーター質問の読み込みに失敗しました")
     st.stop()
 
 # Show progress
 progress = st.session_state.current_question_index / len(questions)
-st.progress(progress, text=f"Progress: {st.session_state.current_question_index}/{len(questions)} questions")
+st.progress(progress, text=f"進捗: {st.session_state.current_question_index}/{len(questions)} 質問")
 
 
 def process_answer(question: dict, user_input: str):
@@ -188,16 +188,16 @@ def save_charter(charter_data: dict, filename: str):
             st.session_state.selected_charter_file = str(charter_path)
             st.session_state.charter_created = True
             
-            st.success(f"✅ Charter saved successfully: {charter_path}")
-            st.info("You can now proceed to the next step: ✏️ Preview Charter")
+            st.success(f"✅ チャーターが正常に保存されました: {charter_path}")
+            st.info("次のステップに進むことができます: ✏️ チャーター確認")
             
             # Auto-navigate to next page after a short delay
             st.balloons()
         else:
-            st.error("❌ Failed to save charter")
+            st.error("❌ チャーターの保存に失敗しました")
     
     except Exception as e:
-        st.error(f"❌ Error saving charter: {str(e)}")
+        st.error(f"❌ チャーター保存エラー: {str(e)}")
 
 
 # Chat interface for charter generation
@@ -220,14 +220,14 @@ if not st.session_state.charter_complete:
             # Add question to chat
             st.session_state.charter_chat_messages.append({
                 "role": "assistant",
-                "content": f"**{question['prompt']}**\n\n*Question {current_index + 1} of {len(questions)}*"
+                "content": f"**{question['prompt']}**\n\n*質問 {current_index + 1} / {len(questions)}*"
             })
             st.rerun()
     
     # User input
     if current_index < len(questions):
         question = questions[current_index]
-        user_input = st.chat_input(f"回答を入力してください... (Question {current_index + 1}/{len(questions)})")
+        user_input = st.chat_input(f"回答を入力してください... (質問 {current_index + 1}/{len(questions)})")
         
         if user_input:
             # Add user response to chat
@@ -254,7 +254,7 @@ if not st.session_state.charter_complete:
             
             st.rerun()
     else:
-        st.info("All questions completed! Please save your charter below.")
+        st.info("すべての質問が完了しました！下でチャーターを保存してください。")
 
 else:
     # Show charter summary and save option
@@ -264,17 +264,17 @@ else:
     charter_data = build_charter_data()
     
     # Show preview
-    with st.expander("📋 Charter Preview", expanded=True):
-        st.write("**Project Name:**", charter_data.get('name', 'N/A'))
-        st.write("**Purpose:**", charter_data.get('purpose', 'N/A'))
+    with st.expander("📋 チャータープレビュー", expanded=True):
+        st.write("**プロジェクト名:**", charter_data.get('name', 'N/A'))
+        st.write("**目的:**", charter_data.get('purpose', 'N/A'))
         
         if charter_data.get('outcomes'):
-            st.write("**Outcomes:**")
+            st.write("**成果物:**")
             for outcome in charter_data['outcomes']:
                 st.write(f"- {outcome}")
         
         if charter_data.get('stakeholders'):
-            st.write("**Stakeholders:**")
+            st.write("**ステークホルダー:**")
             for stakeholder in charter_data['stakeholders']:
                 name = stakeholder.get('name', 'Unknown')
                 role = stakeholder.get('role', 'Unknown') 
@@ -285,17 +285,17 @@ else:
     
     with col1:
         charter_filename = st.text_input(
-            "Charter filename:",
+            "チャーターファイル名:",
             value=generate_charter_filename(),
-            help="Enter filename for the charter (will be saved in data/charters/)"
+            help="チャーターのファイル名を入力してください (data/charters/に保存されます)"
         )
     
     with col2:
-        if st.button("💾 Save Charter", type="primary", use_container_width=True):
+        if st.button("💾 チャーター保存", type="primary", use_container_width=True):
             save_charter(charter_data, charter_filename)
     
     # Reset button
-    if st.button("🔄 Start Over", help="Clear all answers and start new charter"):
+    if st.button("🔄 最初からやり直し", help="すべての回答をクリアして新しいチャーターを開始"):
         keys_to_reset = [
             "charter_chat_messages",
             "charter_answers", 

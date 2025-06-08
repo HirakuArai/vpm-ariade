@@ -6,7 +6,7 @@ import streamlit as st
 
 # Set page config first, before any other Streamlit commands
 st.set_page_config(
-    page_title="Kai VPM v2 - Analysis & WBS",
+    page_title="Kai VPM v2 - 分析とWBS",
     page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -29,56 +29,56 @@ from libs.ui_layout import (
 )
 
 # Main page content
-st.title("🧠 Analysis & Work Breakdown Structure")
-st.markdown("AI-powered analysis and detailed work breakdown structure generation")
+st.title("🧠 分析と作業分解構造")
+st.markdown("AI による分析と詳細な作業分解構造の生成")
 
 # Check prerequisites
 charter_file = st.session_state.get("selected_charter_file")
 
 if not charter_file:
-    st.info("👈 Please create and review a charter first")
+    st.info("👈 まずチャーターを作成・確認してください")
     st.stop()
 
 charter_path = Path(charter_file)
 
 # Show charter file info
-st.info(f"📄 **Analyzing Charter:** {charter_path.name}")
+st.info(f"📄 **分析対象チャーター:** {charter_path.name}")
 
 if not charter_path.exists():
-    st.error(f"❌ Charter file not found: {charter_file}")
+    st.error(f"❌ チャーターファイルが見つかりません: {charter_file}")
     st.stop()
 
 # Analysis buttons
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    if st.button("🧠 Run Persona Analysis", type="primary", use_container_width=True):
+    if st.button("🧠 ペルソナ分析実行", type="primary", use_container_width=True):
         try:
-            with st.spinner("🧠 Running persona analysis..."):
+            with st.spinner("🧠 ペルソナ分析実行中..."):
                 persona_result = analyze_charter(str(charter_path))
                 st.session_state.persona_result = persona_result
                 st.session_state.analysis_complete = True
-                st.success("✅ Persona analysis completed!")
+                st.success("✅ ペルソナ分析が完了しました！")
                 st.rerun()
         except Exception as e:
-            st.error(f"❌ Persona analysis failed: {str(e)}")
-            with st.expander("🔍 Debug Details"):
+            st.error(f"❌ ペルソナ分析に失敗しました: {str(e)}")
+            with st.expander("🔍 デバッグ詳細"):
                 import traceback
                 st.code(traceback.format_exc())
 
 with col2:
     if (st.session_state.get("persona_result") and 
-        st.button("📋 Generate WBS", use_container_width=True)):
+        st.button("📋 WBS生成", use_container_width=True)):
         try:
-            with st.spinner("📋 Generating Work Breakdown Structure..."):
+            with st.spinner("📋 作業分解構造生成中..."):
                 persona_result = st.session_state.persona_result
                 wbs_result = generate_wbs(persona_result)
                 st.session_state.wbs_result = wbs_result
-                st.success("✅ WBS generation completed!")
+                st.success("✅ WBS生成が完了しました！")
                 st.rerun()
         except Exception as e:
-            st.error(f"❌ WBS generation failed: {str(e)}")
-            with st.expander("🔍 Debug Details"):
+            st.error(f"❌ WBS生成に失敗しました: {str(e)}")
+            with st.expander("🔍 デバッグ詳細"):
                 import traceback
                 st.code(traceback.format_exc())
 
@@ -86,16 +86,16 @@ with col2:
 if st.session_state.get("persona_result"):
     persona_result = st.session_state.persona_result
     
-    with st.expander("🧠 Persona Analysis Results", expanded=True):
+    with st.expander("🧠 ペルソナ分析結果", expanded=True):
         # Project overview
-        st.subheader(f"Project: {persona_result.get('project_name', 'Unknown')}")
+        st.subheader(f"プロジェクト: {persona_result.get('project_name', '不明')}")
         
         # Format results for display
         formatted = format_persona_results(persona_result)
         
         # High priority goals
         if formatted and formatted['goals_df'] is not None:
-            st.write("**🎯 High Priority Goals:**")
+            st.write("**🎯 高優先度目標:**")
             st.dataframe(
                 formatted['goals_df'],
                 use_container_width=True,
@@ -104,7 +104,7 @@ if st.session_state.get("persona_result"):
         
         # Risks
         if formatted and formatted['risks_df'] is not None:
-            st.write("**⚠️ Potential Risks:**")
+            st.write("**⚠️ 潜在的リスク:**")
             
             # Make risks editable
             edited_risks_df = st.data_editor(
@@ -113,13 +113,13 @@ if st.session_state.get("persona_result"):
                 hide_index=True,
                 num_rows="dynamic",
                 column_config={
-                    "risk": st.column_config.TextColumn("Risk", width="medium"),
+                    "risk": st.column_config.TextColumn("リスク", width="medium"),
                     "impact": st.column_config.SelectboxColumn(
-                        "Impact", 
+                        "影響度", 
                         options=["低", "中", "高"],
                         width="small"
                     ),
-                    "suggested_mitigation": st.column_config.TextColumn("Mitigation", width="large")
+                    "suggested_mitigation": st.column_config.TextColumn("対策", width="large")
                 },
                 key="risks_editor"
             )
@@ -130,7 +130,7 @@ if st.session_state.get("persona_result"):
         
         # Milestones
         if formatted and formatted['milestones_df'] is not None:
-            st.write("**📅 Recommended Milestones:**")
+            st.write("**📅 推奨マイルストーン:**")
             
             # Make milestones editable
             edited_milestones_df = st.data_editor(
@@ -139,8 +139,8 @@ if st.session_state.get("persona_result"):
                 hide_index=True,
                 num_rows="dynamic",
                 column_config={
-                    "Due Date": st.column_config.DateColumn("Due Date", width="small"),
-                    "Milestone": st.column_config.TextColumn("Milestone", width="large")
+                    "Due Date": st.column_config.DateColumn("期限", width="small"),
+                    "Milestone": st.column_config.TextColumn("マイルストーン", width="large")
                 },
                 key="milestones_editor"
             )
@@ -157,30 +157,30 @@ if st.session_state.get("persona_result"):
                     
                     milestones_data.append({
                         "due": due_str,
-                        "title": row['Milestone']
+                        "title": row['マイルストーン']
                     })
                 
                 st.session_state.persona_result["recommended_milestones"] = milestones_data
         
         # Persona comment
         if formatted and formatted['comment']:
-            st.write("**💭 AI Persona Comment:**")
+            st.write("**💭 AIペルソナコメント:**")
             st.info(formatted['comment'])
 
 if st.session_state.get("wbs_result"):
     wbs_result = st.session_state.wbs_result
     
-    with st.expander("📋 Work Breakdown Structure (WBS)", expanded=True):
+    with st.expander("📋 作業分解構造 (WBS)", expanded=True):
         if not wbs_result:
-            st.warning("No WBS data available")
+            st.warning("WBSデータがありません")
         else:
             # Summary statistics
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.metric("Total Tasks", len(wbs_result))
+                st.metric("総タスク数", len(wbs_result))
             with col2:
                 tasks_with_deps = sum(1 for task in wbs_result if task.get('depends_on'))
-                st.metric("Tasks with Dependencies", tasks_with_deps)
+                st.metric("依存関係のあるタスク", tasks_with_deps)
             with col3:
                 # Calculate date range
                 dates = []
@@ -193,13 +193,13 @@ if st.session_state.get("wbs_result"):
                 
                 if dates:
                     duration_days = (max(dates) - min(dates)).days
-                    st.metric("Project Duration (days)", duration_days)
+                    st.metric("プロジェクト期間（日数）", duration_days)
             
             # Format WBS for editing
             wbs_df = format_wbs_for_editor(wbs_result)
             
             if not wbs_df.empty:
-                st.write("**📝 Editable Task List:**")
+                st.write("**📝 編集可能タスクリスト:**")
                 
                 # Make WBS editable
                 edited_wbs_df = st.data_editor(
@@ -209,19 +209,19 @@ if st.session_state.get("wbs_result"):
                     num_rows="dynamic",
                     column_config={
                         'ID': st.column_config.NumberColumn("ID", width="small", disabled=True),
-                        'Task Name': st.column_config.TextColumn("Task Name", width="medium"),
-                        'Description': st.column_config.TextColumn("Description", width="large"),
-                        'Due Date': st.column_config.DateColumn("Due Date", width="small"),
-                        'Dependencies': st.column_config.TextColumn("Dependencies", width="medium"),
+                        'Task Name': st.column_config.TextColumn("タスク名", width="medium"),
+                        'Description': st.column_config.TextColumn("説明", width="large"),
+                        'Due Date': st.column_config.DateColumn("期限", width="small"),
+                        'Dependencies': st.column_config.TextColumn("依存関係", width="medium"),
                         'Status': st.column_config.SelectboxColumn(
-                            "Status",
-                            options=["Pending", "In Progress", "Completed", "Blocked"],
+                            "ステータス",
+                            options=["待機中", "進行中", "完了", "ブロック"],
                             width="small"
                         ),
-                        'Assigned To': st.column_config.TextColumn("Assigned To", width="small"),
+                        'Assigned To': st.column_config.TextColumn("担当者", width="small"),
                         'Priority': st.column_config.SelectboxColumn(
-                            "Priority",
-                            options=["Low", "Medium", "High", "Critical"],
+                            "優先度",
+                            options=["低", "中", "高", "緊急"],
                             width="small"
                         )
                     },
@@ -233,7 +233,7 @@ if st.session_state.get("wbs_result"):
                 
                 # Show task timeline visualization
                 if len(wbs_result) > 0:
-                    st.write("**📊 Task Timeline:**")
+                    st.write("**📊 タスクタイムライン:**")
                     timeline_data = []
                     for _, row in edited_wbs_df.iterrows():
                         try:
@@ -265,13 +265,13 @@ if st.session_state.get("wbs_result"):
 
 # Save results section
 if st.session_state.get("persona_result") or st.session_state.get("wbs_result"):
-    st.header("💾 Save Analysis Results")
+    st.header("💾 分析結果を保存")
     
     col1, col2 = st.columns([2, 1])
     
     with col1:
         # Preview what will be saved
-        with st.expander("📄 Preview JSON Output"):
+        with st.expander("📄 JSON出力プレビュー"):
             save_data = {
                 "charter_file": str(charter_file),
                 "analysis_timestamp": datetime.now().isoformat(),
@@ -286,7 +286,7 @@ if st.session_state.get("persona_result") or st.session_state.get("wbs_result"):
             st.json(save_data, expanded=False)
     
     with col2:
-        if st.button("💾 Save Results", type="primary", use_container_width=True):
+        if st.button("💾 結果を保存", type="primary", use_container_width=True):
             try:
                 persona_result = st.session_state.get("persona_result")
                 wbs_result = st.session_state.get("wbs_result")
@@ -300,19 +300,19 @@ if st.session_state.get("persona_result") or st.session_state.get("wbs_result"):
                 )
                 
                 if output_path:
-                    st.success(f"✅ Results saved successfully!")
-                    st.info(f"📁 **File:** {output_path}")
+                    st.success(f"✅ 結果が正常に保存されました！")
+                    st.info(f"📁 **ファイル:** {output_path}")
                     
                     # Show file info
                     file_size = Path(output_path).stat().st_size
-                    st.caption(f"File size: {file_size:,} bytes")
+                    st.caption(f"ファイルサイズ: {file_size:,} バイト")
                 else:
-                    st.error("❌ Failed to save results")
+                    st.error("❌ 結果の保存に失敗しました")
             except Exception as e:
-                st.error(f"❌ Error saving results: {str(e)}")
+                st.error(f"❌ 結果保存エラー: {str(e)}")
         
         # Reset analysis button
-        if st.button("🔄 Reset Analysis", use_container_width=True):
+        if st.button("🔄 分析をリセット", use_container_width=True):
             keys_to_reset = [
                 "persona_result",
                 "wbs_result", 
@@ -324,5 +324,5 @@ if st.session_state.get("persona_result") or st.session_state.get("wbs_result"):
                 if key in st.session_state:
                     del st.session_state[key]
             
-            st.success("🔄 Analysis state reset! You can run new analysis.")
+            st.success("🔄 分析状態がリセットされました！新しい分析を実行できます。")
             st.rerun()

@@ -30,21 +30,21 @@ def setup_sidebar():
     """Setup common sidebar navigation"""
     with st.sidebar:
         st.title("🌟 Kai VPM v2")
-        st.markdown("**AI Project Manager**")
+        st.markdown("**AIプロジェクトマネージャー**")
         st.markdown("---")
         
         # Navigation menu
         pages = {
-            "1️⃣ New Project": "1_new_project",
-            "2️⃣ Preview Charter": "2_preview_charter", 
-            "3️⃣ Analysis & WBS": "3_persona_and_wbs"
+            "1️⃣ 新規プロジェクト": "1_new_project",
+            "2️⃣ チャーター確認": "2_preview_charter", 
+            "3️⃣ 分析とWBS": "3_persona_and_wbs"
         }
         
         selected_page = st.selectbox(
-            "Navigate to:",
+            "ページ選択:",
             list(pages.keys()),
             index=_get_current_page_index(pages),
-            help="Select a page to navigate to"
+            help="移動したいページを選択してください"
         )
         
         # Update session state
@@ -77,7 +77,7 @@ def display_current_charter_info():
     charter_file = st.session_state.get("selected_charter_file")
     
     if charter_file:
-        st.write("**Current Charter:**")
+        st.write("**現在のチャーター:**")
         charter_path = Path(charter_file)
         st.write(f"📄 {charter_path.name}")
         
@@ -89,24 +89,24 @@ def display_current_charter_info():
             project_name = charter_data.get('name', 'Unknown')
             deadline = charter_data.get('constraints', {}).get('deadline', 'Not set')
             
-            st.write(f"**Project:** {project_name}")
-            st.write(f"**Deadline:** {deadline}")
+            st.write(f"**プロジェクト:** {project_name}")
+            st.write(f"**期限:** {deadline}")
             
         except Exception:
-            st.write("⚠️ Error reading charter")
+            st.write("⚠️ チャーター読み込みエラー")
     else:
-        st.write("**No charter selected**")
-        st.write("Start by creating a new project")
+        st.write("**チャーターが選択されていません**")
+        st.write("新しいプロジェクトを作成して始めてください")
 
 
 def display_progress_indicator():
     """Display progress through the workflow"""
-    st.write("**Progress:**")
+    st.write("**進捗:**")
     
     steps = [
-        ("Charter Created", st.session_state.get("charter_created", False)),
-        ("Charter Reviewed", st.session_state.get("charter_reviewed", False)),
-        ("Analysis Complete", st.session_state.get("analysis_complete", False))
+        ("チャーター作成", st.session_state.get("charter_created", False)),
+        ("チャーター確認", st.session_state.get("charter_reviewed", False)),
+        ("分析完了", st.session_state.get("analysis_complete", False))
     ]
     
     for step_name, completed in steps:
@@ -124,18 +124,18 @@ def navigation_buttons(current_page: str):
     
     with col1:
         if current_index > 0:
-            if st.button("⬅️ Previous", use_container_width=True):
+            if st.button("⬅️ 前のページ", use_container_width=True):
                 st.session_state["current_page"] = page_order[current_index - 1]
                 st.rerun()
     
     with col2:
-        if st.button("🏠 Home", use_container_width=True):
+        if st.button("🏠 ホーム", use_container_width=True):
             st.session_state["current_page"] = "1_new_project"
             st.rerun()
     
     with col3:
         if current_index < len(page_order) - 1:
-            if st.button("Next ➡️", use_container_width=True):
+            if st.button("次のページ ➡️", use_container_width=True):
                 st.session_state["current_page"] = page_order[current_index + 1]
                 st.rerun()
 
@@ -146,15 +146,15 @@ def error_boundary(func):
         try:
             return func(*args, **kwargs)
         except Exception as e:
-            st.error("An unexpected error occurred:")
+            st.error("予期しないエラーが発生しました:")
             st.code(traceback.format_exc())
             
-            with st.expander("🔍 Debug Information"):
-                st.write(f"**Error Type:** {type(e).__name__}")
-                st.write(f"**Error Message:** {str(e)}")
-                st.write(f"**Python Version:** {sys.version}")
-                st.write(f"**Working Directory:** {Path.cwd()}")
-                st.write(f"**Session State Keys:** {list(st.session_state.keys())}")
+            with st.expander("🔍 デバッグ情報"):
+                st.write(f"**エラータイプ:** {type(e).__name__}")
+                st.write(f"**エラーメッセージ:** {str(e)}")
+                st.write(f"**Pythonバージョン:** {sys.version}")
+                st.write(f"**作業ディレクトリ:** {Path.cwd()}")
+                st.write(f"**セッション状態キー:** {list(st.session_state.keys())}")
     
     return wrapper
 
@@ -165,7 +165,7 @@ def load_charter_data(charter_file: str) -> dict:
         with open(charter_file, 'r', encoding='utf-8') as f:
             return yaml.safe_load(f) or {}
     except Exception as e:
-        st.error(f"Error loading charter: {str(e)}")
+        st.error(f"チャーター読み込みエラー: {str(e)}")
         return {}
 
 
@@ -176,37 +176,37 @@ def save_charter_data(charter_file: str, charter_data: dict) -> bool:
             yaml.dump(charter_data, f, default_flow_style=False, allow_unicode=True)
         return True
     except Exception as e:
-        st.error(f"Error saving charter: {str(e)}")
+        st.error(f"チャーター保存エラー: {str(e)}")
         return False
 
 
 def display_charter_overview(charter_data: dict):
     """Display charter overview in a nice format"""
     if not charter_data:
-        st.warning("No charter data available")
+        st.warning("チャーターデータがありません")
         return
     
-    with st.expander("📋 Charter Overview", expanded=True):
+    with st.expander("📋 チャーター概要", expanded=True):
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            st.write("**Project Name:**", charter_data.get('name', 'N/A'))
-            st.write("**Purpose:**", charter_data.get('purpose', 'N/A'))
+            st.write("**プロジェクト名:**", charter_data.get('name', 'N/A'))
+            st.write("**目的:**", charter_data.get('purpose', 'N/A'))
             
             outcomes = charter_data.get('outcomes', [])
             if outcomes:
-                st.write("**Outcomes:**")
+                st.write("**成果物:**")
                 for outcome in outcomes:
                     st.write(f"- {outcome}")
         
         with col2:
             constraints = charter_data.get('constraints', {})
-            st.write("**Budget:**", constraints.get('budget', 'N/A'))
-            st.write("**Deadline:**", constraints.get('deadline', 'N/A'))
+            st.write("**予算:**", constraints.get('budget', 'N/A'))
+            st.write("**期限:**", constraints.get('deadline', 'N/A'))
             
             stakeholders = charter_data.get('stakeholders', [])
             if stakeholders:
-                st.write("**Stakeholders:**")
+                st.write("**ステークホルダー:**")
                 for stakeholder in stakeholders:
                     if isinstance(stakeholder, dict):
                         name = stakeholder.get('name', 'Unknown')
@@ -225,7 +225,7 @@ def format_persona_results(persona_result: dict):
     goals_df = None
     goals = persona_result.get('high_priority_goals', [])
     if goals:
-        goals_df = pd.DataFrame([{"Priority Goal": goal} for goal in goals])
+        goals_df = pd.DataFrame([{"優先目標": goal} for goal in goals])
     
     # Risks
     risks_df = None
@@ -240,7 +240,7 @@ def format_persona_results(persona_result: dict):
         milestones_df = pd.DataFrame(milestones)
         if not milestones_df.empty and 'title' in milestones_df.columns and 'due' in milestones_df.columns:
             milestones_df = milestones_df[['due', 'title']]
-            milestones_df.columns = ['Due Date', 'Milestone']
+            milestones_df.columns = ['期限', 'マイルストーン']
     
     return {
         'goals_df': goals_df,
@@ -264,9 +264,9 @@ def format_wbs_for_editor(wbs_result: list) -> pd.DataFrame:
             'Description': task.get('description', ''),
             'Due Date': task.get('suggested_due_date', ''),
             'Dependencies': ', '.join(task.get('depends_on', [])),
-            'Status': 'Pending',  # Default status for new tasks
+            'Status': '待機中',  # Default status for new tasks
             'Assigned To': '',     # Empty for user to fill
-            'Priority': 'Medium'   # Default priority
+            'Priority': '中'   # Default priority
         })
     
     return pd.DataFrame(edit_data)
@@ -298,7 +298,7 @@ def save_results_to_json(charter_file: str, persona_result: dict, wbs_result: li
             json.dump(save_data, f, ensure_ascii=False, indent=2)
         return str(output_path)
     except Exception as e:
-        st.error(f"Failed to save results: {str(e)}")
+        st.error(f"結果の保存に失敗しました: {str(e)}")
         return None
 
 
@@ -307,8 +307,8 @@ def check_prerequisites(required_keys: list) -> bool:
     missing_keys = [key for key in required_keys if key not in st.session_state or not st.session_state[key]]
     
     if missing_keys:
-        st.error(f"Missing prerequisites: {', '.join(missing_keys)}")
-        st.info("Please complete the previous steps first.")
+        st.error(f"必要な前提条件が不足: {', '.join(missing_keys)}")
+        st.info("まず前のステップを完了してください。")
         return False
     
     return True
@@ -346,7 +346,7 @@ def reset_session_state():
         if key in st.session_state:
             del st.session_state[key]
     
-    st.success("Session reset! You can start a new project.")
+    st.success("セッションがリセットされました！新しいプロジェクトを始められます。")
     st.rerun()
 
 
@@ -359,7 +359,7 @@ def get_charter_questions() -> list:
             data = yaml.safe_load(f)
         return data.get('questions', [])
     except Exception as e:
-        st.error(f"Failed to load charter questions: {str(e)}")
+        st.error(f"チャーター質問の読み込みに失敗しました: {str(e)}")
         return []
 
 
