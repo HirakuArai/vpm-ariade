@@ -21,8 +21,9 @@ class TestOpenAIHelper:
         """Test that system prompt contains <charter_complete/> instruction"""
         prompt = get_system_prompt()
         assert "<charter_complete/>" in prompt
-        assert "JSON block" in prompt
-        assert "Ask ONE question at a time in Japanese" in prompt
+        assert "exactly ONE" in prompt
+        assert "Japanese" in prompt
+        assert "algorithm" in prompt
     
     @patch('libs.openai_helper.os.getenv')
     def test_check_openai_key_with_key(self, mock_getenv):
