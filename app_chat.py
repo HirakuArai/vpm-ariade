@@ -23,6 +23,7 @@ import streamlit as st
 from core.git_ops import commit_and_push_log  # ← NEW: auto‑push helper
 from core.minutes_utils import generate_daily_minutes, safe_push_minutes
 from utils.render_minutes import render_md
+from core.project_service import create_project, set_status
 
 # ────────────────────────────────────────────────────────────────────────────
 # Paths & basic setup
@@ -148,6 +149,14 @@ st.title("Kai – Virtual Project Manager Chat")
 if "history" not in st.session_state:
     st.session_state["history"] = []
 
+# Project creation flow state
+if "awaiting_project_overview" not in st.session_state:
+    st.session_state["awaiting_project_overview"] = False
+if "awaiting_activate_confirm" not in st.session_state:
+    st.session_state["awaiting_activate_confirm"] = False
+if "created_project_id" not in st.session_state:
+    st.session_state["created_project_id"] = None
+
 # 履歴表示（セッション全件を常時下スクロール表示）
 for msg in st.session_state["history"]:
     st.chat_message("user" if msg["role"] == "user" else "assistant").markdown(msg["content"])
@@ -159,21 +168,59 @@ if user_input:
     # 1) ログへ保存
     _append_log("user", user_input)
 
-    # 2) GPT へ問い合わせ
-    try:
-        system_prompt = get_system_prompt()
-        messages = [{"role": "system", "content": system_prompt}] + \
-                  st.session_state["history"] + \
-                  [{"role": "user", "content": user_input}]
-        response = openai.chat.completions.create(
-            model="gpt-4.1",
-            messages=messages,
-        )
-        assistant_reply = response.choices[0].message.content.strip()
-    except Exception as e:
-        st.error(f"❌ OpenAI 呼び出し失敗: {e}")
-        traceback.print_exc()
-        assistant_reply = "[ERROR]"
+    # Handle project creation flow
+    assistant_reply = None
+    
+    # Check if we're waiting for project overview
+    if st.session_state["awaiting_project_overview"]:
+        try:
+            # Create project with auto-generated ID
+            project = create_project(None, user_input, "human_user")
+            st.session_state["created_project_id"] = project.identifier
+            st.session_state["awaiting_project_overview"] = False
+            st.session_state["awaiting_activate_confirm"] = True
+            assistant_reply = f"プロジェクト **{project.identifier}** を DRAFT で作成しました。次は ACTIVE にしますか？"
+        except Exception as e:
+            assistant_reply = f"プロジェクト作成中にエラーが発生しました: {str(e)}"
+            st.session_state["awaiting_project_overview"] = False
+    
+    # Check if we're waiting for activation confirmation
+    elif st.session_state["awaiting_activate_confirm"]:
+        user_lower = user_input.lower().strip()
+        if any(word in user_lower for word in ["はい", "yes", "する", "active", "アクティブ"]):
+            try:
+                set_status(st.session_state["created_project_id"], "ACTIVE")
+                assistant_reply = f"プロジェクト **{st.session_state['created_project_id']}** を ACTIVE に設定しました！"
+            except Exception as e:
+                assistant_reply = f"ステータス更新中にエラーが発生しました: {str(e)}"
+        else:
+            assistant_reply = "プロジェクトは DRAFT のままです。後でステータスを変更できます。"
+        
+        # Reset flow state
+        st.session_state["awaiting_activate_confirm"] = False
+        st.session_state["created_project_id"] = None
+    
+    # Check for project creation trigger
+    elif "プロジェクト作成" in user_input:
+        st.session_state["awaiting_project_overview"] = True
+        assistant_reply = "プロジェクトの概要を一行で教えてください。"
+    
+    # Default GPT handling if no project creation flow
+    if assistant_reply is None:
+        try:
+            system_prompt = get_system_prompt()
+            messages = [{"role": "system", "content": system_prompt}] + \
+                      st.session_state["history"] + \
+                      [{"role": "user", "content": user_input}]
+            response = openai.chat.completions.create(
+                model="gpt-4.1",
+                messages=messages,
+            )
+            assistant_reply = response.choices[0].message.content.strip()
+        except Exception as e:
+            st.error(f"❌ OpenAI 呼び出し失敗: {e}")
+            traceback.print_exc()
+            assistant_reply = "[ERROR]"
 
     # 3) UI 表示
     st.chat_message("user").markdown(user_input)
