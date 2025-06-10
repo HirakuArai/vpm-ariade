@@ -1,0 +1,405 @@
+diff --git a/core/models.py b/core/models.py
+new file mode 100644
+index 0000000..505f84c
+--- /dev/null
++++ b/core/models.py
+@@ -0,0 +1,22 @@
++from __future__ import annotations
++from dataclasses import dataclass, field
++from datetime import datetime
++from uuid import uuid4
++
++SCHEMA_VERSION = "1.0"
++DEFAULT_UNDEF = "__UNDEFINED__"
++
++@dataclass
++class Project:
++    identifier: str
++    overview: str
++    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
++    created_by: str = DEFAULT_UNDEF
++    status: str = "DRAFT"
++    schema_version: str = SCHEMA_VERSION
++    updated_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
++    change_log: list = field(default_factory=list)
++    uuid: str = field(default_factory=lambda: str(uuid4()))
++
++    def to_dict(self) -> dict:
++        return {k: (v if v else DEFAULT_UNDEF) for k, v in self.__dict__.items()}
+\ No newline at end of file
+diff --git a/core/project_diff.py b/core/project_diff.py
+new file mode 100644
+index 0000000..82d1b63
+--- /dev/null
++++ b/core/project_diff.py
+@@ -0,0 +1,80 @@
++"""
++Self-checker diff functionality for project snapshots
++"""
++
++import json
++from typing import Dict, Any, List
++from pathlib import Path
++from core.models import DEFAULT_UNDEF
++
++def compare_snapshots(old_snapshot: Dict[str, Any], new_snapshot: Dict[str, Any]) -> Dict[str, Any]:
++    """
++    Compare two project snapshots and return differences, ignoring __UNDEFINED__ values.
++    
++    Args:
++        old_snapshot: Previous project state
++        new_snapshot: Current project state
++        
++    Returns:
++        Dictionary containing differences found
++    """
++    differences = {}
++    
++    # Get all keys from both snapshots
++    all_keys = set(old_snapshot.keys()) | set(new_snapshot.keys())
++    
++    for key in all_keys:
++        old_val = old_snapshot.get(key)
++        new_val = new_snapshot.get(key)
++        
++        # Skip undefined fields as specified in the prompt
++        if old_val == DEFAULT_UNDEF or new_val == DEFAULT_UNDEF:
++            continue
++        
++        if old_val != new_val:
++            differences[key] = {
++                "old": old_val,
++                "new": new_val
++            }
++    
++    return differences
++
++def check_project_changes(project_id: str, projects_dir: Path = None) -> Dict[str, Any]:
++    """
++    Check for changes in a project by comparing current state with previous snapshot.
++    
++    Args:
++        project_id: Project identifier
++        projects_dir: Directory containing project snapshots
++        
++    Returns:
++        Change report with any differences found
++    """
++    if projects_dir is None:
++        projects_dir = Path("data/projects")
++    
++    snapshot_path = projects_dir / f"{project_id}.json"
++    
++    if not snapshot_path.exists():
++        return {"error": f"Project {project_id} not found"}
++    
++    try:
++        with open(snapshot_path, 'r') as f:
++            current_snapshot = json.load(f)
++        
++        # For now, we just validate the snapshot is readable
++        # In future, this could compare against a previous version
++        return {
++            "project_id": project_id,
++            "status": "valid",
++            "snapshot_valid": True,
++            "has_undefined_fields": any(
++                v == DEFAULT_UNDEF for v in current_snapshot.values()
++            )
++        }
++        
++    except Exception as e:
++        return {
++            "project_id": project_id,
++            "error": f"Failed to read snapshot: {str(e)}"
++        }
+\ No newline at end of file
+diff --git a/core/project_service.py b/core/project_service.py
+new file mode 100644
+index 0000000..a7bc24f
+--- /dev/null
++++ b/core/project_service.py
+@@ -0,0 +1,15 @@
++import json
++from pathlib import Path
++from .models import Project
++
++PROJECTS_DIR = Path("data/projects")
++PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
++
++def create_project(identifier: str, overview: str, created_by: str) -> Project:
++    """Create a new Project instance, save snapshot, and return it (idempotent)."""
++    path = PROJECTS_DIR / f"{identifier}.json"
++    if path.exists():
++        return Project(**json.loads(path.read_text()))
++    project = Project(identifier=identifier, overview=overview, created_by=created_by)
++    path.write_text(json.dumps(project.to_dict(), indent=2))
++    return project
+\ No newline at end of file
+diff --git a/core/self_checker/__init__.py b/core/self_checker/__init__.py
+index e69de29..a46b4fb 100644
+--- a/core/self_checker/__init__.py
++++ b/core/self_checker/__init__.py
+@@ -0,0 +1,10 @@
++"""
++Self-checker module for project snapshots and capability analysis
++"""
++
++from .scan_capabilities import main as scan_capabilities
++
++# Import from the project_diff module
++from ..project_diff import compare_snapshots, check_project_changes
++
++__all__ = ['scan_capabilities', 'compare_snapshots', 'check_project_changes']
+\ No newline at end of file
+diff --git a/pages/01_create_project.py b/pages/01_create_project.py
+new file mode 100644
+index 0000000..dc0e41d
+--- /dev/null
++++ b/pages/01_create_project.py
+@@ -0,0 +1,55 @@
++"""
++01_create_project.py - Simple Project Creation UI
++"""
++
++import streamlit as st
++import sys
++from pathlib import Path
++
++# Add project root to path
++project_root = Path(__file__).parent.parent
++sys.path.insert(0, str(project_root))
++
++from core.project_service import create_project
++
++# Set page config
++st.set_page_config(
++    page_title="Create New Project",
++    page_icon="🆕", 
++    layout="wide"
++)
++
++st.header("🆕 Create New Project")
++
++with st.form("new_project_form"):
++    identifier = st.text_input("Identifier", help="Unique project identifier, e.g. project-alpha")
++    overview = st.text_input("Overview", help="One-line summary of the project")
++    submitted = st.form_submit_button("Create")
++
++if submitted and identifier and overview:
++    try:
++        proj = create_project(identifier, overview, created_by="human_user")
++        st.success(f"Project '{proj.identifier}' created in DRAFT status.")
++        st.json(proj.to_dict(), expanded=False)
++        
++        # Show next steps
++        st.info("Next: Continue the conversation with Kai to refine your project charter.")
++        
++    except Exception as e:
++        st.error(f"Error creating project: {str(e)}")
++elif submitted:
++    st.warning("Please fill in both identifier and overview.")
++
++# Show existing projects
++st.subheader("Existing Projects")
++projects_dir = Path("data/projects")
++if projects_dir.exists():
++    project_files = list(projects_dir.glob("*.json"))
++    if project_files:
++        st.write(f"Found {len(project_files)} project(s):")
++        for project_file in project_files:
++            st.write(f"- {project_file.stem}")
++    else:
++        st.write("No projects found.")
++else:
++    st.write("No projects directory found.")
+\ No newline at end of file
+diff --git a/tests/test_project_creation.py b/tests/test_project_creation.py
+new file mode 100644
+index 0000000..85a6f1c
+--- /dev/null
++++ b/tests/test_project_creation.py
+@@ -0,0 +1,182 @@
++"""
++Test project creation functionality
++"""
++
++import pytest
++import tempfile
++import json
++from pathlib import Path
++import sys
++
++# Add project root to path
++project_root = Path(__file__).parent.parent
++sys.path.insert(0, str(project_root))
++
++from core.project_service import create_project
++from core.models import Project, DEFAULT_UNDEF
++from core.self_checker import compare_snapshots, check_project_changes
++
++
++class TestProjectCreation:
++    """Test project creation functionality"""
++    
++    def setup_method(self):
++        """Setup test environment"""
++        self.test_dir = Path(tempfile.mkdtemp())
++        # Mock the PROJECTS_DIR for testing
++        import core.project_service
++        self.original_projects_dir = core.project_service.PROJECTS_DIR
++        core.project_service.PROJECTS_DIR = self.test_dir
++    
++    def teardown_method(self):
++        """Cleanup test environment"""
++        import shutil
++        import core.project_service
++        core.project_service.PROJECTS_DIR = self.original_projects_dir
++        if self.test_dir.exists():
++            shutil.rmtree(self.test_dir)
++    
++    def test_create_project_basic(self):
++        """Test basic project creation"""
++        identifier = "test-project"
++        overview = "A test project"
++        created_by = "test_user"
++        
++        project = create_project(identifier, overview, created_by)
++        
++        # Verify project object
++        assert project.identifier == identifier
++        assert project.overview == overview
++        assert project.created_by == created_by
++        assert project.status == "DRAFT"
++        assert project.schema_version == "1.0"
++        assert project.uuid is not None
++        assert project.created_at is not None
++        assert project.updated_at is not None
++        assert isinstance(project.change_log, list)
++    
++    def test_create_project_idempotency(self):
++        """Test that creating the same project twice returns the same result"""
++        identifier = "test-project-idem"
++        overview = "A test project for idempotency"
++        created_by = "test_user"
++        
++        # Create project first time
++        project1 = create_project(identifier, overview, created_by)
++        
++        # Create project second time (should load existing)
++        project2 = create_project(identifier, overview, created_by)
++        
++        # Should be identical
++        assert project1.identifier == project2.identifier
++        assert project1.overview == project2.overview
++        assert project1.created_by == project2.created_by
++        assert project1.uuid == project2.uuid
++        assert project1.created_at == project2.created_at
++    
++    def test_project_to_dict(self):
++        """Test project serialization"""
++        project = Project(
++            identifier="test",
++            overview="test overview",
++            created_by="user"
++        )
++        
++        data = project.to_dict()
++        
++        # Verify all fields present
++        assert data["identifier"] == "test"
++        assert data["overview"] == "test overview"
++        assert data["created_by"] == "user"
++        assert data["status"] == "DRAFT"
++        assert data["schema_version"] == "1.0"
++        assert "uuid" in data
++        assert "created_at" in data
++        assert "updated_at" in data
++        assert "change_log" in data
++    
++    def test_project_file_creation(self):
++        """Test that project files are created correctly"""
++        identifier = "test-file-creation"
++        overview = "Test file creation"
++        created_by = "test_user"
++        
++        project = create_project(identifier, overview, created_by)
++        
++        # Verify file exists
++        project_file = self.test_dir / f"{identifier}.json"
++        assert project_file.exists()
++        
++        # Verify file content
++        with open(project_file, 'r') as f:
++            data = json.load(f)
++        
++        assert data["identifier"] == identifier
++        assert data["overview"] == overview
++        assert data["created_by"] == created_by
++        assert data["status"] == "DRAFT"
++    
++    def test_undefined_field_handling(self):
++        """Test handling of undefined fields"""
++        project = Project(identifier="test", overview="test")
++        data = project.to_dict()
++        
++        # created_by should be __UNDEFINED__ if not provided
++        assert data["created_by"] == DEFAULT_UNDEF
++    
++    def test_compare_snapshots_ignore_undefined(self):
++        """Test that snapshot comparison ignores __UNDEFINED__ values"""
++        old_snapshot = {
++            "identifier": "test",
++            "overview": "old overview",
++            "created_by": DEFAULT_UNDEF
++        }
++        
++        new_snapshot = {
++            "identifier": "test", 
++            "overview": "new overview",
++            "created_by": "actual_user"
++        }
++        
++        differences = compare_snapshots(old_snapshot, new_snapshot)
++        
++        # Should only detect overview change, not created_by since old was undefined
++        assert "overview" in differences
++        assert "created_by" not in differences
++        assert differences["overview"]["old"] == "old overview"
++        assert differences["overview"]["new"] == "new overview"
++    
++    def test_check_project_changes(self):
++        """Test project change checking functionality"""
++        identifier = "test-changes"
++        overview = "Test changes"
++        created_by = "test_user"
++        
++        # Create project
++        create_project(identifier, overview, created_by)
++        
++        # Check changes
++        report = check_project_changes(identifier, self.test_dir)
++        
++        assert report["project_id"] == identifier
++        assert report["status"] == "valid"
++        assert report["snapshot_valid"] is True
++    
++    def test_check_nonexistent_project(self):
++        """Test checking changes for nonexistent project"""
++        report = check_project_changes("nonexistent", self.test_dir)
++        
++        assert "error" in report
++        assert "not found" in report["error"]
++    
++    def test_project_with_empty_fields(self):
++        """Test project creation with empty optional fields"""
++        project = Project(
++            identifier="test-empty",
++            overview="test with empty fields"
++        )
++        
++        data = project.to_dict()
++        
++        # Empty fields should become __UNDEFINED__
++        assert data["created_by"] == DEFAULT_UNDEF
+\ No newline at end of file

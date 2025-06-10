@@ -1,0 +1,94 @@
+### Claude Code Rewrite Prompt — Dynamic RAG, Two‑Layer Chat, Draft Lifecycle
+
+**Objective** 
+Implement a two‑step conversation engine that:
+
+1. Automatically asks the *most relevant* next question based on missing charter keys.
+2. Pulls background knowledge for ANY user‑stated topic via a generic RAG helper and injects it into the prompt.
+3. Stores all artefacts as *draft* until the user formally saves → then promotes to *formal* project and persists background for Phase‑2 persona.
+
+---
+
+## 1  Create libs/knowledge\_rag.py
+
+```python
+get_domain_info(query: str, max_tokens:int=300) -> str
+```
+
+* If `data/cache/{hash(query)}.md` exists → return it.
+* Else:
+
+  * Use `duckduckgo_search` (3 results, 250 chars each).
+  * Summarise via `openai.chat.completions.create(model="gpt-3.5-turbo", temperature=0, …)` so the output ≤ `max_tokens`.
+  * Save summary to cache and return.
+* Add `duckduckgo-search>=4.0.2` to `requirements.txt`.
+
+---
+
+## 2  Modify libs/openai\_helper.py
+
+### 2.1  Two‑layer helper
+
+```python
+async def generate_next_question(convo: list[dict], charter: dict) -> str
+```
+
+* Derive `missing_keys`.
+* Build *controller prompt*:
+  "You are a meta‑planner. missing\_keys = … Return ONLY the most important key to ask next as plain text."
+* Call GPT‑4o (temperature 0.2) → `next_key`.
+* Map `next_key` → jp\_question via `KEY_TO_JA` dict.
+* Return question string.
+
+### 2.2  First‑turn background injection
+
+* After first user message (`first_intent`), call `get_domain_info(first_intent)` → `domain_info`.
+* Store `st.session_state["domain_info"] = domain_info`.
+* Append `\n<background>\n{domain_info}` to **system prompt** for all subsequent calls.
+
+---
+
+## 3  Rewrite pages/1\_📝\_New\_Project.py
+
+* Conversation loop per turn:
+
+  1. `if turn==0`: run RAG & store draft.
+  2. *Pass #1* – call `generate_next_question()` (invisible to user).
+  3. *Pass #2* – call `ask_gpt()` with system+background+question → assistant reply to user.
+* Draft handling:
+
+  * On first turn create `draft_id = uuid4()`.
+  * Save interim `data/drafts/draft_{id}.yaml/json` after each user answer.
+  * Buttons: `🗑️ 破棄` deletes draft; `💾 保存して次へ` finalises.
+* On `<charter_complete/>`: 
+
+  * Move draft charter + convo + domain\_info → `data/charters/{project_id}.yaml` & `data/conversations/{project_id}.json`.
+  * Delete draft files.
+
+---
+
+## 4  core/v2/persona\_core.py
+
+* Update `get_persona_prompt(charter_path)` to append `charter['background']` to persona system prompt for Phase‑2 continuity.
+
+---
+
+## 5  Auto‑purge script
+
+* `scripts/purge_drafts.py --ttl 24h` removes stale `data/drafts/*`.
+* Add to CI (optional).
+
+---
+
+## 6  Tests
+
+* `tests/test_rag_cache.py` – cache hit/miss.
+* `tests/test_two_layer_flow.py` – monkeypatch GPT to ensure controller → question → user → charter\_complete.
+* `tests/test_persist_background.py` – persona prompt contains `<background>`.
+
+---
+
+## 7  Deliverables
+
+* Updated / new files saved.
+* PR description auto‑generated including **Changes Table** + **pytest summary**.

@@ -18,4 +18,7 @@ coverage.json
 data/charters/
 data/results/
 data/conversations/
+data/drafts/
+data/cache/
 
+tools/pycg/

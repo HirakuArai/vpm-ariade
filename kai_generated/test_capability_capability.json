@@ -1,0 +1,7 @@
+{
+  "id": "test_capability",
+  "name": "テスト能力",
+  "description": "これはテスト用の能力です。",
+  "requires_confirm": false,
+  "enabled": true
+}
