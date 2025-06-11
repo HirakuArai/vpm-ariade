@@ -17,6 +17,8 @@ from zoneinfo import ZoneInfo
 import yaml, pandas as pd
 import streamlit as st
 
+st.set_page_config(page_title="Chat", page_icon="💬")
+
 # ────────────────────────────────────────────────────────────────────────────
 # Kai modules
 # ────────────────────────────────────────────────────────────────────────────
@@ -143,7 +145,6 @@ def get_system_prompt() -> str:
 # ────────────────────────────────────────────────────────────────────────────
 # Streamlit UI
 # ────────────────────────────────────────────────────────────────────────────
-st.set_page_config(page_title="Kai Chat", page_icon="", layout="centered")
 st.title("Kai – Virtual Project Manager Chat")
 
 if "history" not in st.session_state:
