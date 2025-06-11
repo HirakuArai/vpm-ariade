@@ -17,7 +17,7 @@ from zoneinfo import ZoneInfo
 import yaml, pandas as pd
 import streamlit as st
 
-st.set_page_config(page_title="Chat", page_icon="💬")
+st.set_page_config(page_title="Kai VPM", page_icon="💬", initial_sidebar_state="collapsed")
 
 # ────────────────────────────────────────────────────────────────────────────
 # Kai modules
@@ -25,7 +25,9 @@ st.set_page_config(page_title="Chat", page_icon="💬")
 from core.git_ops import commit_and_push_log  # ← NEW: auto‑push helper
 from core.minutes_utils import generate_daily_minutes, safe_push_minutes
 from utils.render_minutes import render_md
-from core.project_service import create_project, set_status
+from core.project_service import create_project, set_status, add_task, apply_updates
+from core.project_diff import generate_update_candidates, extract_new_data_from_chat, generate_diff_summary, validate_update_candidate
+from core.project_prompt import get_project_prompt, get_available_project_ids, get_project_summary
 
 # ────────────────────────────────────────────────────────────────────────────
 # Paths & basic setup
@@ -101,6 +103,32 @@ def _append_log(role: str, content: str) -> None:
     with log_path.open("w", encoding="utf-8") as fp:
         json.dump(data, fp, ensure_ascii=False, indent=2)
 
+
+def _project_log_path(project_id: str) -> Path:
+    """Return Path for today's project-specific conversation log."""
+    today = datetime.now(_JST).strftime("%Y%m%d")
+    project_conv_dir = Path(f"data/conversations/{project_id}")
+    project_conv_dir.mkdir(parents=True, exist_ok=True)
+    return project_conv_dir / f"{today}.jsonl"
+
+
+def _append_project_log(project_id: str, role: str, content: str) -> None:
+    """Append a single message to today's project-specific JSONL log."""
+    log_path = _project_log_path(project_id)
+    now_iso = datetime.now(_JST).isoformat(timespec="seconds")
+    
+    # Create JSONL entry
+    log_entry = {
+        "project_id": project_id,
+        "role": role,
+        "content": content,
+        "timestamp": now_iso
+    }
+    
+    # Append to JSONL file
+    with log_path.open("a", encoding="utf-8") as fp:
+        fp.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
+
 # ────────────────────────────────────────────────────────────────────────────
 # Small utils
 # ────────────────────────────────────────────────────────────────────────────
@@ -140,12 +168,48 @@ def get_system_prompt() -> str:
     dsl_block = "\n".join([dsl_readme.strip()] + dsl_lines if dsl_readme else dsl_lines)
     proj = _read(DOCS / "project_definition.md")
     arch = _read(DOCS / "architecture_overview.md")
-    return "\n\n".join([rules, dsl_block, proj, arch])
+    
+    # Add project context if available
+    project_context = ""
+    current_project_id = st.session_state.get("current_project_id")
+    if current_project_id:
+        project_context = get_project_prompt(current_project_id)
+    
+    base_prompt = "\n\n".join([rules, dsl_block, proj, arch])
+    
+    if project_context:
+        return f"{base_prompt}\n\n{project_context}"
+    else:
+        return base_prompt
 
 # ────────────────────────────────────────────────────────────────────────────
 # Streamlit UI
 # ────────────────────────────────────────────────────────────────────────────
 st.title("Kai – Virtual Project Manager Chat")
+
+# ────────────────────────────────────────────────────────────────────────────
+# Project Selector UI
+# ────────────────────────────────────────────────────────────────────────────
+project_ids = get_available_project_ids()
+if project_ids:
+    # Create options for selectbox
+    project_options = ["プロジェクトを選択してください"] + [
+        get_project_summary(pid) for pid in project_ids
+    ]
+    
+    # Map display names back to IDs
+    display_to_id = {get_project_summary(pid): pid for pid in project_ids}
+    
+    selected_display = st.selectbox("💼 プロジェクトを選択", project_options)
+    
+    if selected_display != "プロジェクトを選択してください":
+        st.session_state["current_project_id"] = display_to_id[selected_display]
+        st.success(f"✅ プロジェクト '{display_to_id[selected_display]}' を選択しました")
+    else:
+        if "current_project_id" in st.session_state:
+            del st.session_state["current_project_id"]
+else:
+    st.info("📝 まずプロジェクトを作成してください。下記の「プロジェクト作成」コマンドを使用できます。")
 
 if "history" not in st.session_state:
     st.session_state["history"] = []
@@ -157,17 +221,30 @@ if "awaiting_activate_confirm" not in st.session_state:
     st.session_state["awaiting_activate_confirm"] = False
 if "created_project_id" not in st.session_state:
     st.session_state["created_project_id"] = None
+if "current_project_id" not in st.session_state:
+    st.session_state["current_project_id"] = None
+if "update_candidates" not in st.session_state:
+    st.session_state["update_candidates"] = []
 
 # 履歴表示（セッション全件を常時下スクロール表示）
 for msg in st.session_state["history"]:
     st.chat_message("user" if msg["role"] == "user" else "assistant").markdown(msg["content"])
 
 # ユーザー入力
-user_input = st.chat_input("あなたの発言を入力してください…")
+if not st.session_state.get("current_project_id"):
+    st.warning("⚠️ まずプロジェクトを選択してください。")
+    user_input = None
+else:
+    user_input = st.chat_input("あなたの発言を入力してください…")
 
 if user_input:
     # 1) ログへ保存
     _append_log("user", user_input)
+    
+    # Also log to project-specific log if project is selected
+    current_project_id = st.session_state.get("current_project_id")
+    if current_project_id:
+        _append_project_log(current_project_id, "user", user_input)
 
     # Handle project creation flow
     assistant_reply = None
@@ -178,6 +255,7 @@ if user_input:
             # Create project with auto-generated ID
             project = create_project(None, user_input, "human_user")
             st.session_state["created_project_id"] = project.identifier
+            st.session_state["current_project_id"] = project.identifier  # Set as current project
             st.session_state["awaiting_project_overview"] = False
             st.session_state["awaiting_activate_confirm"] = True
             assistant_reply = f"プロジェクト **{project.identifier}** を DRAFT で作成しました。次は ACTIVE にしますか？"
@@ -201,6 +279,39 @@ if user_input:
         st.session_state["awaiting_activate_confirm"] = False
         st.session_state["created_project_id"] = None
     
+    # Check for task addition command: "タスク <説明> <YYYY-MM-DD>"
+    elif user_input.startswith("タスク "):
+        import re
+        # Parse task command: タスク <description> <YYYY-MM-DD>
+        parts = user_input[3:].strip().split()  # Remove "タスク " prefix
+        if len(parts) >= 2:
+            # Last part should be date, everything else is description
+            due_date = parts[-1]
+            description = " ".join(parts[:-1])
+            
+            # Validate date format
+            if re.match(r'\d{4}-\d{2}-\d{2}', due_date):
+                if st.session_state["current_project_id"]:
+                    try:
+                        task = add_task(st.session_state["current_project_id"], description, due_date)
+                        
+                        # Get current tasks for display
+                        import json
+                        path = Path(f"data/projects/{st.session_state['current_project_id']}.json")
+                        data = json.loads(path.read_text())
+                        tasks = data.get("tasks", [])
+                        
+                        task_list = "\n".join([f"- {t['id']}: {t['description']} (期日: {t['due_date']})" for t in tasks])
+                        assistant_reply = f"タスクを追加しました。\n\n現在のタスク一覧:\n{task_list}"
+                    except Exception as e:
+                        assistant_reply = f"タスク追加中にエラーが発生しました: {str(e)}"
+                else:
+                    assistant_reply = "まずプロジェクトを作成または選択してください。"
+            else:
+                assistant_reply = "日付は YYYY-MM-DD 形式で入力してください。"
+        else:
+            assistant_reply = "使用方法: タスク <説明> <YYYY-MM-DD>"
+    
     # Check for project creation trigger
     elif "プロジェクト作成" in user_input:
         st.session_state["awaiting_project_overview"] = True
@@ -223,6 +334,27 @@ if user_input:
             traceback.print_exc()
             assistant_reply = "[ERROR]"
 
+    # Hook: Generate update candidates from chat content
+    if st.session_state.get("current_project_id") and assistant_reply != "[ERROR]":
+        try:
+            # Extract potential project updates from both user input and assistant reply
+            combined_content = f"{user_input} {assistant_reply}"
+            new_data = extract_new_data_from_chat(combined_content, st.session_state["current_project_id"])
+            
+            if new_data:
+                # Generate update candidates
+                candidates = generate_update_candidates(st.session_state["current_project_id"], new_data)
+                
+                # Validate candidates before adding
+                valid_candidates = [c for c in candidates if validate_update_candidate(c)]
+                
+                if valid_candidates:
+                    # Store in session state for UI display
+                    st.session_state["update_candidates"] = valid_candidates
+        except Exception as e:
+            # Silently ignore errors in update candidate generation
+            print(f"Error generating update candidates: {e}")
+
     # 3) UI 表示
     st.chat_message("user").markdown(user_input)
     st.chat_message("assistant").markdown(assistant_reply)
@@ -233,12 +365,63 @@ if user_input:
         {"role": "assistant", "content": assistant_reply},
     ])
     _append_log("assistant", assistant_reply)
+    
+    # Also log assistant reply to project-specific log
+    if current_project_id:
+        _append_project_log(current_project_id, "assistant", assistant_reply)
 
     # 5) Git push (conversation log only)
     try:
         commit_and_push_log(_today_log_path())
     except Exception as e:
         st.warning(f"⚠️ Git push failed: {e}")
+
+# --- 更新案 UI (Update Proposals) ---
+if st.session_state.get("update_candidates"):
+    with st.expander("📝 更新案を確認・承認", expanded=True):
+        st.write("チャット中に確認された新情報に基づく更新候補です：")
+        
+        # Display update candidates
+        for i, diff in enumerate(st.session_state["update_candidates"]):
+            st.write(f"**{diff['field']}**: {diff['old']} → {diff['new']}")
+        
+        # Show summary
+        summary = generate_diff_summary(st.session_state["update_candidates"])
+        st.markdown(summary)
+        
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            if st.button("✅ 承認して反映", type="primary"):
+                if st.session_state.get("current_project_id"):
+                    try:
+                        result = apply_updates(
+                            st.session_state["current_project_id"], 
+                            st.session_state["update_candidates"]
+                        )
+                        
+                        if result["success"]:
+                            success_msg = f"✅ {result['updates_applied']} 件の更新を適用しました。"
+                            if result.get("git_committed"):
+                                success_msg += " Git にもコミットしました。"
+                            elif "git_error" in result:
+                                success_msg += f" Git コミットに失敗: {result['git_error']}"
+                            
+                            st.success(success_msg)
+                            # Clear update candidates after applying
+                            st.session_state["update_candidates"] = []
+                            st.rerun()
+                        else:
+                            st.error(f"❌ 更新の適用に失敗しました: {result.get('error', '不明なエラー')}")
+                    except Exception as e:
+                        st.error(f"❌ 更新適用中にエラーが発生しました: {str(e)}")
+                else:
+                    st.error("❌ 現在のプロジェクトが選択されていません。")
+        
+        with col2:
+            if st.button("❌ キャンセル"):
+                st.session_state["update_candidates"] = []
+                st.rerun()
 
 # --- サイドバーにタブを追加 ---
 with st.sidebar:
