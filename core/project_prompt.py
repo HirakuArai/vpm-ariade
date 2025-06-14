@@ -1,3 +1,4 @@
+# --- core/project_prompt.py ---
 """
 project_prompt.py - Generate project-specific context for system prompts
 """
@@ -7,18 +8,22 @@ from pathlib import Path
 from typing import Optional
 from .models import DEFAULT_UNDEF
 
+PROJECTS_DIR = Path("data/projects")
 
-def get_project_prompt(project_id: str) -> str:
+def get_project_prompt(project_id: str, projects_dir: Path | None = None) -> str:
     """
     Generate project-specific context prompt including overview, status, and top 3 incomplete tasks.
     
     Args:
         project_id: The project identifier
+        projects_dir: Directory containing project files (defaults to PROJECTS_DIR)
         
     Returns:
         Markdown-formatted project context string
     """
-    projects_dir = Path("data/projects")
+    if projects_dir is None:
+        projects_dir = PROJECTS_DIR
+        
     project_file = projects_dir / f"{project_id}.json"
     
     if not project_file.exists():
@@ -28,10 +33,16 @@ def get_project_prompt(project_id: str) -> str:
         with open(project_file, 'r', encoding='utf-8') as f:
             project_data = json.load(f)
         
-        # Extract basic project info
+        # Extract basic project info, filtering undefined fields
         overview = project_data.get("overview", "概要が設定されていません")
         status = project_data.get("status", "DRAFT")
         identifier = project_data.get("identifier", project_id)
+        
+        # Filter out undefined fields from display
+        if overview == DEFAULT_UNDEF:
+            overview = "概要が設定されていません"
+        if status == DEFAULT_UNDEF:
+            status = "DRAFT"
         
         # Build the context prompt
         context_lines = [
@@ -82,25 +93,26 @@ def get_project_prompt(project_id: str) -> str:
                 "まだタスクが作成されていません。"
             ])
         
-        # Add additional context if available
+        # Add additional information section if any optional fields are present
         repository_url = project_data.get("repository_url")
-        if repository_url:
+        due_date = project_data.get("due_date")
+        budget = project_data.get("budget")
+        
+        additional_info = []
+        if repository_url not in [None, DEFAULT_UNDEF, ""]:
+            additional_info.append(f"**リポジトリ**: {repository_url}")
+        if due_date not in [None, DEFAULT_UNDEF, ""]:
+            additional_info.append(f"**プロジェクト期日**: {due_date}")
+        if budget not in [None, DEFAULT_UNDEF, ""]:
+            additional_info.append(f"**予算**: {budget}")
+        
+        if additional_info:
             context_lines.extend([
                 "",
-                f"**リポジトリ**: {repository_url}"
+                "### ℹ️ 追加情報",
+                ""
             ])
-        
-        due_date = project_data.get("due_date")
-        if due_date:
-            context_lines.extend([
-                f"**プロジェクト期日**: {due_date}"
-            ])
-        
-        budget = project_data.get("budget")
-        if budget and budget != DEFAULT_UNDEF:
-            context_lines.extend([
-                f"**予算**: {budget}"
-            ])
+            context_lines.extend(additional_info)
         
         context_lines.extend([
             "",
@@ -116,39 +128,53 @@ def get_project_prompt(project_id: str) -> str:
         return f"❌ プロジェクト {project_id} の読み込み中にエラーが発生しました: {str(e)}"
 
 
-def get_available_project_ids() -> list[str]:
+def get_available_project_ids(projects_dir: Path | None = None) -> list[str]:
     """
     Get list of available project IDs from the projects directory.
     
-    Returns:
-        List of project identifiers
-    """
-    projects_dir = Path("data/projects")
+    Args:
+        projects_dir: Directory containing project files (defaults to PROJECTS_DIR)
     
+    Returns:
+        List of project identifiers for projects with DRAFT or ACTIVE status, sorted by update time
+    """
+    projects_dir = projects_dir or PROJECTS_DIR
     if not projects_dir.exists():
         return []
     
-    project_files = list(projects_dir.glob("*.json"))
-    project_ids = [file.stem for file in project_files]
+    valid_projects = []
+    for project_file in projects_dir.glob("*.json"):
+        try:
+            with open(project_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            status = data.get("status", "DRAFT")
+            if status in {"DRAFT", "ACTIVE"}:
+                ts = data.get("updated_at") or data.get("created_at") or ""
+                valid_projects.append((project_file.stem, ts))
+        except Exception:
+            # Silently skip files that can't be read
+            continue
     
-    # Sort by modification time (most recent first)
-    project_files_with_time = [(file, file.stat().st_mtime) for file in project_files]
-    project_files_with_time.sort(key=lambda x: x[1], reverse=True)
-    
-    return [file[0].stem for file in project_files_with_time]
+    # Sort by timestamp descending
+    valid_projects.sort(key=lambda x: x[1], reverse=True)
+    return [project_id for project_id, _ in valid_projects]
 
 
-def get_project_summary(project_id: str) -> Optional[str]:
+def get_project_summary(project_id: str, projects_dir: Path | None = None) -> Optional[str]:
     """
     Get a brief summary of a project for display in selector.
     
     Args:
         project_id: The project identifier
+        projects_dir: Directory containing project files (defaults to PROJECTS_DIR)
         
     Returns:
         Brief project summary or None if project not found
     """
-    projects_dir = Path("data/projects")
+    if projects_dir is None:
+        projects_dir = PROJECTS_DIR
+        
     project_file = projects_dir / f"{project_id}.json"
     
     if not project_file.exists():
@@ -160,6 +186,12 @@ def get_project_summary(project_id: str) -> Optional[str]:
         
         overview = project_data.get("overview", "概要なし")
         status = project_data.get("status", "DRAFT")
+        
+        # Filter out undefined fields
+        if overview == DEFAULT_UNDEF:
+            overview = "概要なし"
+        if status == DEFAULT_UNDEF:
+            status = "DRAFT"
         
         # Truncate overview if too long
         if len(overview) > 50:

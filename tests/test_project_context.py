@@ -29,14 +29,19 @@ class TestProjectContext:
         self.test_dir = Path(tempfile.mkdtemp())
         # Mock the PROJECTS_DIR for testing
         import core.project_service
-        self.original_projects_dir = core.project_service.PROJECTS_DIR
+        import core.project_prompt
+        self.original_projects_dir_service = core.project_service.PROJECTS_DIR
+        self.original_projects_dir_prompt = core.project_prompt.PROJECTS_DIR
         core.project_service.PROJECTS_DIR = self.test_dir
+        core.project_prompt.PROJECTS_DIR = self.test_dir
     
     def teardown_method(self):
         """Cleanup test environment"""
         import shutil
         import core.project_service
-        core.project_service.PROJECTS_DIR = self.original_projects_dir
+        import core.project_prompt
+        core.project_service.PROJECTS_DIR = self.original_projects_dir_service
+        core.project_prompt.PROJECTS_DIR = self.original_projects_dir_prompt
         if self.test_dir.exists():
             shutil.rmtree(self.test_dir)
     
