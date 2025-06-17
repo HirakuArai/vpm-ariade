@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-17T18:23:40Z",
+  "generated_at": "2025-06-17T22:35:46Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -90,6 +90,10 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/config/config.yml"
     },
     {
+      "path": "config/production.yml",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/config/production.yml"
+    },
+    {
       "path": "conversations/conversation_20250519.json",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/conversations/conversation_20250519.json"
     },
@@ -108,6 +112,10 @@
     {
       "path": "core/append_to_log.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/append_to_log.py"
+    },
+    {
+      "path": "core/auto_update_engine.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/auto_update_engine.py"
     },
     {
       "path": "core/capabilities_diff.py",
@@ -132,6 +140,10 @@
     {
       "path": "core/code_rewriter.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/code_rewriter.py"
+    },
+    {
+      "path": "core/conversation_engine.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/conversation_engine.py"
     },
     {
       "path": "core/decorator_inserter.py",
@@ -166,8 +178,16 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/handle_approval.py"
     },
     {
+      "path": "core/health_check.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/health_check.py"
+    },
+    {
       "path": "core/kai_patch_applier.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/kai_patch_applier.py"
+    },
+    {
+      "path": "core/lifecycle_manager.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/lifecycle_manager.py"
     },
     {
       "path": "core/log_utils.py",
@@ -190,8 +210,16 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/models.py"
     },
     {
+      "path": "core/notification_system.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/notification_system.py"
+    },
+    {
       "path": "core/patch_log.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/patch_log.py"
+    },
+    {
+      "path": "core/progress_monitor.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/progress_monitor.py"
     },
     {
       "path": "core/project_diff.py",
@@ -208,6 +236,10 @@
     {
       "path": "core/run_code_analysis.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/run_code_analysis.py"
+    },
+    {
+      "path": "core/schedule_manager.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/schedule_manager.py"
     },
     {
       "path": "core/self_checker/__init__.py",
@@ -316,6 +348,26 @@
     {
       "path": "data/needed_capabilities_gpt.json",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/needed_capabilities_gpt.json"
+    },
+    {
+      "path": "data/schedules/test-deadlines_schedule.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/schedules/test-deadlines_schedule.json"
+    },
+    {
+      "path": "data/schedules/test-full-workflow_schedule.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/schedules/test-full-workflow_schedule.json"
+    },
+    {
+      "path": "data/schedules/test-integration-3_schedule.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/schedules/test-integration-3_schedule.json"
+    },
+    {
+      "path": "data/schedules/test-recommendations_schedule.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/schedules/test-recommendations_schedule.json"
+    },
+    {
+      "path": "data/schedules/test-schedule_schedule.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/schedules/test-schedule_schedule.json"
     },
     {
       "path": "data/structure_snapshot.json",
@@ -486,6 +538,18 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/\"pages/3_\\360\\237\\247\\240_Analysis_and_WBS.py\""
     },
     {
+      "path": "pages/4_Progress_Dashboard.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/pages/4_Progress_Dashboard.py"
+    },
+    {
+      "path": "pages/5_Schedule_Management.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/pages/5_Schedule_Management.py"
+    },
+    {
+      "path": "pages/6_System_Monitor.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/pages/6_System_Monitor.py"
+    },
+    {
       "path": "pages/conversations/conversation_20250611.json",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/pages/conversations/conversation_20250611.json"
     },
@@ -500,6 +564,10 @@
     {
       "path": "patches/handle_approval_capability.json",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/patches/handle_approval_capability.json"
+    },
+    {
+      "path": "prompts/feature_audit_prompt.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/prompts/feature_audit_prompt.md"
     },
     {
       "path": "prompts/fix_page_config_order.txt",
@@ -698,8 +766,16 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/test_env.py"
     },
     {
+      "path": "tests/test_automation_integration.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/tests/test_automation_integration.py"
+    },
+    {
       "path": "tests/test_chat_project_creation.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/tests/test_chat_project_creation.py"
+    },
+    {
+      "path": "tests/test_conversation_engine.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/tests/test_conversation_engine.py"
     },
     {
       "path": "tests/test_convo_mode.py",
@@ -708,6 +784,10 @@
     {
       "path": "tests/test_diff_proposal.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/tests/test_diff_proposal.py"
+    },
+    {
+      "path": "tests/test_lifecycle_manager.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/tests/test_lifecycle_manager.py"
     },
     {
       "path": "tests/test_persist_background.py",
