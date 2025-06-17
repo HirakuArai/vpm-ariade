@@ -1,0 +1,39 @@
+{
+  "identifier": "proj-20250618-075700-122",
+  "overview": "八ヶ岳登山を計画します。",
+  "created_at": "2025-06-17T22:57:00.122048",
+  "created_by": "human_user",
+  "status": "DRAFT",
+  "schema_version": "1.0",
+  "updated_at": "2025-06-17T22:57:00.123891",
+  "change_log": [
+    {
+      "timestamp": "2025-06-17T22:57:00.123703",
+      "type": "field_update",
+      "field": "phase",
+      "new_value": "DEFINITION",
+      "source": "project_service"
+    },
+    {
+      "timestamp": "2025-06-17T22:57:00.123798",
+      "type": "phase_advancement",
+      "description": "フェーズを INCEPTION から DEFINITION に進行",
+      "source": "lifecycle_manager"
+    }
+  ],
+  "uuid": "c95ae42f-c156-45c1-8fc9-77ddf1d55fc4",
+  "tasks": [],
+  "phase": "DEFINITION",
+  "completion_percentage": 25.0,
+  "next_actions": [],
+  "blocking_issues": [],
+  "phase_requirements": "__UNDEFINED__",
+  "phase_history": [
+    {
+      "from_phase": "INCEPTION",
+      "to_phase": "DEFINITION",
+      "timestamp": "2025-06-17T22:57:00.123796",
+      "type": "phase_transition"
+    }
+  ]
+}

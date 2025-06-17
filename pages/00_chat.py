@@ -342,10 +342,10 @@ for msg in st.session_state["history"]:
 
 # ユーザー入力
 if not st.session_state.get("current_project_id"):
-    st.warning("⚠️ まずプロジェクトを選択してください。")
-    user_input = None
-else:
-    user_input = st.chat_input("あなたの発言を入力してください…")
+    st.info("💡 プロジェクト作成は下記の入力欄で「プロジェクト作成」と入力してください。")
+
+# チャット入力は常に有効（プロジェクト作成のため）
+user_input = st.chat_input("メッセージを入力してください…（プロジェクト作成は「プロジェクト作成」と入力）")
 
 if user_input:
     # 1) ログへ保存
