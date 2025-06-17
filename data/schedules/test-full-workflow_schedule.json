@@ -1,0 +1,201 @@
+{
+  "project_id": "test-full-workflow",
+  "generated_at": "2025-06-17T22:30:54.718316",
+  "start_date": "2025-06-18",
+  "estimated_completion": "2025-06-26",
+  "events": [
+    {
+      "id": "test-full-workflow_task_1",
+      "project_id": "test-full-workflow",
+      "title": "ワークフローテストタスク",
+      "description": "ワークフローテストタスク",
+      "start_date": "2024-12-26",
+      "end_date": "2024-12-31",
+      "event_type": "task",
+      "priority": "urgent",
+      "assigned_to": [
+        "test_user"
+      ],
+      "resources_required": {
+        "time": 1.0
+      },
+      "dependencies": [],
+      "completion_percentage": 100.0,
+      "status": "completed"
+    },
+    {
+      "id": "test-full-workflow_task_2",
+      "project_id": "test-full-workflow",
+      "title": "データベース設計のタスクを追加",
+      "description": "データベース設計のタスクを追加",
+      "start_date": "2025-06-20",
+      "end_date": "2025-06-25",
+      "event_type": "task",
+      "priority": "normal",
+      "assigned_to": [
+        "auto_detected"
+      ],
+      "resources_required": {
+        "time": 1.0
+      },
+      "dependencies": [
+        "test-full-workflow_task_1"
+      ],
+      "completion_percentage": 0.0,
+      "status": "planned"
+    },
+    {
+      "id": "test-full-workflow_task_3",
+      "project_id": "test-full-workflow",
+      "title": "が完了しました。次にデータベース設計のタスクを追加する必要があります。 完了おめでとうございます。データベース設計のタスクを追加しましょう。",
+      "description": "が完了しました。次にデータベース設計のタスクを追加する必要があります。 完了おめでとうございます。データベース設計のタスクを追加しましょう。",
+      "start_date": "2025-06-20",
+      "end_date": "2025-06-25",
+      "event_type": "task",
+      "priority": "normal",
+      "assigned_to": [
+        "auto_detected"
+      ],
+      "resources_required": {
+        "time": 1.0
+      },
+      "dependencies": [
+        "test-full-workflow_task_2"
+      ],
+      "completion_percentage": 0.0,
+      "status": "planned"
+    },
+    {
+      "id": "test-full-workflow_task_4",
+      "project_id": "test-full-workflow",
+      "title": "ワークフローテストタスクが完了しました。次にデータベース設計のタスク",
+      "description": "ワークフローテストタスクが完了しました。次にデータベース設計のタスク",
+      "start_date": "2025-06-20",
+      "end_date": "2025-06-25",
+      "event_type": "task",
+      "priority": "normal",
+      "assigned_to": [
+        "auto_detected"
+      ],
+      "resources_required": {
+        "time": 1.0
+      },
+      "dependencies": [
+        "test-full-workflow_task_3"
+      ],
+      "completion_percentage": 0.0,
+      "status": "planned"
+    },
+    {
+      "id": "test-full-workflow_task_5",
+      "project_id": "test-full-workflow",
+      "title": "する必要があります。 完了おめでとうございます。データベース設計のタスク",
+      "description": "する必要があります。 完了おめでとうございます。データベース設計のタスク",
+      "start_date": "2025-06-20",
+      "end_date": "2025-06-25",
+      "event_type": "task",
+      "priority": "normal",
+      "assigned_to": [
+        "auto_detected"
+      ],
+      "resources_required": {
+        "time": 1.0
+      },
+      "dependencies": [
+        "test-full-workflow_task_4"
+      ],
+      "completion_percentage": 0.0,
+      "status": "planned"
+    }
+  ],
+  "critical_path": [
+    "test-full-workflow_task_1"
+  ],
+  "milestones": [
+    {
+      "id": "test-full-workflow_milestone_1",
+      "title": "マイルストーン 1",
+      "date": "2025-06-25",
+      "description": "プロジェクトの25%完了時点",
+      "target_completion": 25
+    },
+    {
+      "id": "test-full-workflow_milestone_2",
+      "title": "マイルストーン 2",
+      "date": "2025-06-25",
+      "description": "プロジェクトの50%完了時点",
+      "target_completion": 50
+    },
+    {
+      "id": "test-full-workflow_milestone_3",
+      "title": "マイルストーン 3",
+      "date": "2025-06-25",
+      "description": "プロジェクトの75%完了時点",
+      "target_completion": 75
+    },
+    {
+      "id": "test-full-workflow_milestone_4",
+      "title": "マイルストーン 4",
+      "date": "2025-06-25",
+      "description": "プロジェクトの100%完了時点",
+      "target_completion": 100
+    }
+  ],
+  "resource_allocation": [
+    {
+      "resource_id": "human_resource_1",
+      "resource_type": "human",
+      "allocated_amount": 1.0,
+      "available_amount": 8.0,
+      "allocation_date": "2024-12-26",
+      "project_id": "test-full-workflow",
+      "task_id": "test-full-workflow_task_1"
+    },
+    {
+      "resource_id": "human_resource_1",
+      "resource_type": "human",
+      "allocated_amount": 1.0,
+      "available_amount": 8.0,
+      "allocation_date": "2025-06-20",
+      "project_id": "test-full-workflow",
+      "task_id": "test-full-workflow_task_2"
+    },
+    {
+      "resource_id": "human_resource_1",
+      "resource_type": "human",
+      "allocated_amount": 1.0,
+      "available_amount": 8.0,
+      "allocation_date": "2025-06-20",
+      "project_id": "test-full-workflow",
+      "task_id": "test-full-workflow_task_3"
+    },
+    {
+      "resource_id": "human_resource_1",
+      "resource_type": "human",
+      "allocated_amount": 1.0,
+      "available_amount": 8.0,
+      "allocation_date": "2025-06-20",
+      "project_id": "test-full-workflow",
+      "task_id": "test-full-workflow_task_4"
+    },
+    {
+      "resource_id": "human_resource_1",
+      "resource_type": "human",
+      "allocated_amount": 1.0,
+      "available_amount": 8.0,
+      "allocation_date": "2025-06-20",
+      "project_id": "test-full-workflow",
+      "task_id": "test-full-workflow_task_5"
+    }
+  ],
+  "schedule_metrics": {
+    "total_tasks": 5,
+    "completed_tasks": 1,
+    "in_progress_tasks": 0,
+    "completion_rate": 0.2,
+    "total_duration_days": 181,
+    "average_task_duration": 36.2,
+    "urgent_tasks": 1,
+    "high_priority_tasks": 0
+  }
+}

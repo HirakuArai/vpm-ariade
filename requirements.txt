@@ -6,3 +6,6 @@ networkx>=3.1,<4.0        # 到達判定用グラフ探索ライブラリ
 pycg @ git+https://github.com/vitsalis/pycg.git@main#egg=pycg  # AST → コールグラフ生成
 coverage>=7.4,<8.0        # pytest 実行時の呼び出しカバレッジ収集
 duckduckgo-search>=4.0.2  # RAG用のWeb検索
+pandas>=2.0.0            # データ処理
+plotly>=5.0.0            # グラフ表示
+psutil>=5.9.0            # システム監視

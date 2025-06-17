@@ -10,12 +10,17 @@ import json
 import os
 import sys
 import traceback
+import logging
 from datetime import date, datetime
 from pathlib import Path
 from textwrap import dedent
 from zoneinfo import ZoneInfo
 import yaml, pandas as pd
 import streamlit as st
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 st.set_page_config(page_title="Kai VPM", page_icon="💬", initial_sidebar_state="collapsed")
 
@@ -28,6 +33,12 @@ from utils.render_minutes import render_md
 from core.project_service import create_project, set_status, add_task, apply_updates
 from core.project_diff import generate_update_candidates, extract_new_data_from_chat, generate_diff_summary, validate_update_candidate
 from core.project_prompt import get_project_prompt, get_available_project_ids, get_project_summary
+from core.lifecycle_manager import ProjectLifecycleManager
+from core.conversation_engine import PhaseAwareConversationEngine
+from core.auto_update_engine import AutoUpdateEngine
+from core.progress_monitor import ProgressMonitor
+from core.notification_system import NotificationSystem
+from core.models import ProjectPhase
 
 # ────────────────────────────────────────────────────────────────────────────
 # Paths & basic setup
@@ -149,38 +160,137 @@ def _extract_section(md_path: Path, headings: list[str]) -> str:
     return "\n".join(buf)
 
 # ────────────────────────────────────────────────────────────────────────────
+# Phase Management UI
+# ────────────────────────────────────────────────────────────────────────────
+
+def render_phase_management_ui(project_id: str):
+    """プロジェクトフェーズ管理UIの表示"""
+    try:
+        lifecycle_manager = ProjectLifecycleManager()
+        
+        # 現在のフェーズ表示
+        current_phase = lifecycle_manager.get_current_phase(project_id)
+        
+        # フェーズ進捗の表示
+        progress_info = lifecycle_manager.get_phase_progress(project_id)
+        completion = progress_info.get("completion_percentage", 0.0)
+        
+        # フェーズプログレスバー
+        phase_names = ["INCEPTION", "DEFINITION", "PLANNING", "EXECUTION", "MONITORING", "CLOSURE"]
+        current_index = phase_names.index(current_phase.value) if current_phase.value in phase_names else 0
+        progress_percentage = (current_index + 1) / len(phase_names)
+        
+        st.progress(progress_percentage, text=f"フェーズ進捗: {current_index + 1}/{len(phase_names)}")
+        
+        # 現在フェーズの表示
+        phase_emoji = {
+            "INCEPTION": "💡",
+            "DEFINITION": "📋", 
+            "PLANNING": "📅",
+            "EXECUTION": "🚀",
+            "MONITORING": "📊",
+            "CLOSURE": "✅"
+        }
+        
+        st.info(f"{phase_emoji.get(current_phase.value, '📌')} **現在**: {current_phase.value}")
+        st.metric("完了率", f"{completion:.1f}%")
+        
+        # フェーズ進行チェック
+        can_advance = progress_info.get("can_advance", False)
+        missing_requirements = progress_info.get("missing_requirements", [])
+        next_phase = progress_info.get("next_phase")
+        
+        if next_phase:
+            if can_advance:
+                if st.button(f"📈 次フェーズへ進む\n({next_phase})", key="advance_phase"):
+                    success = lifecycle_manager.advance_phase(project_id)
+                    if success:
+                        st.success(f"フェーズを {next_phase} に進めました！")
+                        st.rerun()
+                    else:
+                        st.error("フェーズの進行に失敗しました")
+            else:
+                st.warning("**フェーズ進行の要件:**")
+                for req in missing_requirements:
+                    st.write(f"- {req}")
+        else:
+            st.success("🎉 プロジェクト完了！")
+        
+        # 要件チェックリスト（展開可能）
+        with st.expander("📋 フェーズ要件チェックリスト"):
+            checklist = lifecycle_manager.get_phase_requirements_checklist(project_id)
+            if checklist:
+                for item in checklist.get("status", []):
+                    icon = "✅" if item["satisfied"] else "❌"
+                    st.write(f"{icon} {item['requirement']}")
+        
+        # フェーズ履歴（展開可能）
+        phase_history = progress_info.get("phase_history", [])
+        if phase_history:
+            with st.expander("📚 フェーズ履歴"):
+                for entry in reversed(phase_history[-5:]):  # 最新5件
+                    timestamp = entry.get("timestamp", "")
+                    from_phase = entry.get("from_phase", "")
+                    to_phase = entry.get("to_phase", "")
+                    if timestamp:
+                        date_str = timestamp[:10]  # YYYY-MM-DD部分
+                        st.write(f"**{date_str}**: {from_phase} → {to_phase}")
+        
+    except Exception as e:
+        st.error(f"フェーズ管理UI エラー: {str(e)}")
+        st.exception(e)
+
+# ────────────────────────────────────────────────────────────────────────────
 # Prompt generator
 # ────────────────────────────────────────────────────────────────────────────
 
+@st.cache_data(ttl=300)  # Cache for 5 minutes
 def get_system_prompt() -> str:
-    rules = _read(DOCS / "base_os_rules.md")
-    dsl_readme_path = DSL_DIR / "README.md"
-    dsl_readme = dsl_readme_path.read_text(encoding="utf-8") if dsl_readme_path.exists() else ""
-    dsl_lines: list[str] = []
+    """Get system prompt with caching for performance optimization"""
     try:
-        for raw in (DSL_DIR / "integrated_dsl.jsonl").read_text(encoding="utf-8").splitlines():
-            item = json.loads(raw)
-            name, desc = item.get("name"), item.get("description")
-            if name and desc:
-                dsl_lines.append(f"- **{name}**: {desc}")
-    except FileNotFoundError:
-        pass
-    dsl_block = "\n".join([dsl_readme.strip()] + dsl_lines if dsl_readme else dsl_lines)
-    proj = _read(DOCS / "project_definition.md")
-    arch = _read(DOCS / "architecture_overview.md")
+        rules = _read(DOCS / "base_os_rules.md")
+        dsl_readme_path = DSL_DIR / "README.md"
+        dsl_readme = dsl_readme_path.read_text(encoding="utf-8") if dsl_readme_path.exists() else ""
+        dsl_lines: list[str] = []
+        try:
+            for raw in (DSL_DIR / "integrated_dsl.jsonl").read_text(encoding="utf-8").splitlines():
+                item = json.loads(raw)
+                name, desc = item.get("name"), item.get("description")
+                if name and desc:
+                    dsl_lines.append(f"- **{name}**: {desc}")
+        except FileNotFoundError:
+            pass
+        dsl_block = "\n".join([dsl_readme.strip()] + dsl_lines if dsl_readme else dsl_lines)
+        proj = _read(DOCS / "project_definition.md")
+        arch = _read(DOCS / "architecture_overview.md")
+        
+        base_prompt = "\n\n".join([rules, dsl_block, proj, arch])
+        return base_prompt
+        
+    except Exception as e:
+        logger.error(f"Error generating system prompt: {str(e)}")
+        return "You are Kai, a Virtual Project Manager AI assistant."
+
+@st.cache_data(ttl=60)  # Cache for 1 minute
+def get_cached_project_context(project_id: str) -> str:
+    """Get project context with caching"""
+    try:
+        return get_project_prompt(project_id)
+    except Exception as e:
+        logger.error(f"Error getting project context for {project_id}: {str(e)}")
+        return ""
+
+def get_full_system_prompt() -> str:
+    """Get full system prompt including project context"""
+    base_prompt = get_system_prompt()
     
-    # Add project context if available
-    project_context = ""
     current_project_id = st.session_state.get("current_project_id")
     if current_project_id:
-        project_context = get_project_prompt(current_project_id)
+        project_context = get_cached_project_context(current_project_id)
+        if project_context:
+            return f"{base_prompt}\n\n{project_context}"
     
-    base_prompt = "\n\n".join([rules, dsl_block, proj, arch])
-    
-    if project_context:
-        return f"{base_prompt}\n\n{project_context}"
-    else:
-        return base_prompt
+    return base_prompt
 
 # ────────────────────────────────────────────────────────────────────────────
 # Streamlit UI
@@ -320,40 +430,86 @@ if user_input:
     # Default GPT handling if no project creation flow
     if assistant_reply is None:
         try:
-            system_prompt = get_system_prompt()
+            system_prompt = get_full_system_prompt()
             messages = [{"role": "system", "content": system_prompt}] + \
                       st.session_state["history"] + \
                       [{"role": "user", "content": user_input}]
+            
+            # Performance optimization: limit history to last 10 exchanges
+            if len(st.session_state["history"]) > 20:  # 20 messages = 10 exchanges
+                recent_history = st.session_state["history"][-20:]
+                messages = [{"role": "system", "content": system_prompt}] + \
+                          recent_history + \
+                          [{"role": "user", "content": user_input}]
+            
             response = openai.chat.completions.create(
                 model="gpt-4.1",
                 messages=messages,
+                max_tokens=2000,  # Limit response length for performance
+                temperature=0.7
             )
             assistant_reply = response.choices[0].message.content.strip()
         except Exception as e:
+            logger.error(f"OpenAI API call failed: {str(e)}")
             st.error(f"❌ OpenAI 呼び出し失敗: {e}")
-            traceback.print_exc()
             assistant_reply = "[ERROR]"
 
-    # Hook: Generate update candidates from chat content
+    # Hook: AutoUpdateEngine processes conversation automatically
     if st.session_state.get("current_project_id") and assistant_reply != "[ERROR]":
         try:
-            # Extract potential project updates from both user input and assistant reply
-            combined_content = f"{user_input} {assistant_reply}"
-            new_data = extract_new_data_from_chat(combined_content, st.session_state["current_project_id"])
+            # Use AutoUpdateEngine for automatic project updates
+            auto_engine = AutoUpdateEngine()
+            auto_result = auto_engine.process_conversation(
+                st.session_state["current_project_id"], 
+                user_input, 
+                assistant_reply
+            )
             
-            if new_data:
-                # Generate update candidates
-                candidates = generate_update_candidates(st.session_state["current_project_id"], new_data)
+            if auto_result.success:
+                # Show notifications for applied updates
+                if auto_result.updates_applied:
+                    st.info(f"🤖 {len(auto_result.updates_applied)}件の自動更新を適用しました")
                 
-                # Validate candidates before adding
-                valid_candidates = [c for c in candidates if validate_update_candidate(c)]
+                # Show phase advancement notification
+                if auto_result.phase_advanced:
+                    st.success("🚀 プロジェクトフェーズが自動進行しました！")
                 
-                if valid_candidates:
-                    # Store in session state for UI display
-                    st.session_state["update_candidates"] = valid_candidates
+                # Store rejected updates as candidates for manual review
+                if auto_result.updates_rejected:
+                    # Convert rejected updates to the format expected by UI
+                    manual_candidates = []
+                    for update in auto_result.updates_rejected:
+                        candidate = {
+                            "field": update.field,
+                            "old": str(update.old_value) if update.old_value else "なし",
+                            "new": str(update.new_value),
+                            "confidence": update.confidence,
+                            "reasoning": update.reasoning
+                        }
+                        manual_candidates.append(candidate)
+                    
+                    st.session_state["update_candidates"] = manual_candidates
+                
+                # Display any error messages
+                if auto_result.errors:
+                    for error in auto_result.errors:
+                        st.warning(f"⚠️ 自動更新エラー: {error}")
+            
         except Exception as e:
-            # Silently ignore errors in update candidate generation
-            print(f"Error generating update candidates: {e}")
+            # Fallback to manual system if auto-update fails
+            print(f"AutoUpdateEngine error, falling back to manual: {e}")
+            try:
+                combined_content = f"{user_input} {assistant_reply}"
+                new_data = extract_new_data_from_chat(combined_content, st.session_state["current_project_id"])
+                
+                if new_data:
+                    candidates = generate_update_candidates(st.session_state["current_project_id"], new_data)
+                    valid_candidates = [c for c in candidates if validate_update_candidate(c)]
+                    
+                    if valid_candidates:
+                        st.session_state["update_candidates"] = valid_candidates
+            except Exception as fallback_error:
+                print(f"Fallback error: {fallback_error}")
 
     # 3) UI 表示
     st.chat_message("user").markdown(user_input)
@@ -423,8 +579,122 @@ if st.session_state.get("update_candidates"):
                 st.session_state["update_candidates"] = []
                 st.rerun()
 
+# --- 通知システム UI ---
+if st.session_state.get("current_project_id"):
+    try:
+        notification_system = NotificationSystem()
+        
+        # 最新の通知を表示（実際の実装では通知キューから取得）
+        if hasattr(notification_system, 'notification_queue') and not notification_system.notification_queue.empty():
+            with st.expander("🔔 最新の通知", expanded=False):
+                st.write("新しい通知があります")
+                # 実際の通知内容表示は notification_system の実装に依存
+        
+        # 進捗アラートをチェックして通知を生成
+        try:
+            progress_monitor = ProgressMonitor()
+            report = progress_monitor.monitor_project(st.session_state["current_project_id"])
+            
+            if report.alerts:
+                # 重要なアラートを通知として処理
+                critical_alerts = [a for a in report.alerts if a.level.value == "critical"]
+                if critical_alerts:
+                    notification_system.process_progress_alerts(
+                        st.session_state["current_project_id"], 
+                        critical_alerts
+                    )
+                    
+                    # 通知バッジ表示
+                    if len(critical_alerts) > 0:
+                        st.error(f"🚨 {len(critical_alerts)}件の重要なアラートがあります")
+        
+        except Exception as e:
+            # 通知システムエラーは非表示にして続行
+            pass
+            
+    except Exception as e:
+        # 通知システム全体のエラーも非表示にして続行
+        pass
+
 # --- サイドバーにタブを追加 ---
 with st.sidebar:
+    # プロジェクトフェーズ管理UI
+    if st.session_state.get("current_project_id"):
+        st.markdown("## 🔄 プロジェクトフェーズ")
+        render_phase_management_ui(st.session_state["current_project_id"])
+        
+        # 進捗モニタリング情報（パフォーマンス最適化）
+        with st.expander("📊 プロジェクト健康状態", expanded=False):
+            try:
+                # Lazy loading: only load when expanded
+                if st.session_state.get("show_progress_details", False):
+                    progress_monitor = ProgressMonitor()
+                    report = progress_monitor.monitor_project(st.session_state["current_project_id"])
+                    
+                    # 健康状態表示
+                    health_color = {
+                        "healthy": "🟢",
+                        "at_risk": "🟡", 
+                        "critical": "🔴"
+                    }
+                    st.write(f"{health_color.get(report.overall_health, '⚪')} **状態**: {report.overall_health}")
+                    
+                    # メトリクス表示
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        completion_rate = report.metrics.get("task_completion_rate", 0)
+                        st.metric("完了率", f"{completion_rate:.1%}")
+                    with col2:
+                        risk_score = report.metrics.get("risk_score", 0)
+                        st.metric("リスクスコア", f"{risk_score:.2f}")
+                    
+                    # アラート表示
+                    if report.alerts:
+                        st.markdown("### ⚠️ アラート")
+                        for alert in report.alerts[:3]:  # 最大3件表示
+                            level_icon = {"critical": "🔴", "warning": "🟡", "info": "🔵"}
+                            st.write(f"{level_icon.get(alert.level.value, '⚪')} {alert.title}")
+                    
+                    # タスクサマリー
+                    if report.task_summary:
+                        with st.expander("📋 タスクサマリー"):
+                            summary = report.task_summary
+                            st.write(f"- 総タスク数: {summary.get('total', 0)}")
+                            st.write(f"- 完了: {summary.get('completed', 0)}")
+                            st.write(f"- 未完了: {summary.get('pending', 0)}")
+                            st.write(f"- 遅延: {summary.get('overdue', 0)}")
+                else:
+                    if st.button("🔄 詳細を表示"):
+                        st.session_state["show_progress_details"] = True
+                        st.rerun()
+                
+            except Exception as e:
+                st.error(f"進捗監視エラー: {str(e)}")
+        
+        # 今後の期限表示（最適化）
+        with st.expander("📅 今後の期限", expanded=False):
+            try:
+                # Cache deadline data
+                @st.cache_data(ttl=300)  # Cache for 5 minutes
+                def get_project_deadlines(project_id: str):
+                    schedule_manager = ScheduleManager()
+                    deadlines = schedule_manager.get_upcoming_deadlines(days_ahead=7)
+                    return [d for d in deadlines if d["project_id"] == project_id]
+                
+                project_deadlines = get_project_deadlines(st.session_state["current_project_id"])
+                
+                if project_deadlines:
+                    for deadline in project_deadlines[:3]:  # 最大3件
+                        days_remaining = deadline["days_remaining"]
+                        urgency_icon = "🔴" if days_remaining <= 1 else "🟡" if days_remaining <= 3 else "🟢"
+                        st.write(f"{urgency_icon} **{deadline['event_title']}**")
+                        st.write(f"   期限: {deadline['deadline']} ({days_remaining}日後)")
+                else:
+                    st.write("今後7日以内の期限はありません")
+                    
+            except Exception as e:
+                st.write("スケジュール情報の取得に失敗しました")
+    
     st.markdown("## 📑 議事録")
     sel_day = st.date_input("対象日を選択", value=date.today())
     if st.button("📝 minutes生成/再生成"):

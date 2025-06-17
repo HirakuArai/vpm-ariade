@@ -1,0 +1,81 @@
+{
+  "project_id": "test-deadlines",
+  "generated_at": "2025-06-17T22:30:54.710568",
+  "start_date": "2025-06-18",
+  "estimated_completion": "2025-06-21",
+  "events": [
+    {
+      "id": "test-deadlines_task_1",
+      "project_id": "test-deadlines",
+      "title": "締切近いタスク",
+      "description": "締切近いタスク",
+      "start_date": "2025-06-16",
+      "end_date": "2025-06-21",
+      "event_type": "task",
+      "priority": "high",
+      "assigned_to": [
+        "test_user"
+      ],
+      "resources_required": {
+        "time": 1.0
+      },
+      "dependencies": [],
+      "completion_percentage": 0.0,
+      "status": "planned"
+    }
+  ],
+  "critical_path": [
+    "test-deadlines_task_1"
+  ],
+  "milestones": [
+    {
+      "id": "test-deadlines_milestone_1",
+      "title": "マイルストーン 1",
+      "date": "2025-06-21",
+      "description": "プロジェクトの25%完了時点",
+      "target_completion": 25
+    },
+    {
+      "id": "test-deadlines_milestone_2",
+      "title": "マイルストーン 2",
+      "date": "2025-06-21",
+      "description": "プロジェクトの50%完了時点",
+      "target_completion": 50
+    },
+    {
+      "id": "test-deadlines_milestone_3",
+      "title": "マイルストーン 3",
+      "date": "2025-06-21",
+      "description": "プロジェクトの75%完了時点",
+      "target_completion": 75
+    },
+    {
+      "id": "test-deadlines_milestone_4",
+      "title": "マイルストーン 4",
+      "date": "2025-06-21",
+      "description": "プロジェクトの100%完了時点",
+      "target_completion": 100
+    }
+  ],
+  "resource_allocation": [
+    {
+      "resource_id": "human_resource_1",
+      "resource_type": "human",
+      "allocated_amount": 1.0,
+      "available_amount": 8.0,
+      "allocation_date": "2025-06-16",
+      "project_id": "test-deadlines",
+      "task_id": "test-deadlines_task_1"
+    }
+  ],
+  "schedule_metrics": {
+    "total_tasks": 1,
+    "completed_tasks": 0,
+    "in_progress_tasks": 0,
+    "completion_rate": 0.0,
+    "total_duration_days": 5,
+    "average_task_duration": 5.0,
+    "urgent_tasks": 0,
+    "high_priority_tasks": 1
+  }
+}

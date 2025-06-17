@@ -1,0 +1,76 @@
+# Production Configuration for Kai VPM
+app:
+  name: "Kai VPM - Production"
+  version: "2.0.0"
+  environment: "production"
+  debug: false
+
+# Performance settings
+performance:
+  cache_ttl_seconds:
+    system_prompt: 300  # 5 minutes
+    project_context: 60  # 1 minute
+    project_deadlines: 300  # 5 minutes
+    progress_reports: 180  # 3 minutes
+  
+  openai:
+    max_tokens: 2000
+    temperature: 0.7
+    timeout_seconds: 30
+    max_retries: 3
+    history_limit: 20  # Max messages in history
+  
+  monitoring:
+    batch_size: 10  # Process projects in batches
+    alert_throttle_minutes: 30  # Minimum time between same alerts
+    max_alerts_per_project: 5
+
+# Logging settings
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/kai_vpm.log"
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+
+# Security settings
+security:
+  session_timeout_minutes: 60
+  max_file_size_mb: 10
+  allowed_file_types: [".json", ".yaml", ".yml", ".md", ".txt"]
+
+# Database/File settings
+storage:
+  backup_enabled: true
+  backup_interval_hours: 6
+  retention_days: 30
+  max_project_size_mb: 100
+
+# Automation settings
+automation:
+  auto_update:
+    confidence_threshold: 0.7
+    max_updates_per_conversation: 10
+  
+  notifications:
+    max_queue_size: 1000
+    worker_threads: 2
+    retry_attempts: 3
+  
+  monitoring:
+    check_interval_minutes: 15
+    alert_escalation_hours: 24
+
+# UI settings
+ui:
+  page_size: 20
+  chart_max_points: 100
+  lazy_loading: true
+  auto_refresh_seconds: 30
+
+# Feature flags
+features:
+  experimental_ai: false
+  advanced_analytics: true
+  real_time_collaboration: false
+  api_access: false
