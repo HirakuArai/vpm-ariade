@@ -45,26 +45,25 @@ class AutoUpdateEngine:
     def __init__(self, projects_dir: Path | None = None):
         self.projects_dir = projects_dir
         self.lifecycle_manager = ProjectLifecycleManager(projects_dir)
-        self.confidence_threshold = 0.7  # 自動適用の信頼度閾値
+        self.confidence_threshold = 0.8  # 自動適用の信頼度閾値（より厳格に）
         
-        # 自動更新パターン定義
+        # 自動更新パターン定義（より厳格な基準）
         self.update_patterns = {
             "task_completion": {
                 "patterns": [
-                    r"(.+?)(?:が|を|は)(?:完了|終了|完成|済み|できた|した)",
-                    r"(.+?)(?:finish|complete|done)",
-                    r"(.+?)(?:fix|fixed|resolve|resolved)",
+                    r"(.{5,30}?)(?:が|を|は)(?:完了|終了|完成)(?:しました|した|です)",
+                    r"(.{5,30}?)(?:finish|complete|done)",
+                    r"(.{5,30}?)(?:の|を)(?:fix|fixed|resolve|resolved)",
                 ],
                 "confidence": 0.9,
                 "field": "task_completion"
             },
             "task_creation": {
                 "patterns": [
-                    r"(?:次に|今度は|新しく)(.+?)(?:する|やる|作る|実装)",
-                    r"(?:タスク|作業|TODO):?\s*(.+)",
-                    r"(.+?)(?:が必要|を追加|をしないと)",
+                    r"(?:タスク|作業|TODO):\s*([^。！？\n]{8,50})",
+                    r"(?:次は|今度は|新しく)(.{8,30}?)(?:する|やる|作る|実装)(?:必要|すべき|したい)",
                 ],
-                "confidence": 0.8,
+                "confidence": 0.9,
                 "field": "new_task"
             },
             "blocker_identification": {
@@ -190,6 +189,11 @@ class AutoUpdateEngine:
         
         if update_type == "task_completion":
             task_name = match.group(1).strip()
+            
+            # バリデーション: 意味のないフラグメントを除外
+            if not self._is_valid_task_description(task_name):
+                return None
+                
             return UpdateCandidate(
                 field="task_completion",
                 old_value=None,
@@ -202,6 +206,11 @@ class AutoUpdateEngine:
         
         elif update_type == "task_creation":
             task_name = match.group(1).strip()
+            
+            # バリデーション: 意味のないフラグメントを除外
+            if not self._is_valid_task_description(task_name):
+                return None
+                
             return UpdateCandidate(
                 field="new_task",
                 old_value=None,
@@ -492,3 +501,39 @@ class AutoUpdateEngine:
         
         # 2文字以上のキーワードのみ
         return [kw for kw in keywords if len(kw) >= 2]
+    
+    def _is_valid_task_description(self, description: str) -> bool:
+        """タスク説明の有効性を検証"""
+        if not description or len(description.strip()) < 3:
+            return False
+        
+        # 無効なパターンを除外
+        invalid_patterns = [
+            r'^[。、！？\s]*$',  # 句読点のみ
+            r'^[はをがにでとからまでもや\s]*$',  # 助詞のみ
+            r'^[\*\(\)（）\[\]「」『』\s]*$',  # 記号のみ
+            r'^[のですますである\s]*$',  # 語尾のみ
+            r'^\*\*.*\*\*$',  # Markdown太字のみ
+            r'^を[追加|更新|削除]',  # 文の一部
+            r'^[や|と|も].*',  # 文の一部
+            r'.*[ですか|でしょうか|ますか]$',  # 質問文の一部
+            r'^[（|＜].*[）|＞]$',  # 説明の括弧部分のみ
+            r'^[上位|下位]\d+件',  # リストの説明部分
+            r'^が\d+件',  # 数量説明のみ
+            r'^の[期限|期日|スケジュール]',  # 属性説明のみ
+        ]
+        
+        for pattern in invalid_patterns:
+            if re.search(pattern, description.strip()):
+                return False
+        
+        # 最小限の意味を持つ内容かチェック
+        # 動詞または名詞が含まれているかの簡易チェック
+        meaningful_patterns = [
+            r'[調査|作成|実装|検討|確認|準備|計画|設計|開発|テスト|修正|更新|追加|削除]',  # 動詞
+            r'[登山|ルート|装備|リスト|機能|システム|データ|ファイル|コード|文書]',  # 名詞
+        ]
+        
+        has_meaning = any(re.search(pattern, description) for pattern in meaningful_patterns)
+        
+        return has_meaning

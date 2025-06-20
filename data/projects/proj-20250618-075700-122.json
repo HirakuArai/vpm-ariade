@@ -3,9 +3,9 @@
   "overview": "八ヶ岳登山を計画します。",
   "created_at": "2025-06-17T22:57:00.122048",
   "created_by": "human_user",
-  "status": "DRAFT",
+  "status": "ACTIVE",
   "schema_version": "1.0",
-  "updated_at": "2025-06-17T22:57:00.123891",
+  "updated_at": "2025-06-20T17:40:13.627708",
   "change_log": [
     {
       "timestamp": "2025-06-17T22:57:00.123703",
@@ -22,12 +22,27 @@
     }
   ],
   "uuid": "c95ae42f-c156-45c1-8fc9-77ddf1d55fc4",
-  "tasks": [],
+  "tasks": [
+    {
+      "id": 1,
+      "description": "登山ルート調査",
+      "due_date": "2025-01-31",
+      "owner": "human_user",
+      "status": "pending"
+    },
+    {
+      "id": 2,
+      "description": "装備リスト作成",
+      "due_date": "2025-02-15",
+      "owner": "human_user",
+      "status": "pending"
+    }
+  ],
   "phase": "DEFINITION",
   "completion_percentage": 25.0,
   "next_actions": [],
   "blocking_issues": [],
-  "phase_requirements": "__UNDEFINED__",
+  "phase_requirements": {},
   "phase_history": [
     {
       "from_phase": "INCEPTION",

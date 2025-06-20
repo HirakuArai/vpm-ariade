@@ -23,3 +23,6 @@ data/cache/
 
 tools/pycg/
 *.rej
+.coverage
+coverage.json
+kai_generated/
