@@ -26,3 +26,5 @@ tools/pycg/
 .coverage
 coverage.json
 kai_generated/
+output/master_snapshot.json
+test_ui.py
