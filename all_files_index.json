@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-20T18:22:33Z",
+  "generated_at": "2025-06-21T02:41:11Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -350,6 +350,10 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/needed_capabilities_gpt.json"
     },
     {
+      "path": "data/projects/proj-20250618-075700-122.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/projects/proj-20250618-075700-122.json"
+    },
+    {
       "path": "data/schedules/test-deadlines_schedule.json",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/schedules/test-deadlines_schedule.json"
     },
@@ -386,8 +390,16 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/docs/base_os_rules_a.md"
     },
     {
+      "path": "docs/conversation_system.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/docs/conversation_system.md"
+    },
+    {
       "path": "docs/minutes/2025/minutes_20250521.yaml",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/docs/minutes/2025/minutes_20250521.yaml"
+    },
+    {
+      "path": "docs/minutes/2025/minutes_20250618.yaml",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/docs/minutes/2025/minutes_20250618.yaml"
     },
     {
       "path": "docs/ondemand_index.md",
@@ -498,20 +510,12 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/output/kai_self_state.json"
     },
     {
-      "path": "output/master_snapshot.json",
-      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/output/master_snapshot.json"
-    },
-    {
       "path": "output/needed_capabilities_autogen.json",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/output/needed_capabilities_autogen.json"
     },
     {
       "path": "output/needed_capabilities_gpt.backup.json",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/output/needed_capabilities_gpt.backup.json"
-    },
-    {
-      "path": "pages/00_chat.py",
-      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/pages/00_chat.py"
     },
     {
       "path": "pages/01_create_project.py",
@@ -552,6 +556,18 @@
     {
       "path": "pages/conversations/conversation_20250611.json",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/pages/conversations/conversation_20250611.json"
+    },
+    {
+      "path": "pages/conversations/conversation_20250618.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/pages/conversations/conversation_20250618.json"
+    },
+    {
+      "path": "pages/conversations/conversation_20250619.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/pages/conversations/conversation_20250619.json"
+    },
+    {
+      "path": "pages/conversations/conversation_20250621.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/pages/conversations/conversation_20250621.json"
     },
     {
       "path": "patch_history.json",
