@@ -190,7 +190,7 @@ Return only the key name, nothing else."""
         
         client = openai.OpenAI()
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4.1",
             messages=[{"role": "user", "content": controller_prompt}],
             max_tokens=50,
             temperature=0.2

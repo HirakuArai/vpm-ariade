@@ -93,7 +93,28 @@ def get_project_prompt(project_id: str, projects_dir: Path | None = None) -> str
                 "まだタスクが作成されていません。"
             ])
         
-        # Add additional information section if any optional fields are present
+        # Add dynamic information section
+        dynamic_info = project_data.get("dynamic_info", {})
+        dynamic_fields = dynamic_info.get("fields", {})
+        
+        # 定義済みの動的情報を表示（partial以上で値があるものを含む）
+        defined_info = []
+        for field_name, field_data in dynamic_fields.items():
+            if field_data.get("status") in ["defined", "confirmed", "partial"] and field_data.get("value"):
+                value = field_data["value"]
+                confidence = field_data.get("confidence", 0.0)
+                confidence_indicator = "🔒" if confidence > 0.9 else "📝" if confidence > 0.7 else "❓"
+                defined_info.append(f"**{field_name}**: {value} {confidence_indicator}")
+        
+        if defined_info:
+            context_lines.extend([
+                "",
+                "### 📋 確定済み詳細情報",
+                ""
+            ])
+            context_lines.extend(defined_info)
+        
+        # 従来の追加情報セクション（後方互換性のため保持）
         repository_url = project_data.get("repository_url")
         due_date = project_data.get("due_date")
         budget = project_data.get("budget")

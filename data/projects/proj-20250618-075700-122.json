@@ -26,14 +26,14 @@
     {
       "id": 1,
       "description": "登山ルート調査",
-      "due_date": "2025-01-31",
+      "due_date": "2025-07-01",
       "owner": "human_user",
       "status": "pending"
     },
     {
       "id": 2,
       "description": "装備リスト作成",
-      "due_date": "2025-02-15",
+      "due_date": "2025-07-05",
       "owner": "human_user",
       "status": "pending"
     }
@@ -50,5 +50,75 @@
       "timestamp": "2025-06-17T22:57:00.123796",
       "type": "phase_transition"
     }
-  ]
+  ],
+  "dynamic_info": {
+    "schema_version": "1.0",
+    "last_analyzed": "2025-06-22T04:05:00.377175",
+    "fields": {
+      "participants": {
+        "value": "4名（初心者2名、経験者2名）",
+        "priority": "required",
+        "status": "defined",
+        "confidence": 0.9,
+        "source": "test_conversation",
+        "last_updated": "2025-06-22T03:01:08.682449",
+        "questions": [
+          "参加者は何名ですか？",
+          "参加者の登山経験レベルはどの程度ですか？"
+        ],
+        "ask_after": null
+      },
+      "timeline": {
+        "value": "2025年8月第2週、2泊3日",
+        "priority": "required",
+        "status": "partial",
+        "confidence": 0.8,
+        "source": "test_integration",
+        "last_updated": "2025-06-22T03:03:36.868743",
+        "questions": [
+          "実施予定時期はいつ頃ですか？",
+          "何日間の予定ですか？"
+        ],
+        "ask_after": "participants"
+      },
+      "budget": {
+        "value": null,
+        "priority": "required",
+        "status": "undefined",
+        "confidence": 0.0,
+        "source": null,
+        "last_updated": null,
+        "questions": [
+          "予算の目安はありますか？",
+          "一人当たりの費用上限はありますか？"
+        ],
+        "ask_after": "timeline"
+      },
+      "route_preference": {
+        "value": "赤岳天狗尾根ルート（中級者向け）",
+        "priority": "recommended",
+        "status": "partial",
+        "confidence": 0.75,
+        "source": "test_integration",
+        "last_updated": "2025-06-22T03:03:36.868749",
+        "questions": [
+          "希望する登山ルートはありますか？",
+          "難易度の希望はありますか？"
+        ],
+        "ask_after": "participants"
+      },
+      "accommodation": {
+        "value": "行者小屋（山小屋泊）",
+        "priority": "recommended",
+        "status": "defined",
+        "confidence": 1.0,
+        "source": "conversation",
+        "last_updated": "2025-06-22T04:05:00.376831",
+        "questions": [
+          "宿泊方法の希望はありますか？（山小屋/テント/日帰り）"
+        ],
+        "ask_after": "timeline"
+      }
+    }
+  }
 }

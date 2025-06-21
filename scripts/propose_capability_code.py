@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 PATCH_PATH = "kai_capabilities_patch.json"
 OUTPUT_PATH = "kai_capabilities_completion.json"
-MODEL = "gpt-4"
+MODEL = "gpt-4.1"
 
 def load_json(path):
     if not os.path.exists(path):
