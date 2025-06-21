@@ -1,0 +1,112 @@
+{
+  "project_id": "proj-20250618-075700-122",
+  "generated_at": "2025-06-21T15:09:40.044345",
+  "start_date": "2025-06-22",
+  "estimated_completion": "2025-07-07",
+  "events": [
+    {
+      "id": "proj-20250618-075700-122_task_1",
+      "project_id": "proj-20250618-075700-122",
+      "title": "登山ルート調査",
+      "description": "登山ルート調査",
+      "start_date": "2025-06-26",
+      "end_date": "2025-07-01",
+      "event_type": "task",
+      "priority": "low",
+      "assigned_to": [
+        "human_user"
+      ],
+      "resources_required": {
+        "time": 1.0
+      },
+      "dependencies": [],
+      "completion_percentage": 0.0,
+      "status": "planned"
+    },
+    {
+      "id": "proj-20250618-075700-122_task_2",
+      "project_id": "proj-20250618-075700-122",
+      "title": "装備リスト作成",
+      "description": "装備リスト作成",
+      "start_date": "2025-06-30",
+      "end_date": "2025-07-05",
+      "event_type": "task",
+      "priority": "low",
+      "assigned_to": [
+        "human_user"
+      ],
+      "resources_required": {
+        "time": 1.0
+      },
+      "dependencies": [
+        "proj-20250618-075700-122_task_1"
+      ],
+      "completion_percentage": 0.0,
+      "status": "planned"
+    }
+  ],
+  "critical_path": [
+    "proj-20250618-075700-122_task_1",
+    "proj-20250618-075700-122_task_2"
+  ],
+  "milestones": [
+    {
+      "id": "proj-20250618-075700-122_milestone_1",
+      "title": "マイルストーン 1",
+      "date": "2025-07-01",
+      "description": "プロジェクトの25%完了時点",
+      "target_completion": 25
+    },
+    {
+      "id": "proj-20250618-075700-122_milestone_2",
+      "title": "マイルストーン 2",
+      "date": "2025-07-05",
+      "description": "プロジェクトの50%完了時点",
+      "target_completion": 50
+    },
+    {
+      "id": "proj-20250618-075700-122_milestone_3",
+      "title": "マイルストーン 3",
+      "date": "2025-07-05",
+      "description": "プロジェクトの75%完了時点",
+      "target_completion": 75
+    },
+    {
+      "id": "proj-20250618-075700-122_milestone_4",
+      "title": "マイルストーン 4",
+      "date": "2025-07-05",
+      "description": "プロジェクトの100%完了時点",
+      "target_completion": 100
+    }
+  ],
+  "resource_allocation": [
+    {
+      "resource_id": "human_resource_1",
+      "resource_type": "human",
+      "allocated_amount": 1.0,
+      "available_amount": 8.0,
+      "allocation_date": "2025-06-26",
+      "project_id": "proj-20250618-075700-122",
+      "task_id": "proj-20250618-075700-122_task_1"
+    },
+    {
+      "resource_id": "human_resource_1",
+      "resource_type": "human",
+      "allocated_amount": 1.0,
+      "available_amount": 8.0,
+      "allocation_date": "2025-06-30",
+      "project_id": "proj-20250618-075700-122",
+      "task_id": "proj-20250618-075700-122_task_2"
+    }
+  ],
+  "schedule_metrics": {
+    "total_tasks": 2,
+    "completed_tasks": 0,
+    "in_progress_tasks": 0,
+    "completion_rate": 0.0,
+    "total_duration_days": 9,
+    "average_task_duration": 4.5,
+    "urgent_tasks": 0,
+    "high_priority_tasks": 0
+  }
+}

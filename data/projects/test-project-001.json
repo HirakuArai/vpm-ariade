@@ -1,0 +1,87 @@
+{
+  "identifier": "test-project-001",
+  "overview": "AI分析により生成されたプロジェクト",
+  "created_at": "2025-06-22T03:15:13.165491",
+  "created_by": "ai_analyzer",
+  "status": "DRAFT",
+  "schema_version": "1.0",
+  "updated_at": "2025-06-22T03:15:13.165517",
+  "change_log": [],
+  "uuid": "ai-test-project-001",
+  "tasks": [],
+  "phase": "INCEPTION",
+  "completion_percentage": 0.0,
+  "next_actions": [],
+  "blocking_issues": [],
+  "phase_requirements": {},
+  "phase_history": [],
+  "dynamic_info": {
+    "schema_version": "1.0",
+    "last_analyzed": "2025-06-22T03:15:22.587865",
+    "fields": {
+      "participants": {
+        "value": "20名",
+        "priority": "required",
+        "status": "defined",
+        "confidence": 1.0,
+        "source": "conversation",
+        "last_updated": "2025-06-22T03:15:22.587650",
+        "questions": [
+          "参加者は何名ですか？",
+          "参加者の年齢層は？"
+        ],
+        "ask_after": null
+      },
+      "timeline": {
+        "value": "9月の3連休",
+        "priority": "required",
+        "status": "defined",
+        "confidence": 0.9,
+        "source": "conversation",
+        "last_updated": "2025-06-22T03:15:22.587715",
+        "questions": [
+          "旅行期間はいつからいつまでですか？",
+          "1日の活動時間は？"
+        ],
+        "ask_after": "participants"
+      },
+      "destination": {
+        "value": null,
+        "priority": "required",
+        "status": "undefined",
+        "confidence": 0.0,
+        "source": null,
+        "last_updated": null,
+        "questions": [
+          "旅行先はどこですか？",
+          "旅行先での主な活動は？"
+        ],
+        "ask_after": null
+      },
+      "budget": {
+        "value": "一人当たり8000円、総額16万円",
+        "priority": "recommended",
+        "status": "defined",
+        "confidence": 1.0,
+        "source": "conversation",
+        "last_updated": "2025-06-22T03:15:22.587708",
+        "questions": [
+          "予算の上限はありますか？"
+        ],
+        "ask_after": "timeline"
+      },
+      "transportation": {
+        "value": null,
+        "priority": "recommended",
+        "status": "undefined",
+        "confidence": 0.0,
+        "source": null,
+        "last_updated": null,
+        "questions": [
+          "どのような交通手段を利用しますか？"
+        ],
+        "ask_after": "destination"
+      }
+    }
+  }
+}
