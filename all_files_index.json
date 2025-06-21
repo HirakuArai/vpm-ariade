@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-21T02:41:11Z",
+  "generated_at": "2025-06-21T02:51:53Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -28,6 +28,14 @@
     {
       "path": "CLAUDE.md",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/CLAUDE.md"
+    },
+    {
+      "path": "QUICK_REFERENCE.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/QUICK_REFERENCE.md"
+    },
+    {
+      "path": "SESSION_HISTORY.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/SESSION_HISTORY.md"
     },
     {
       "path": "app.py",
