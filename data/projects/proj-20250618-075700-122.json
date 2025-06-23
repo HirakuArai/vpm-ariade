@@ -53,15 +53,15 @@
   ],
   "dynamic_info": {
     "schema_version": "1.0",
-    "last_analyzed": "2025-06-22T04:05:00.377175",
+    "last_analyzed": "2025-06-24T01:11:37.146840",
     "fields": {
       "participants": {
-        "value": "4名（初心者2名、経験者2名）",
+        "value": "4名",
         "priority": "required",
         "status": "defined",
         "confidence": 0.9,
-        "source": "test_conversation",
-        "last_updated": "2025-06-22T03:01:08.682449",
+        "source": "conversation",
+        "last_updated": "2025-06-24T00:53:04.238992",
         "questions": [
           "参加者は何名ですか？",
           "参加者の登山経験レベルはどの程度ですか？"
@@ -69,12 +69,12 @@
         "ask_after": null
       },
       "timeline": {
-        "value": "2025年8月第2週、2泊3日",
+        "value": "2025年7月27日（日）～7月28日（月）の2日間",
         "priority": "required",
-        "status": "partial",
-        "confidence": 0.8,
-        "source": "test_integration",
-        "last_updated": "2025-06-22T03:03:36.868743",
+        "status": "defined",
+        "confidence": 1.0,
+        "source": "conversation",
+        "last_updated": "2025-06-24T01:11:37.146430",
         "questions": [
           "実施予定時期はいつ頃ですか？",
           "何日間の予定ですか？"
@@ -95,12 +95,12 @@
         "ask_after": "timeline"
       },
       "route_preference": {
-        "value": "赤岳天狗尾根ルート（中級者向け）",
+        "value": "美濃戸登山口（南沢ルート）→行者小屋→赤岳（ピストン）→行者小屋→美濃戸登山口",
         "priority": "recommended",
-        "status": "partial",
-        "confidence": 0.75,
-        "source": "test_integration",
-        "last_updated": "2025-06-22T03:03:36.868749",
+        "status": "defined",
+        "confidence": 1.0,
+        "source": "conversation",
+        "last_updated": "2025-06-24T01:11:37.146575",
         "questions": [
           "希望する登山ルートはありますか？",
           "難易度の希望はありますか？"
@@ -108,17 +108,145 @@
         "ask_after": "participants"
       },
       "accommodation": {
-        "value": "行者小屋（山小屋泊）",
+        "value": "行者小屋（山小屋泊・個室・夕朝食付き・予約済み）",
         "priority": "recommended",
         "status": "defined",
         "confidence": 1.0,
         "source": "conversation",
-        "last_updated": "2025-06-22T04:05:00.376831",
+        "last_updated": "2025-06-24T01:11:37.146619",
         "questions": [
           "宿泊方法の希望はありますか？（山小屋/テント/日帰り）"
         ],
         "ask_after": "timeline"
+      },
+      "itinerary_details": {
+        "value": "【1日目】美濃戸登山口（標高約1,700m）→南沢ルート（約5.5km、標高差+500m、2.5～3時間）→行者小屋（標高約2,350m）→赤岳（標高2,899m、片道2.3km、登り2～2.5時間、下り1.5～2時間、往復3.5～4.5時間）→行者小屋泊【2日目】行者小屋→美濃戸登山口（約5.5km、標高差-650m、2～2.5時間）→下山後温泉",
+        "priority": "optional",
+        "status": "defined",
+        "confidence": 1.0,
+        "source": "conversation",
+        "last_updated": "2025-06-24T01:10:46.051762",
+        "questions": [
+          "行程の詳細情報はありますか？"
+        ],
+        "ask_after": null
+      },
+      "elevation_info": {
+        "value": "美濃戸登山口: 約1,700m、行者小屋: 約2,350m、赤岳山頂: 2,899m",
+        "priority": "optional",
+        "status": "defined",
+        "confidence": 1.0,
+        "source": "conversation",
+        "last_updated": "2025-06-24T01:10:46.051920",
+        "questions": [
+          "標高情報はありますか？"
+        ],
+        "ask_after": null
+      },
+      "time_estimates": {
+        "value": "美濃戸登山口→行者小屋: 2.5～3時間、行者小屋→赤岳（登り）: 2～2.5時間、赤岳→行者小屋（下り）: 1.5～2時間、行者小屋→美濃戸登山口: 2～2.5時間",
+        "priority": "optional",
+        "status": "defined",
+        "confidence": 1.0,
+        "source": "conversation",
+        "last_updated": "2025-06-24T01:10:46.051965",
+        "questions": [
+          "各区間の想定時間はありますか？"
+        ],
+        "ask_after": null
       }
     }
-  }
+  },
+  "reanalysis_history": [
+    {
+      "date_analyzed": "20250622",
+      "reanalyzed_at": "2025-06-23T04:01:02.923734+09:00",
+      "updated_fields": 0,
+      "analyzer_version": "v2_phase_2_4"
+    },
+    {
+      "date_analyzed": "20250621",
+      "reanalyzed_at": "2025-06-23T04:03:35.598368+09:00",
+      "updated_fields": 0,
+      "analyzer_version": "v2_phase_2_4"
+    },
+    {
+      "date_analyzed": "20250621",
+      "reanalyzed_at": "2025-06-23T04:19:25.477917+09:00",
+      "updated_fields": 1,
+      "analyzer_version": "v2_phase_2_4"
+    },
+    {
+      "date_analyzed": "20250622",
+      "reanalyzed_at": "2025-06-23T04:21:50.686436+09:00",
+      "updated_fields": 0,
+      "analyzer_version": "v2_phase_2_4"
+    },
+    {
+      "date_analyzed": "20250622",
+      "reanalyzed_at": "2025-06-23T04:32:41.289545+09:00",
+      "updated_fields": 2,
+      "analyzer_version": "v2_phase_2_4"
+    },
+    {
+      "date_analyzed": "20250622",
+      "reanalyzed_at": "2025-06-23T04:33:27.076287+09:00",
+      "updated_fields": 2,
+      "analyzer_version": "v2_phase_2_4"
+    },
+    {
+      "date_analyzed": "20250622",
+      "reanalyzed_at": "2025-06-23T04:34:25.790293+09:00",
+      "updated_fields": 2,
+      "analyzer_version": "v2_phase_2_4"
+    },
+    {
+      "date_analyzed": "20250622",
+      "reanalyzed_at": "2025-06-23T04:39:28.074651+09:00",
+      "updated_fields": 2,
+      "analyzer_version": "v2_phase_2_4"
+    },
+    {
+      "date_analyzed": "20250622",
+      "reanalyzed_at": "2025-06-23T04:54:10.240413+09:00",
+      "updated_fields": 2,
+      "analyzer_version": "v2_phase_2_4"
+    },
+    {
+      "date_analyzed": "20250622",
+      "reanalyzed_at": "2025-06-24T00:07:56.235494+09:00",
+      "updated_fields": 2,
+      "analyzer_version": "v2_phase_2_4"
+    },
+    {
+      "date_analyzed": "20250622",
+      "reanalyzed_at": "2025-06-24T00:23:06.985324+09:00",
+      "updated_fields": 2,
+      "analyzer_version": "v2_phase_2_4"
+    },
+    {
+      "date_analyzed": "20250622",
+      "reanalyzed_at": "2025-06-24T00:25:30.789124+09:00",
+      "updated_fields": 2,
+      "analyzer_version": "v2_phase_2_4"
+    },
+    {
+      "date_analyzed": "20250622",
+      "reanalyzed_at": "2025-06-24T00:53:04.240811+09:00",
+      "updated_fields": 5,
+      "analyzer_version": "v2_phase_2_4"
+    },
+    {
+      "date_analyzed": "20250622",
+      "reanalyzed_at": "2025-06-24T01:02:18.748030+09:00",
+      "updated_fields": 2,
+      "analyzer_version": "v2_phase_2_4"
+    },
+    {
+      "date_analyzed": "20250622",
+      "reanalyzed_at": "2025-06-24T01:10:46.053571+09:00",
+      "updated_fields": 3,
+      "analyzer_version": "v2_phase_2_4"
+    }
+  ]
 }

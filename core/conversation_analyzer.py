@@ -101,6 +101,14 @@ class ConversationAnalyzer:
             pattern_extracted = self._extract_with_patterns(recent_messages, project_schema)
             extracted_info.extend(pattern_extracted)
             
+            # タスク関連情報の抽出
+            task_extracted = self._extract_task_information(recent_messages)
+            extracted_info.extend(task_extracted)
+            
+            # 詳細プロジェクト情報の抽出
+            detail_extracted = self._extract_project_detail_information(recent_messages)
+            extracted_info.extend(detail_extracted)
+            
             # 重複を除去（信頼度の高いものを優先）
             extracted_info = self._deduplicate_extractions(extracted_info)
             
@@ -115,16 +123,21 @@ class ConversationAnalyzer:
         """AI による情報抽出"""
         try:
             # プロジェクトスキーマから期待される情報を取得
+            # 未定義フィールドだけでなく、更新可能な全フィールドを対象にする
             expected_fields = {}
             for field_name, field in project_schema.fields.items():
-                if field.status.value == "undefined":
+                # undefined または partial のフィールド、もしくは常に更新対象のフィールド
+                if field.status.value in ["undefined", "partial"] or field_name in ["timeline", "accommodation", "route_preference"]:
                     expected_fields[field_name] = {
                         "priority": field.priority.value,
-                        "questions": field.questions
+                        "questions": field.questions,
+                        "current_value": field.value,
+                        "status": field.status.value
                     }
             
             if not expected_fields:
-                return []  # 抽出すべき情報がない
+                logger.warning("No fields to extract - all fields are confirmed")
+                # それでも会話内容から新しい情報や更新があるかもしれないので続行
             
             # システムプロンプトの構築
             system_prompt = self._build_extraction_prompt(expected_fields)
@@ -170,6 +183,7 @@ class ConversationAnalyzer:
 2. **具体的な値** - 曖昧な表現ではなく明確な値を抽出
 3. **信頼度評価** - 情報の確実性を0.0〜1.0で評価
 4. **文脈考慮** - 質問と回答の流れを理解する
+5. **更新情報も抽出** - 既存の値から変更された情報も抽出する
 
 # 出力形式
 
@@ -210,7 +224,12 @@ AI: "4名の構成ですね。どのような活動を予定していますか�
 }}
 ```
 
-情報が見つからない場合は extracted を空配列にしてください。"""
+情報が見つからない場合は extracted を空配列にしてください。
+
+# 重要な注意事項
+- 既存の値から変更された情報も必ず抽出してください
+- 例: 「スケジュールは2025/7/27から28の2日間です」は timeline フィールドの更新
+- 例: 「行者小屋で一泊」は accommodation フィールドの情報"""
     
     def _format_conversation(self, messages: List[Dict]) -> str:
         """会話を読みやすい形式に整形"""
@@ -286,6 +305,183 @@ AI: "4名の構成ですね。どのような活動を予定していますか�
         
         except Exception as e:
             logger.error(f"Pattern extraction failed: {e}")
+        
+        return extracted_info
+    
+    def _extract_task_information(self, messages: List[Dict]) -> List[ExtractedInformation]:
+        """タスク関連情報の抽出"""
+        extracted_info = []
+        
+        try:
+            import re
+            
+            # タスク期日変更のパターン
+            task_patterns = [
+                r'([^、。は]+?)は(\d{4}[/-]\d{1,2}[/-]\d{1,2})',  # "登山ルート調査は2025/7/1"
+                r'([^、。：]+?)：(\d{4}[/-]\d{1,2}[/-]\d{1,2})',  # "登山ルート調査：2025/7/1"
+                r'([^、。を]+?)を(\d{4}[/-]\d{1,2}[/-]\d{1,2})',  # "装備リスト作成を2025/7/5"
+                r'([^、。]+?)\s+(\d{4}[/-]\d{1,2}[/-]\d{1,2})',  # "登山ルート調査 2025/7/1"
+            ]
+            
+            for message in messages:
+                content = message.get("content", "")
+                role = message.get("role", "")
+                
+                # ユーザーメッセージのみを処理（AIの応答は除外）
+                if role != "user":
+                    continue
+                
+                # 期日変更の意図が明確なメッセージのみ処理
+                if not any(keyword in content for keyword in ["期日", "見直し", "変更", "更新"]):
+                    continue
+                
+                # タスク期日変更の検出
+                for pattern in task_patterns:
+                    matches = re.finditer(pattern, content)
+                    for match in matches:
+                        task_name = match.group(1).strip()
+                        task_date = match.group(2).strip()
+                        
+                        # 日付形式を正規化
+                        normalized_date = self._normalize_date_format(task_date)
+                        
+                        if task_name and normalized_date and len(task_name) < 50:  # 長すぎるマッチを除外
+                            extracted_info.append(ExtractedInformation(
+                                field_name="task_deadline_update",
+                                value=f"{task_name}: {normalized_date}",
+                                confidence=0.9,
+                                source="conversation",
+                                extraction_method="task_pattern_matching",
+                                original_text=match.group(0)
+                            ))
+                            
+                            logger.info(f"Extracted task deadline: {task_name} -> {normalized_date}")
+            
+        except Exception as e:
+            logger.error(f"Task information extraction failed: {e}")
+        
+        return extracted_info
+    
+    def _normalize_date_format(self, date_str: str) -> Optional[str]:
+        """日付形式を YYYY-MM-DD に正規化"""
+        import re
+        
+        # YYYY/MM/DD または YYYY-MM-DD 形式
+        match = re.match(r'(\d{4})[/-](\d{1,2})[/-](\d{1,2})', date_str)
+        if match:
+            year, month, day = match.groups()
+            return f"{year}-{month.zfill(2)}-{day.zfill(2)}"
+        
+        return None
+    
+    def _extract_project_detail_information(self, messages: List[Dict]) -> List[ExtractedInformation]:
+        """詳細プロジェクト情報の抽出（スケジュール、ルート、宿泊等）"""
+        extracted_info = []
+        
+        try:
+            import re
+            
+            for message in messages:
+                content = message.get("content", "")
+                role = message.get("role", "")
+                
+                # ユーザーメッセージのみを処理
+                if role != "user":
+                    continue
+                
+                # スケジュール/日程の抽出（より柔軟なパターン）
+                timeline_patterns = [
+                    # 「スケジュールは」で始まるパターン
+                    r'スケジュールは(\d{4}/\d{1,2}/\d{1,2}から\d{1,2}の\d+日間)',
+                    r'スケジュールは(\d{4}/\d{1,2}/\d{1,2}.*?\d+日間)',
+                    r'スケジュールは(\d{4}/\d{1,2}/\d{1,2}から\d{1,2})',
+                    # 「スケジュールは」で始まらないパターン
+                    r'(\d{4}/\d{1,2}/\d{1,2}から\d{1,2}の\d+日間)です',
+                    r'(\d{4}/\d{1,2}/\d{1,2}から\d{1,2})の(\d+日間)です',
+                    r'日程.*?(\d{4}年\d{1,2}月\d{1,2}日.*?\d+日間)',
+                    # より広いパターン
+                    r'(\d{4}年\d{1,2}月\d{1,2}日[^。、]*\d+日間)',
+                    r'(\d{4}/\d{1,2}/\d{1,2}[^。、]*\d+日間)'
+                ]
+                
+                for pattern in timeline_patterns:
+                    matches = re.finditer(pattern, content)
+                    for match in matches:
+                        timeline_value = match.group(1).strip()
+                        
+                        # 抽出された値を適切にフォーマット
+                        if "から" in timeline_value and "日間" not in timeline_value:
+                            # "2025/7/27から28" → "2025/7/27から28の2日間"
+                            timeline_value += "の2日間"
+                        
+                        extracted_info.append(ExtractedInformation(
+                            field_name="timeline",
+                            value=timeline_value,
+                            confidence=0.95,
+                            source="conversation",
+                            extraction_method="timeline_pattern_matching",
+                            original_text=match.group(0)
+                        ))
+                        logger.info(f"Extracted timeline: {timeline_value}")
+                
+                # 参加者数の修正（「初心者2名、経験者2名」削除など）
+                if "参加者" in content and "削除" in content:
+                    participants_patterns = [
+                        r'参加者.*?「([^」]+)」.*?削除',
+                        r'「([^」]+)」.*?削除',
+                    ]
+                    for pattern in participants_patterns:
+                        matches = re.finditer(pattern, content)
+                        for match in matches:
+                            removal_text = match.group(1).strip()
+                            # 削除要求として記録
+                            extracted_info.append(ExtractedInformation(
+                                field_name="participants_update",
+                                value=f"remove: {removal_text}",
+                                confidence=0.9,
+                                source="conversation",
+                                extraction_method="participants_modification",
+                                original_text=match.group(0)
+                            ))
+                            logger.info(f"Extracted participants modification: remove {removal_text}")
+                
+                # 新規タスク追加の検出
+                if "新規タスク" in content and "追加" in content:
+                    extracted_info.append(ExtractedInformation(
+                        field_name="new_task_request",
+                        value="新規タスク追加要求",
+                        confidence=0.8,
+                        source="conversation",
+                        extraction_method="task_addition_request",
+                        original_text=content[:100]
+                    ))
+                    logger.info("Detected new task addition request")
+                
+                # 宿泊情報の抽出
+                accommodation_patterns = [
+                    r'行者小屋.*?(?:一泊|宿泊|泊)',
+                    r'(?:宿泊|泊).*?行者小屋',
+                    r'(行者小屋)(?:で|に)(?:一泊|宿泊)',
+                    r'宿泊.*?[:：].*?(行者小屋)',
+                ]
+                
+                for pattern in accommodation_patterns:
+                    matches = re.finditer(pattern, content)
+                    for match in matches:
+                        # 行者小屋の宿泊情報を検出
+                        extracted_info.append(ExtractedInformation(
+                            field_name="accommodation",
+                            value="行者小屋（山小屋泊）",
+                            confidence=0.9,
+                            source="conversation",
+                            extraction_method="accommodation_pattern_matching",
+                            original_text=match.group(0)
+                        ))
+                        logger.info(f"Extracted accommodation: 行者小屋")
+                        break  # 最初のマッチのみ
+                
+        except Exception as e:
+            logger.error(f"Project detail information extraction failed: {e}")
         
         return extracted_info
     
@@ -381,12 +577,20 @@ AI: "4名の構成ですね。どのような活動を予定していますか�
                 has_conflict = any(c.field_name == info.field_name for c in conflicts)
                 
                 if not has_conflict or info.confidence > 0.9:
-                    success = schema.update_field_value(
-                        info.field_name,
-                        info.value,
-                        info.confidence,
-                        info.source
-                    )
+                    # 特別処理が必要な情報タイプ
+                    if info.field_name == "task_deadline_update":
+                        success = self._apply_task_deadline_update(info, project_id, projects_dir)
+                    elif info.field_name == "participants_update":
+                        success = self._apply_participants_update(info, schema)
+                    elif info.field_name == "new_task_request":
+                        success = self._apply_new_task_request(info, project_id, projects_dir)
+                    else:
+                        success = schema.update_field_value(
+                            info.field_name,
+                            info.value,
+                            info.confidence,
+                            info.source
+                        )
                     
                     if success:
                         applied_count += 1
@@ -401,6 +605,107 @@ AI: "4名の構成ですね。どのような活動を予定していますか�
         except Exception as e:
             logger.error(f"Failed to apply extracted information: {e}")
             return 0, []
+    
+    def _apply_task_deadline_update(self, info: ExtractedInformation, project_id: str, projects_dir=None) -> bool:
+        """タスク期日更新の適用"""
+        try:
+            import json
+            from pathlib import Path
+            
+            # プロジェクトファイルのパス
+            if projects_dir:
+                project_file = Path(projects_dir) / f"{project_id}.json"
+            else:
+                project_file = Path("data/projects") / f"{project_id}.json"
+            
+            if not project_file.exists():
+                logger.error(f"Project file not found: {project_file}")
+                return False
+            
+            # プロジェクトデータの読み込み
+            with project_file.open(encoding="utf-8") as f:
+                project_data = json.load(f)
+            
+            # タスク期日更新の解析
+            # "登山ルート調査: 2025-07-01" 形式
+            task_info = info.value.split(": ")
+            if len(task_info) != 2:
+                logger.error(f"Invalid task deadline format: {info.value}")
+                return False
+            
+            task_name, new_deadline = task_info
+            
+            # 既存タスクを検索して更新
+            tasks = project_data.get("tasks", [])
+            updated = False
+            
+            logger.info(f"Looking for task: '{task_name.strip()}'")
+            for task in tasks:
+                task_desc = task.get("description", "").strip()
+                logger.info(f"Comparing with existing task: '{task_desc}'")
+                if task_desc == task_name.strip():
+                    old_deadline = task.get("due_date")
+                    task["due_date"] = new_deadline
+                    logger.info(f"Updated task '{task_name}' deadline: {old_deadline} -> {new_deadline}")
+                    updated = True
+                    break
+            
+            if not updated:
+                logger.warning(f"Task '{task_name}' not found for deadline update")
+                logger.info(f"Available tasks: {[task.get('description') for task in tasks]}")
+                return False
+            
+            # プロジェクトファイルの保存
+            with project_file.open("w", encoding="utf-8") as f:
+                json.dump(project_data, f, ensure_ascii=False, indent=2)
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to apply task deadline update: {e}")
+            return False
+    
+    def _apply_participants_update(self, info: ExtractedInformation, schema) -> bool:
+        """参加者情報の更新"""
+        try:
+            if info.value.startswith("remove:"):
+                # 削除処理
+                removal_text = info.value[7:].strip()  # "remove: "を除去
+                current_value = schema.fields.get("participants").value or ""
+                
+                # 削除対象文字列を除去（様々なパターンに対応）
+                updated_value = current_value.replace(f"（{removal_text}）", "").replace(f"({removal_text})", "")
+                updated_value = updated_value.replace(removal_text, "")  # 括弧なしも対応
+                updated_value = updated_value.strip()
+                
+                success = schema.update_field_value(
+                    "participants",
+                    updated_value,
+                    info.confidence,
+                    info.source
+                )
+                
+                if success:
+                    logger.info(f"Updated participants: removed '{removal_text}' -> '{updated_value}'")
+                
+                return success
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"Failed to apply participants update: {e}")
+            return False
+    
+    def _apply_new_task_request(self, info: ExtractedInformation, project_id: str, projects_dir=None) -> bool:
+        """新規タスク追加要求の処理"""
+        try:
+            # 実際のタスク追加は別途処理されているため、ここでは記録のみ
+            logger.info("New task addition request recorded (actual task addition handled separately)")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to apply new task request: {e}")
+            return False
 
 
 # ユーティリティ関数

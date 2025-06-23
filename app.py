@@ -15,6 +15,7 @@ from datetime import date, datetime
 from pathlib import Path
 from textwrap import dedent
 from zoneinfo import ZoneInfo
+from typing import Optional, List, Dict
 import yaml, pandas as pd
 import streamlit as st
 
@@ -40,6 +41,8 @@ from core.progress_monitor import ProgressMonitor
 from core.notification_system import NotificationSystem
 from core.models import ProjectPhase
 from core.ui_components import ProjectVisualization, QuestionVisualization, InteractiveComponents, StatusIndicators
+from core.navigation import navigator, PageType
+from core.pages import ProjectInfoPage, PhaseProgressPage, ConversationHistoryPage
 
 # ────────────────────────────────────────────────────────────────────────────
 # Paths & basic setup
@@ -272,7 +275,7 @@ def get_system_prompt() -> str:
         logger.error(f"Error generating system prompt: {str(e)}")
         return "You are Kai, a Virtual Project Manager AI assistant."
 
-@st.cache_data(ttl=60)  # Cache for 1 minute
+@st.cache_data(ttl=10)  # Cache for 10 seconds (shorter for frequent updates)
 def get_cached_project_context(project_id: str) -> str:
     """Get project context with caching"""
     try:
@@ -298,165 +301,138 @@ def get_full_system_prompt() -> str:
     return f"{base_prompt}{date_context}"
 
 # ────────────────────────────────────────────────────────────────────────────
-# Streamlit UI
+# Hierarchical Navigation UI
 # ────────────────────────────────────────────────────────────────────────────
-st.title("Kai – Virtual Project Manager Chat")
 
-# ────────────────────────────────────────────────────────────────────────────
-# Enhanced Project Selector UI
-# ────────────────────────────────────────────────────────────────────────────
-project_ids = get_available_project_ids()
-if project_ids:
-    # プロジェクトデータを取得
-    try:
-        import json
-        project_data_list = []
-        for pid in project_ids:
-            try:
-                project_file = Path(f"data/projects/{pid}.json")
-                if project_file.exists():
-                    with open(project_file, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
-                        project_data_list.append(data)
-            except Exception as e:
-                logger.error(f"Error loading project {pid}: {e}")
-        
-        # 従来のselectboxも提供（互換性のため）
-        if st.checkbox("💼 シンプル選択モード", value=False):
-            project_options = ["プロジェクトを選択してください"] + [
-                get_project_summary(pid) for pid in project_ids
-            ]
-            display_to_id = {get_project_summary(pid): pid for pid in project_ids}
-            selected_display = st.selectbox("プロジェクトを選択", project_options)
-            
-            if selected_display != "プロジェクトを選択してください":
-                st.session_state["current_project_id"] = display_to_id[selected_display]
-                st.success(f"✅ プロジェクト '{display_to_id[selected_display]}' を選択しました")
-            else:
-                if "current_project_id" in st.session_state:
-                    del st.session_state["current_project_id"]
+# サイドバーナビゲーションの描画
+nav_state = navigator.render_sidebar_navigation()
+
+# ナビゲーション状態の妥当性チェック
+navigator.validate_navigation_state()
+
+# ページヘッダーの描画
+navigator.render_page_header()
+
+# ページコンテンツの描画
+def render_page_content():
+    """現在のページコンテンツを描画"""
+    current_page = nav_state.current_page
+    selected_project = nav_state.selected_project_id
+    
+    if current_page == PageType.PROJECT_INFO:
+        if selected_project:
+            ProjectInfoPage.render(selected_project)
         else:
-            # 新しいカード型UI
-            selected_project = InteractiveComponents.render_project_selector(project_data_list)
-            if selected_project:
-                st.session_state["current_project_id"] = selected_project
-                st.success(f"✅ プロジェクト '{selected_project}' を選択しました")
-                st.rerun()
+            st.warning("プロジェクトを選択してください")
     
-    except Exception as e:
-        logger.error(f"Error in project selector: {e}")
-        # フォールバック：従来のUI
-        project_options = ["プロジェクトを選択してください"] + [
-            get_project_summary(pid) for pid in project_ids
-        ]
-        display_to_id = {get_project_summary(pid): pid for pid in project_ids}
-        selected_display = st.selectbox("💼 プロジェクトを選択", project_options)
-        
-        if selected_display != "プロジェクトを選択してください":
-            st.session_state["current_project_id"] = display_to_id[selected_display]
-            st.success(f"✅ プロジェクト '{display_to_id[selected_display]}' を選択しました")
+    elif current_page == PageType.PHASE_PROGRESS:
+        if selected_project:
+            PhaseProgressPage.render(selected_project)
         else:
-            if "current_project_id" in st.session_state:
-                del st.session_state["current_project_id"]
-else:
-    st.info("📝 まずプロジェクトを作成してください。下記の「プロジェクト作成」コマンドを使用できます。")
-
-if "history" not in st.session_state:
-    st.session_state["history"] = []
-
-# Project creation flow state
-if "awaiting_project_overview" not in st.session_state:
-    st.session_state["awaiting_project_overview"] = False
-if "awaiting_activate_confirm" not in st.session_state:
-    st.session_state["awaiting_activate_confirm"] = False
-if "created_project_id" not in st.session_state:
-    st.session_state["created_project_id"] = None
-if "current_project_id" not in st.session_state:
-    st.session_state["current_project_id"] = None
-if "update_candidates" not in st.session_state:
-    st.session_state["update_candidates"] = []
-
-# 履歴表示（プロジェクト固有履歴＋セッション履歴）
-def load_project_conversation_history(project_id: str) -> list:
-    """プロジェクト固有の会話履歴を読み込み"""
-    project_conv_dir = Path(f"data/conversations/{project_id}")
-    history = []
+            st.warning("プロジェクトを選択してください")
     
-    if project_conv_dir.exists():
-        # 最新の会話ログファイルを取得
-        today = datetime.now(_JST).strftime("%Y%m%d")
-        log_file = project_conv_dir / f"{today}.jsonl"
-        
-        if log_file.exists():
-            try:
-                with open(log_file, 'r', encoding='utf-8') as f:
-                    for line in f:
-                        entry = json.loads(line.strip())
-                        history.append({
-                            "role": entry["role"],
-                            "content": entry["content"]
-                        })
-            except Exception as e:
-                print(f"Error loading project history: {e}")
+    elif current_page == PageType.CONVERSATION_HISTORY:
+        if selected_project:
+            ConversationHistoryPage.render(selected_project)
+        else:
+            st.warning("プロジェクトを選択してください")
     
-    return history
+    elif current_page == PageType.PROGRESS_DASHBOARD:
+        render_progress_dashboard()
+    
+    elif current_page == PageType.SCHEDULE_MANAGEMENT:
+        render_schedule_management()
+    
+    elif current_page == PageType.SYSTEM_MONITOR:
+        render_system_monitor()
+    
+    else:  # PageType.HOME
+        render_home_page()
 
-# プロジェクト固有の履歴を表示
-current_project_id = st.session_state.get("current_project_id")
-if current_project_id:
-    # プロジェクト情報の視覚化を追加
-    try:
-        from core.dynamic_schema import get_project_schema
-        from core.lifecycle_manager import ProjectLifecycleManager
-        
-        # 動的スキーマ視覚化
-        with st.expander("📊 プロジェクト情報収集状況", expanded=True):
-            schema = get_project_schema(current_project_id)
-            ProjectVisualization.render_schema_progress(schema)
-            ProjectVisualization.render_field_cards(schema)
-        
-        # フェーズ進捗視覚化
-        with st.expander("🗺️ フェーズ進捗", expanded=False):
-            lifecycle_manager = ProjectLifecycleManager()
-            current_phase = lifecycle_manager.get_current_phase(current_project_id)
-            progress_info = lifecycle_manager.get_phase_progress(current_project_id)
-            StatusIndicators.render_phase_progression(current_phase, progress_info)
-        
-    except Exception as e:
-        logger.error(f"Error rendering project visualization: {e}")
-        st.warning("プロジェクト視覚化の表示でエラーが発生しました")
-    
-    # 会話履歴
-    project_history = load_project_conversation_history(current_project_id)
-    if project_history:
-        with st.expander("📜 プロジェクト会話履歴", expanded=False):
-            for msg in project_history[-10:]:  # 最新10件を表示
-                st.chat_message("user" if msg["role"] == "user" else "assistant").markdown(msg["content"])
+def render_home_page():
+    """ホームページ（メイン会話ページ）の描画"""
+    # プロジェクト情報の視覚化（選択されている場合）
+    current_project_id = nav_state.selected_project_id
+    if current_project_id:
+        try:
+            from core.dynamic_schema import get_project_schema
+            from core.lifecycle_manager import ProjectLifecycleManager
             
-            if len(project_history) > 10:
-                st.caption(f"（{len(project_history)}件中、最新10件を表示）")
+            # 動的スキーマ視覚化
+            with st.expander("📊 プロジェクト情報収集状況", expanded=True):
+                schema = get_project_schema(current_project_id)
+                ProjectVisualization.render_schema_progress(schema)
+                ProjectVisualization.render_field_cards(schema)
+            
+            # フェーズ進捗視覚化
+            with st.expander("🗺️ フェーズ進捗", expanded=False):
+                lifecycle_manager = ProjectLifecycleManager()
+                current_phase = lifecycle_manager.get_current_phase(current_project_id)
+                progress_info = lifecycle_manager.get_phase_progress(current_project_id)
+                StatusIndicators.render_phase_progression(current_phase, progress_info)
+            
+        except Exception as e:
+            logger.error(f"Error rendering project visualization: {e}")
+            st.warning("プロジェクト視覚化の表示でエラーが発生しました")
+        
+        # 会話履歴
+        project_history = load_project_conversation_history(current_project_id)
+        if project_history:
+            with st.expander("📜 プロジェクト会話履歴", expanded=False):
+                for msg in project_history[-10:]:  # 最新10件を表示
+                    st.chat_message("user" if msg["role"] == "user" else "assistant").markdown(msg["content"])
+                
+                if len(project_history) > 10:
+                    st.caption(f"（{len(project_history)}件中、最新10件を表示）")
+    else:
+        st.info("💡 左サイドバーからプロジェクトを選択するか、「プロジェクト作成」と入力して新しいプロジェクトを作成してください。")
+    
+    # セッション履歴表示
+    if st.session_state.get("history"):
+        st.markdown("### 💬 現在のセッション")
+        for msg in st.session_state["history"]:
+            st.chat_message("user" if msg["role"] == "user" else "assistant").markdown(msg["content"])
 
-# セッション履歴表示
-if st.session_state["history"]:
-    st.markdown("### 💬 現在のセッション")
-    for msg in st.session_state["history"]:
-        st.chat_message("user" if msg["role"] == "user" else "assistant").markdown(msg["content"])
+def render_progress_dashboard():
+    """進捗ダッシュボードページ"""
+    st.info("🚧 進捗ダッシュボードページ（実装予定）")
 
-# ユーザー入力
-if not st.session_state.get("current_project_id"):
-    st.info("💡 プロジェクト作成は下記の入力欄で「プロジェクト作成」と入力してください。")
+def render_schedule_management():
+    """スケジュール管理ページ"""
+    st.info("🚧 スケジュール管理ページ（実装予定）")
 
-# チャット入力は常に有効（プロジェクト作成のため）
-user_input = st.chat_input("メッセージを入力してください…（プロジェクト作成は「プロジェクト作成」と入力）")
+def render_system_monitor():
+    """システム監視ページ"""
+    st.info("🚧 システム監視ページ（実装予定）")
 
-if user_input:
+def render_chat_interface():
+    """チャットインターフェースの描画"""
+    st.divider()
+    st.markdown("### 💬 AI との会話")
+    
+    # プロジェクト作成のヒント
+    current_project_id = nav_state.selected_project_id
+    if not current_project_id:
+        st.info("💡 プロジェクト作成は「プロジェクト作成」と入力してください。")
+    
+    # チャット入力
+    user_input = st.chat_input("メッセージを入力してください…（プロジェクト作成は「プロジェクト作成」と入力）")
+    
+    if user_input:
+        # 会話処理を実行
+        process_chat_input(user_input)
+
+def process_chat_input(user_input: str):
+    """チャット入力の処理"""
     # 1) ログへ保存
     _append_log("user", user_input)
     
     # Also log to project-specific log if project is selected
-    current_project_id = st.session_state.get("current_project_id")
+    current_project_id = nav_state.selected_project_id
     if current_project_id:
         _append_project_log(current_project_id, "user", user_input)
+        # Backward compatibility
+        st.session_state["current_project_id"] = current_project_id
 
     # Handle project creation flow
     assistant_reply = None
@@ -467,7 +443,11 @@ if user_input:
             # Create project with auto-generated ID
             project = create_project(None, user_input, "human_user")
             st.session_state["created_project_id"] = project.identifier
-            st.session_state["current_project_id"] = project.identifier  # Set as current project
+            
+            # Update navigation state
+            st.session_state.navigation_state.selected_project_id = project.identifier
+            st.session_state["current_project_id"] = project.identifier  # Backward compatibility
+            
             st.session_state["awaiting_project_overview"] = False
             st.session_state["awaiting_activate_confirm"] = True
             assistant_reply = f"プロジェクト **{project.identifier}** を DRAFT で作成しました。次は ACTIVE にしますか？"
@@ -503,13 +483,13 @@ if user_input:
             
             # Validate date format
             if re.match(r'\d{4}-\d{2}-\d{2}', due_date):
-                if st.session_state["current_project_id"]:
+                if current_project_id:
                     try:
-                        task = add_task(st.session_state["current_project_id"], description, due_date)
+                        task = add_task(current_project_id, description, due_date)
                         
                         # Get current tasks for display
                         import json
-                        path = Path(f"data/projects/{st.session_state['current_project_id']}.json")
+                        path = Path(f"data/projects/{current_project_id}.json")
                         data = json.loads(path.read_text())
                         tasks = data.get("tasks", [])
                         
@@ -531,362 +511,161 @@ if user_input:
     
     # Enhanced conversation flow with question generation
     if assistant_reply is None:
-        try:
-            # 1. 基本的なAI応答生成
-            system_prompt = get_full_system_prompt()
-            messages = [{"role": "system", "content": system_prompt}] + \
-                      st.session_state["history"] + \
-                      [{"role": "user", "content": user_input}]
-            
-            # Performance optimization: limit history to last 10 exchanges
-            if len(st.session_state["history"]) > 20:  # 20 messages = 10 exchanges
-                recent_history = st.session_state["history"][-20:]
-                messages = [{"role": "system", "content": system_prompt}] + \
-                          recent_history + \
-                          [{"role": "user", "content": user_input}]
-            
-            response = openai.chat.completions.create(
-                model="gpt-4.1",
-                messages=messages,
-                max_tokens=2000,  # Limit response length for performance
-                temperature=0.7
-            )
-            assistant_reply = response.choices[0].message.content.strip()
-            
-            # 2. プロジェクトが選択されている場合、質問生成を実行
-            if st.session_state.get("current_project_id") and assistant_reply != "[ERROR]":
-                try:
-                    from core.question_generator import AdaptiveQuestionGenerator, create_conversation_context
-                    from core.dynamic_schema import get_project_schema
-                    from core.models import ProjectPhase
-                    
-                    # 会話分析と情報抽出
-                    from core.conversation_analyzer import analyze_conversation_and_update_project
-                    
-                    # 会話メッセージを準備
-                    conversation_messages = st.session_state["history"] + [
-                        {"role": "user", "content": user_input},
-                        {"role": "assistant", "content": assistant_reply}
-                    ]
-                    
-                    # 情報抽出と更新
-                    updated_count, conflicts = analyze_conversation_and_update_project(
-                        conversation_messages[-6:],  # 最新3往復
-                        st.session_state["current_project_id"]
-                    )
-                    
-                    if updated_count > 0:
-                        logger.info(f"Updated {updated_count} project fields from conversation")
-                    
-                    # 質問生成の実行
-                    if "session_start_time" not in st.session_state:
-                        st.session_state["session_start_time"] = datetime.now()
-                    
-                    # プロジェクトスキーマと会話文脈を取得
-                    project_schema = get_project_schema(st.session_state["current_project_id"])
-                    conversation_context = create_conversation_context(
-                        conversation_messages,
-                        ProjectPhase.DEFINITION,  # デフォルトフェーズ
-                        st.session_state["session_start_time"]
-                    )
-                    
-                    # 質問生成
-                    question_generator = AdaptiveQuestionGenerator()
-                    candidate_questions = question_generator.generate_contextual_questions(
-                        project_schema, conversation_context, max_questions=2
-                    )
-                    
-                    # タイミング判定
-                    timed_questions = question_generator.determine_question_timing(
-                        candidate_questions, conversation_context
-                    )
-                    
-                    # 質問をセッション状態に保存（応答には含めない）
-                    if timed_questions:
-                        st.session_state["generated_questions"] = timed_questions
-                    else:
-                        st.session_state["generated_questions"] = []
-                    
-                except Exception as e:
-                    logger.error(f"Question generation failed: {e}")
-                    # エラーが発生しても基本応答は返す
-                    pass
-            
-        except Exception as e:
-            logger.error(f"OpenAI API call failed: {str(e)}")
-            st.error(f"❌ OpenAI 呼び出し失敗: {e}")
-            assistant_reply = "[ERROR]"
-
-    # 自動更新は一時無効化（手動更新のみ）
-    # Hook: Manual update candidates generation only
-    if st.session_state.get("current_project_id") and assistant_reply != "[ERROR]":
-        try:
-            combined_content = f"{user_input} {assistant_reply}"
-            new_data = extract_new_data_from_chat(combined_content, st.session_state["current_project_id"])
-            
-            if new_data:
-                candidates = generate_update_candidates(st.session_state["current_project_id"], new_data)
-                valid_candidates = [c for c in candidates if validate_update_candidate(c)]
-                
-                if valid_candidates:
-                    st.session_state["update_candidates"] = valid_candidates
-        except Exception as e:
-            print(f"Manual update generation error: {e}")
-
-    # 3) UI 表示
-    st.chat_message("user").markdown(user_input)
-    st.chat_message("assistant").markdown(assistant_reply)
-
-    # 4) 履歴保存 & ログへ保存
-    st.session_state["history"].extend([
-        {"role": "user", "content": user_input},
-        {"role": "assistant", "content": assistant_reply},
-    ])
-    _append_log("assistant", assistant_reply)
+        assistant_reply = process_ai_conversation(user_input, current_project_id)
     
-    # Also log assistant reply to project-specific log
+    # Update conversation history
+    st.session_state["history"].append({"role": "user", "content": user_input})
+    st.session_state["history"].append({"role": "assistant", "content": assistant_reply})
+    
+    # Also log assistant reply
+    _append_log("assistant", assistant_reply)
     if current_project_id:
         _append_project_log(current_project_id, "assistant", assistant_reply)
-
-    # 5) Git push (conversation log only)
-    try:
-        commit_and_push_log(_today_log_path())
-    except Exception as e:
-        st.warning(f"⚠️ Git push failed: {e}")
-
-# --- 質問カードUI (Generated Questions) ---
-if st.session_state.get("generated_questions") and st.session_state.get("current_project_id"):
-    with st.expander("❓ プロジェクトの詳細について", expanded=True):
-        try:
-            # 質問カード表示
-            responses = QuestionVisualization.render_question_cards(st.session_state["generated_questions"])
-            
-            # 回答があった場合の処理
-            if responses:
-                if st.button("📝 回答を反映", type="primary"):
-                    try:
-                        from core.dynamic_schema import get_project_schema
-                        schema = get_project_schema(st.session_state["current_project_id"])
-                        
-                        # 回答をスキーマに反映
-                        updated_count = 0
-                        for field_name, response_data in responses.items():
-                            if field_name in schema.fields:
-                                success = schema.update_field_value(
-                                    field_name, 
-                                    response_data["value"],
-                                    confidence=response_data["confidence"]
-                                )
-                                if success:
-                                    updated_count += 1
-                        
-                        # スキーマを保存
-                        if updated_count > 0:
-                            schema.save_to_project_file()
-                            st.success(f"✅ {updated_count} 件の回答を反映しました！")
-                            # 質問をクリア
-                            st.session_state["generated_questions"] = []
-                            st.rerun()
-                        else:
-                            st.warning("反映できる回答がありませんでした")
-                    
-                    except Exception as e:
-                        logger.error(f"Failed to apply question responses: {e}")
-                        st.error(f"回答の反映でエラーが発生しました: {str(e)}")
-        
-        except Exception as e:
-            logger.error(f"Question visualization error: {e}")
-            st.error("質問表示でエラーが発生しました")
-
-# --- 更新案 UI (Update Proposals) ---
-if st.session_state.get("update_candidates"):
-    try:
-        # 新しいインタラクティブUIを使用
-        approved_updates = InteractiveComponents.render_update_candidates(st.session_state["update_candidates"])
-        
-        if approved_updates is not None:
-            if approved_updates:  # 承認された場合
-                if st.session_state.get("current_project_id"):
-                    try:
-                        result = apply_updates(
-                            st.session_state["current_project_id"], 
-                            approved_updates
-                        )
-                        
-                        if result["success"]:
-                            success_msg = f"✅ {result['updates_applied']} 件の更新を適用しました。"
-                            if result.get("git_committed"):
-                                success_msg += " Git にもコミットしました。"
-                            elif "git_error" in result:
-                                success_msg += f" Git コミットに失敗: {result['git_error']}"
-                            
-                            st.success(success_msg)
-                        else:
-                            st.error(f"❌ 更新の適用に失敗しました: {result.get('error', '不明なエラー')}")
-                    except Exception as e:
-                        st.error(f"❌ 更新適用中にエラーが発生しました: {str(e)}")
-                else:
-                    st.error("❌ 現在のプロジェクトが選択されていません。")
-            
-            # 更新案をクリア
-            st.session_state["update_candidates"] = []
-            st.rerun()
     
-    except Exception as e:
-        logger.error(f"Update candidates UI error: {e}")
-        # フォールバック：従来のUI
-        with st.expander("📝 更新案を確認・承認", expanded=True):
-            st.write("チャット中に確認された新情報に基づく更新候補です：")
-            
-            for i, diff in enumerate(st.session_state["update_candidates"]):
-                st.write(f"**{diff['field']}**: {diff['old']} → {diff['new']}")
-            
-            col1, col2 = st.columns([1, 1])
-            
-            with col1:
-                if st.button("✅ 承認して反映", type="primary"):
-                    # 従来の処理
-                    st.session_state["update_candidates"] = []
-                    st.rerun()
-            
-            with col2:
-                if st.button("❌ キャンセル"):
-                    st.session_state["update_candidates"] = []
-                    st.rerun()
-
-# --- 通知システム UI ---
-if st.session_state.get("current_project_id"):
+    # Auto-push after conversation
     try:
-        notification_system = NotificationSystem()
-        
-        # 最新の通知を表示（実際の実装では通知キューから取得）
-        if hasattr(notification_system, 'notification_queue') and not notification_system.notification_queue.empty():
-            with st.expander("🔔 最新の通知", expanded=False):
-                st.write("新しい通知があります")
-                # 実際の通知内容表示は notification_system の実装に依存
-        
-        # 進捗アラートをチェックして通知を生成
-        try:
-            progress_monitor = ProgressMonitor()
-            report = progress_monitor.monitor_project(st.session_state["current_project_id"])
-            
-            if report.alerts:
-                # 重要なアラートを通知として処理
-                critical_alerts = [a for a in report.alerts if a.level.value == "critical"]
-                if critical_alerts:
-                    notification_system.process_progress_alerts(
-                        st.session_state["current_project_id"], 
-                        critical_alerts
-                    )
-                    
-                    # 通知バッジ表示
-                    if len(critical_alerts) > 0:
-                        st.error(f"🚨 {len(critical_alerts)}件の重要なアラートがあります")
-        
-        except Exception as e:
-            # 通知システムエラーは非表示にして続行
-            pass
-            
+        success = commit_and_push_log()
+        if success:
+            logger.info("Successfully pushed conversation log to git")
+        else:
+            logger.warning("Failed to push conversation log to git")
     except Exception as e:
-        # 通知システム全体のエラーも非表示にして続行
-        pass
+        logger.error(f"Error pushing conversation log: {e}")
+    
+    # Rerun to display the new messages
+    st.rerun()
 
-# --- サイドバーにタブを追加 ---
-with st.sidebar:
-    # プロジェクトフェーズ管理UI
-    if st.session_state.get("current_project_id"):
-        st.markdown("## 🔄 プロジェクトフェーズ")
-        render_phase_management_ui(st.session_state["current_project_id"])
+def process_ai_conversation(user_input: str, current_project_id: Optional[str]) -> str:
+    """AI会話処理"""
+    try:
+        # 1. 基本的なAI応答生成
+        system_prompt = get_full_system_prompt()
+        messages = [{"role": "system", "content": system_prompt}] + \
+                  st.session_state["history"] + \
+                  [{"role": "user", "content": user_input}]
         
-        # 進捗モニタリング情報（パフォーマンス最適化）
-        st.markdown("## 📊 プロジェクト健康状態")
-        try:
-            progress_monitor = ProgressMonitor()
-            report = progress_monitor.monitor_project(st.session_state["current_project_id"])
-            
-            # 健康状態表示
-            health_color = {
-                "healthy": "🟢",
-                "at_risk": "🟡", 
-                "critical": "🔴"
-            }
-            st.write(f"{health_color.get(report.overall_health, '⚪')} **状態**: {report.overall_health}")
-            
-            # メトリクス表示
-            col1, col2 = st.columns(2)
-            with col1:
-                completion_rate = report.metrics.get("task_completion_rate", 0)
-                st.metric("完了率", f"{completion_rate:.1%}")
-            with col2:
-                risk_score = report.metrics.get("risk_score", 0)
-                st.metric("リスクスコア", f"{risk_score:.2f}")
-            
-            # アラート表示
-            if report.alerts:
-                st.markdown("### ⚠️ アラート")
-                for alert in report.alerts[:3]:  # 最大3件表示
-                    level_icon = {"critical": "🔴", "warning": "🟡", "info": "🔵"}
-                    st.write(f"{level_icon.get(alert.level.value, '⚪')} {alert.title}")
-                
-        except Exception as e:
-            st.error(f"進捗監視エラー: {str(e)}")
+        # Performance optimization: limit history to last 5 exchanges to reduce old data influence
+        if len(st.session_state["history"]) > 10:  # 10 messages = 5 exchanges
+            recent_history = st.session_state["history"][-10:]
+            messages = [{"role": "system", "content": system_prompt}] + \
+                      recent_history + \
+                      [{"role": "user", "content": user_input}]
         
-        # 今後の期限表示（最適化）
-        with st.expander("📅 今後の期限", expanded=False):
+        response = openai.chat.completions.create(
+            model="gpt-4.1",
+            messages=messages,
+            max_tokens=2000,  # Limit response length for performance
+            temperature=0.7
+        )
+        assistant_reply = response.choices[0].message.content.strip()
+        
+        # 2. プロジェクトが選択されている場合、質問生成を実行
+        if current_project_id and assistant_reply != "[ERROR]":
             try:
-                from core.schedule_manager import ScheduleManager
-                # Cache deadline data
-                @st.cache_data(ttl=300)  # Cache for 5 minutes
-                def get_project_deadlines(project_id: str):
-                    schedule_manager = ScheduleManager()
-                    deadlines = schedule_manager.get_upcoming_deadlines(days_ahead=7)
-                    return [d for d in deadlines if d["project_id"] == project_id]
+                from core.question_generator import AdaptiveQuestionGenerator, create_conversation_context
+                from core.dynamic_schema import get_project_schema
+                from core.models import ProjectPhase
                 
-                project_deadlines = get_project_deadlines(st.session_state["current_project_id"])
+                # 会話分析と情報抽出
+                from core.conversation_analyzer import analyze_conversation_and_update_project
                 
-                if project_deadlines:
-                    for deadline in project_deadlines[:3]:  # 最大3件
-                        days_remaining = deadline["days_remaining"]
-                        urgency_icon = "🔴" if days_remaining <= 1 else "🟡" if days_remaining <= 3 else "🟢"
-                        st.write(f"{urgency_icon} **{deadline['event_title']}**")
-                        st.write(f"   期限: {deadline['deadline']} ({days_remaining}日後)")
+                # 会話メッセージを準備
+                conversation_messages = st.session_state["history"] + [
+                    {"role": "user", "content": user_input},
+                    {"role": "assistant", "content": assistant_reply}
+                ]
+                
+                # 情報抽出と更新
+                updated_count, conflicts = analyze_conversation_and_update_project(
+                    conversation_messages[-6:],  # 最新3往復
+                    current_project_id
+                )
+                
+                if updated_count > 0:
+                    logger.info(f"Updated {updated_count} project fields from conversation")
+                
+                # 質問生成の実行
+                if "session_start_time" not in st.session_state:
+                    st.session_state["session_start_time"] = datetime.now()
+                
+                # プロジェクトスキーマと会話文脈を取得
+                project_schema = get_project_schema(current_project_id)
+                conversation_context = create_conversation_context(
+                    conversation_messages,
+                    ProjectPhase.DEFINITION,  # デフォルトフェーズ
+                    st.session_state["session_start_time"]
+                )
+                
+                # 質問生成
+                question_generator = AdaptiveQuestionGenerator()
+                candidate_questions = question_generator.generate_contextual_questions(
+                    project_schema, conversation_context, max_questions=2
+                )
+                
+                # タイミング判定
+                timed_questions = question_generator.determine_question_timing(
+                    candidate_questions, conversation_context
+                )
+                
+                # 質問をセッション状態に保存（応答には含めない）
+                if timed_questions:
+                    st.session_state["generated_questions"] = timed_questions
                 else:
-                    st.write("今後7日以内の期限はありません")
-                    
+                    st.session_state["generated_questions"] = []
+                
             except Exception as e:
-                st.write("スケジュール情報の取得に失敗しました")
+                logger.error(f"Question generation failed: {e}")
+                # エラーが発生しても基本応答は返す
+                pass
+        
+        return assistant_reply
+        
+    except Exception as e:
+        logger.error(f"OpenAI API call failed: {str(e)}")
+        return f"❌ AI応答の生成に失敗しました: {e}"
+
+# セッション状態の初期化
+if "history" not in st.session_state:
+    st.session_state["history"] = []
+if "awaiting_project_overview" not in st.session_state:
+    st.session_state["awaiting_project_overview"] = False
+if "awaiting_activate_confirm" not in st.session_state:
+    st.session_state["awaiting_activate_confirm"] = False
+if "created_project_id" not in st.session_state:
+    st.session_state["created_project_id"] = None
+if "current_project_id" not in st.session_state:
+    st.session_state["current_project_id"] = None
+if "update_candidates" not in st.session_state:
+    st.session_state["update_candidates"] = []
+
+# メインコンテンツの描画
+render_page_content()
+
+# ホームページの場合のみ会話機能を表示
+if nav_state.current_page == PageType.HOME:
+    render_chat_interface()
+
+# 履歴表示（プロジェクト固有履歴＋セッション履歴）  
+def load_project_conversation_history(project_id: str) -> List[Dict]:
+    """プロジェクト固有の会話履歴を読み込み"""
+    project_conv_dir = Path(f"data/conversations/{project_id}")
+    history = []
     
-    st.markdown("## 📑 議事録")
-    sel_day = st.date_input("対象日を選択", value=date.today())
-    if st.button("📝 minutes生成/再生成"):
-        minutes_path = generate_daily_minutes(sel_day, force=True)
-        st.success(f"minutes を再生成しました: {minutes_path.name}")
-
-# --- メイン領域に minutes 表示 ---
-if "minutes" not in st.session_state:
-    st.session_state["minutes"] = None
-
-minutes_path = Path(f"docs/minutes/{sel_day.year}/minutes_{sel_day:%Y%m%d}.yaml")
-if minutes_path.exists():
-    minutes_yaml = yaml.safe_load(minutes_path.read_text())
-    st.session_state["minutes"] = minutes_yaml
-
-    st.markdown(render_md(minutes_path), unsafe_allow_html=True)
-
-    # Decisions 編集
-    df = pd.DataFrame(minutes_yaml["decisions"])
-    edited = st.data_editor(df,
-        column_config={"status": st.column_config.SelectboxColumn(
-            options=["AUTO", "CONFIRMED", "CANCELLED"])},
-        use_container_width=True,
-        key="minutes_edit")
-    if st.button("💾 Save & Commit"):
-        minutes_yaml["decisions"] = edited.to_dict("records")
-        minutes_path.write_text(yaml.safe_dump(minutes_yaml, sort_keys=False))
-        safe_push_minutes(f"docs: update minutes {sel_day:%Y-%m-%d}")
-        st.success("minutes saved & pushed")
-
-# ────────────────────────────────────────────────────────────────────────────
-# Footer / debug info (optional)
-# ────────────────────────────────────────────────────────────────────────────
-st.caption("version: 2025-06-21 統合版 - 会話記録・プロジェクト更新システム修正済み")
+    if project_conv_dir.exists():
+        # 最新の会話ログファイルを取得
+        today = datetime.now(_JST).strftime("%Y%m%d")
+        log_file = project_conv_dir / f"{today}.jsonl"
+        
+        if log_file.exists():
+            try:
+                with open(log_file, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        entry = json.loads(line.strip())
+                        history.append({
+                            "role": entry["role"],
+                            "content": entry["content"]
+                        })
+            except Exception as e:
+                print(f"Error loading project history: {e}")
+    
+    return history

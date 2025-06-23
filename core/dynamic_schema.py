@@ -139,6 +139,18 @@ class DynamicProjectSchema:
                 json.dump(project_data, f, ensure_ascii=False, indent=2)
             
             logger.info(f"Dynamic schema saved for project {self.project_id}")
+            
+            # Streamlitキャッシュをクリア（プロジェクト情報更新を即座に反映）
+            try:
+                import streamlit as st
+                st.cache_data.clear()
+                # セッション履歴もクリアして古い情報を除去
+                if hasattr(st.session_state, 'history'):
+                    st.session_state.history = []
+                logger.info("Streamlit cache and conversation history cleared after project update")
+            except Exception as cache_error:
+                logger.warning(f"Failed to clear Streamlit cache: {cache_error}")
+            
             return True
             
         except Exception as e:
@@ -310,7 +322,12 @@ def initialize_schema_for_project(project_id: str, project_description: str,
     basic_fields = [
         ("participants", FieldPriority.REQUIRED, ["参加者は何名ですか？"]),
         ("timeline", FieldPriority.REQUIRED, ["実施予定時期はいつ頃ですか？"]),
-        ("budget", FieldPriority.RECOMMENDED, ["予算の目安はありますか？"])
+        ("budget", FieldPriority.RECOMMENDED, ["予算の目安はありますか？"]),
+        ("route_preference", FieldPriority.RECOMMENDED, ["希望する登山ルートはありますか？"]),
+        ("accommodation", FieldPriority.RECOMMENDED, ["宿泊方法の希望はありますか？"]),
+        ("itinerary_details", FieldPriority.OPTIONAL, ["行程の詳細情報はありますか？"]),
+        ("elevation_info", FieldPriority.OPTIONAL, ["標高情報はありますか？"]),
+        ("time_estimates", FieldPriority.OPTIONAL, ["各区間の想定時間はありますか？"])
     ]
     
     for name, priority, questions in basic_fields:
@@ -318,3 +335,37 @@ def initialize_schema_for_project(project_id: str, project_description: str,
     
     schema.save_to_project_file()
     return schema
+
+def add_missing_fields_to_project(project_id: str, projects_dir: Path = None) -> bool:
+    """既存プロジェクトに不足しているフィールドを追加"""
+    try:
+        schema = get_project_schema(project_id, projects_dir)
+        
+        # 標準フィールドの定義
+        standard_fields = [
+            ("participants", FieldPriority.REQUIRED, ["参加者は何名ですか？"]),
+            ("timeline", FieldPriority.REQUIRED, ["実施予定時期はいつ頃ですか？"]),
+            ("budget", FieldPriority.RECOMMENDED, ["予算の目安はありますか？"]),
+            ("route_preference", FieldPriority.RECOMMENDED, ["希望する登山ルートはありますか？"]),
+            ("accommodation", FieldPriority.RECOMMENDED, ["宿泊方法の希望はありますか？"]),
+            ("itinerary_details", FieldPriority.OPTIONAL, ["行程の詳細情報はありますか？"]),
+            ("elevation_info", FieldPriority.OPTIONAL, ["標高情報はありますか？"]),
+            ("time_estimates", FieldPriority.OPTIONAL, ["各区間の想定時間はありますか？"])
+        ]
+        
+        added_count = 0
+        for name, priority, questions in standard_fields:
+            if name not in schema.fields:
+                success = schema.add_field(name, priority, questions)
+                if success:
+                    added_count += 1
+        
+        if added_count > 0:
+            schema.save_to_project_file()
+            logger.info(f"Added {added_count} missing fields to project {project_id}")
+        
+        return added_count > 0
+        
+    except Exception as e:
+        logger.error(f"Failed to add missing fields to project {project_id}: {e}")
+        return False
