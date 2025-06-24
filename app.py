@@ -404,11 +404,18 @@ def render_home_page():
         project_history = load_project_conversation_history(current_project_id)
         if project_history:
             with st.expander("📜 プロジェクト会話履歴", expanded=False):
-                for msg in project_history[-10:]:  # 最新10件を表示
+                # 最新5会話（10メッセージ）を表示
+                recent_messages = project_history[-10:]
+                for msg in recent_messages:
                     st.chat_message("user" if msg["role"] == "user" else "assistant").markdown(msg["content"])
                 
+                # 会話セット数を計算（質問と回答のペア数）
+                # userメッセージの数を数える（会話セット数と一致）
+                total_conversations = len([msg for msg in project_history if msg["role"] == "user"])
+                displayed_conversations = len([msg for msg in recent_messages if msg["role"] == "user"])
+                
                 if len(project_history) > 10:
-                    st.caption(f"（{len(project_history)}件中、最新10件を表示）")
+                    st.caption(f"（{total_conversations}会話中、最新{displayed_conversations}会話を表示）")
     else:
         st.info("💡 左サイドバーからプロジェクトを選択するか、「プロジェクト作成」と入力して新しいプロジェクトを作成してください。")
     
