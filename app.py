@@ -144,6 +144,31 @@ def _append_project_log(project_id: str, role: str, content: str) -> None:
     with log_path.open("a", encoding="utf-8") as fp:
         fp.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
 
+
+def load_project_conversation_history(project_id: str) -> List[Dict]:
+    """プロジェクト固有の会話履歴を読み込み"""
+    project_conv_dir = Path(f"data/conversations/{project_id}")
+    history = []
+    
+    if project_conv_dir.exists():
+        # 最新の会話ログファイルを取得
+        today = datetime.now(_JST).strftime("%Y%m%d")
+        log_file = project_conv_dir / f"{today}.jsonl"
+        
+        if log_file.exists():
+            try:
+                with open(log_file, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        entry = json.loads(line.strip())
+                        history.append({
+                            "role": entry["role"],
+                            "content": entry["content"]
+                        })
+            except Exception as e:
+                print(f"Error loading project history: {e}")
+    
+    return history
+
 # ────────────────────────────────────────────────────────────────────────────
 # Small utils
 # ────────────────────────────────────────────────────────────────────────────
@@ -655,26 +680,3 @@ if nav_state.current_page == PageType.HOME:
     render_chat_interface()
 
 # 履歴表示（プロジェクト固有履歴＋セッション履歴）  
-def load_project_conversation_history(project_id: str) -> List[Dict]:
-    """プロジェクト固有の会話履歴を読み込み"""
-    project_conv_dir = Path(f"data/conversations/{project_id}")
-    history = []
-    
-    if project_conv_dir.exists():
-        # 最新の会話ログファイルを取得
-        today = datetime.now(_JST).strftime("%Y%m%d")
-        log_file = project_conv_dir / f"{today}.jsonl"
-        
-        if log_file.exists():
-            try:
-                with open(log_file, 'r', encoding='utf-8') as f:
-                    for line in f:
-                        entry = json.loads(line.strip())
-                        history.append({
-                            "role": entry["role"],
-                            "content": entry["content"]
-                        })
-            except Exception as e:
-                print(f"Error loading project history: {e}")
-    
-    return history
