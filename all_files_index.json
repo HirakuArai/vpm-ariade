@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-23T19:54:32Z",
+  "generated_at": "2025-06-24T16:39:23Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -176,6 +176,10 @@
     {
       "path": "core/conversation_engine.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/conversation_engine.py"
+    },
+    {
+      "path": "core/conversation_migrator.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/conversation_migrator.py"
     },
     {
       "path": "core/conversation_reanalyzer.py",
@@ -378,6 +382,34 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/charters/test_charter.yaml"
     },
     {
+      "path": "data/conversations/proj-20250611-154246-996/20250611.jsonl",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/conversations/proj-20250611-154246-996/20250611.jsonl"
+    },
+    {
+      "path": "data/conversations/proj-20250618-075700-122/20250619.jsonl",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/conversations/proj-20250618-075700-122/20250619.jsonl"
+    },
+    {
+      "path": "data/conversations/proj-20250618-075700-122/20250620.jsonl",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/conversations/proj-20250618-075700-122/20250620.jsonl"
+    },
+    {
+      "path": "data/conversations/proj-20250618-075700-122/20250621.jsonl",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/conversations/proj-20250618-075700-122/20250621.jsonl"
+    },
+    {
+      "path": "data/conversations/proj-20250618-075700-122/20250622.jsonl",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/conversations/proj-20250618-075700-122/20250622.jsonl"
+    },
+    {
+      "path": "data/conversations/proj-20250618-075700-122/20250623.jsonl",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/conversations/proj-20250618-075700-122/20250623.jsonl"
+    },
+    {
+      "path": "data/conversations/proj-20250618-075700-122/20250624.jsonl",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/conversations/proj-20250618-075700-122/20250624.jsonl"
+    },
+    {
       "path": "data/dir_whitelist.json",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/dir_whitelist.json"
     },
@@ -488,6 +520,10 @@
     {
       "path": "docs/base_os_rules_a.md",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/docs/base_os_rules_a.md"
+    },
+    {
+      "path": "docs/conversation_log_architecture.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/docs/conversation_log_architecture.md"
     },
     {
       "path": "docs/conversation_system.md",
