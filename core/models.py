@@ -31,6 +31,7 @@ class ProjectStatus(Enum):
 class Project:
     identifier: str
     overview: str
+    display_name: str = ""
     created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
     created_by: str = DEFAULT_UNDEF
     status: str = "DRAFT"

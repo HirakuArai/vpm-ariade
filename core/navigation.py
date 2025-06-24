@@ -176,7 +176,13 @@ class HierarchicalNavigator:
             import json
             project_path = Path(f"data/projects/{project_id}.json")
             if project_path.exists():
-                return json.loads(project_path.read_text(encoding="utf-8"))
+                data = json.loads(project_path.read_text(encoding="utf-8"))
+                # Get display name with fallback to overview, then project_id
+                display_name = data.get("display_name", "")
+                overview = data.get("overview", "")
+                name = display_name if display_name else (overview if overview else project_id)
+                data["name"] = name
+                return data
             return {"name": project_id}
         except Exception:
             return {"name": project_id}

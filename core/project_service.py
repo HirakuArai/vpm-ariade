@@ -19,7 +19,7 @@ def _autogen_id() -> str:
     microseconds = str(int(time.time() * 1000000) % 1000000).zfill(6)
     return f"proj-{timestamp}-{microseconds[:3]}"
 
-def create_project(identifier: Optional[str], overview: str, created_by: str, projects_dir: Path | None = None) -> Project:
+def create_project(identifier: Optional[str], overview: str, created_by: str, display_name: Optional[str] = None, projects_dir: Path | None = None) -> Project:
     """Create a new Project instance, save snapshot, and return it (idempotent)."""
     if projects_dir is None:
         projects_dir = PROJECTS_DIR
@@ -34,7 +34,10 @@ def create_project(identifier: Optional[str], overview: str, created_by: str, pr
     path = projects_dir / f"{identifier}.json"
     if path.exists():
         return Project(**json.loads(path.read_text()))
-    project = Project(identifier=identifier, overview=overview, created_by=created_by)
+    # Set display_name from parameter or fallback to overview
+    if display_name is None:
+        display_name = overview
+    project = Project(identifier=identifier, overview=overview, display_name=display_name, created_by=created_by)
     path.write_text(json.dumps(project.to_dict(), indent=2))
     return project
 

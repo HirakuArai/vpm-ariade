@@ -438,7 +438,7 @@ def render_chat_interface():
     # プロジェクト作成のヒント
     current_project_id = nav_state.selected_project_id
     if not current_project_id:
-        st.info("💡 プロジェクト作成は「プロジェクト作成」と入力してください。")
+        st.info("💡 プロジェクト作成は「プロジェクト作成」と入力してください。\n作成時は「タイトル: 詳細説明」の形式がおすすめです。")
     
     # チャット入力
     user_input = st.chat_input("メッセージを入力してください…（プロジェクト作成は「プロジェクト作成」と入力）")
@@ -465,8 +465,27 @@ def process_chat_input(user_input: str):
     # Check if we're waiting for project overview
     if st.session_state["awaiting_project_overview"]:
         try:
+            # Extract display name from input if provided in format "title: description"
+            if ":" in user_input:
+                parts = user_input.split(":", 1)
+                display_name = parts[0].strip()
+                overview = parts[1].strip()
+            else:
+                # Use first part as display name if it's short, otherwise use entire input as overview
+                if len(user_input.strip()) <= 30:
+                    display_name = user_input.strip()
+                    overview = user_input.strip()
+                else:
+                    # Try to extract a meaningful title from the beginning
+                    words = user_input.strip().split()
+                    if len(words) <= 5:
+                        display_name = user_input.strip()
+                    else:
+                        display_name = " ".join(words[:5]) + "..."
+                    overview = user_input.strip()
+            
             # Create project with auto-generated ID
-            project = create_project(None, user_input, "human_user")
+            project = create_project(None, overview, "human_user", display_name)
             st.session_state["created_project_id"] = project.identifier
             
             # Update navigation state
@@ -475,7 +494,7 @@ def process_chat_input(user_input: str):
             
             st.session_state["awaiting_project_overview"] = False
             st.session_state["awaiting_activate_confirm"] = True
-            assistant_reply = f"プロジェクト **{project.identifier}** を DRAFT で作成しました。次は ACTIVE にしますか？"
+            assistant_reply = f"プロジェクト **{display_name}** を DRAFT で作成しました。次は ACTIVE にしますか？"
         except Exception as e:
             assistant_reply = f"プロジェクト作成中にエラーが発生しました: {str(e)}"
             st.session_state["awaiting_project_overview"] = False
@@ -532,7 +551,7 @@ def process_chat_input(user_input: str):
     # Check for project creation trigger
     elif "プロジェクト作成" in user_input:
         st.session_state["awaiting_project_overview"] = True
-        assistant_reply = "プロジェクトの概要を一行で教えてください。"
+        assistant_reply = "プロジェクトの概要を教えてください。\n\n**入力形式:**\n- 短い名前: `会社研修`\n- タイトル付き: `会社研修: 新入社員向けの研修プログラムを企画・実施する`\n- 詳細のみ: `新入社員向けの研修プログラムを企画・実施する`"
     
     # Enhanced conversation flow with question generation
     if assistant_reply is None:

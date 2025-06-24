@@ -218,6 +218,8 @@ def get_project_summary(project_id: str, projects_dir: Path | None = None) -> Op
         with open(project_file, 'r', encoding='utf-8') as f:
             project_data = json.load(f)
         
+        # Get display name with fallback to overview
+        display_name = project_data.get("display_name", "")
         overview = project_data.get("overview", "概要なし")
         status = project_data.get("status", "DRAFT")
         
@@ -227,11 +229,14 @@ def get_project_summary(project_id: str, projects_dir: Path | None = None) -> Op
         if status == DEFAULT_UNDEF:
             status = "DRAFT"
         
-        # Truncate overview if too long
-        if len(overview) > 50:
-            overview = overview[:47] + "..."
+        # Use display_name if available, otherwise use overview
+        display_text = display_name if display_name else overview
         
-        return f"{project_id} ({status}) - {overview}"
+        # Truncate display text if too long
+        if len(display_text) > 50:
+            display_text = display_text[:47] + "..."
+        
+        return f"{display_text} ({status})"
         
     except Exception:
         return f"{project_id} (読み込みエラー)"
