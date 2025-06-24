@@ -29,6 +29,14 @@ class ReanalysisUI:
         
         if not available_dates:
             st.warning("⚠️ このプロジェクトには再分析可能な会話ログがありません")
+            
+            # 会話ログ移行機能の提供
+            st.markdown("#### 📂 会話ログ移行")
+            st.info("全体会話ログからプロジェクト固有ログを生成できます")
+            
+            if st.button("🔄 会話ログを移行", type="primary"):
+                self._execute_conversation_migration(project_id)
+            
             return
         
         # タブで機能を分離
@@ -257,6 +265,31 @@ class ReanalysisUI:
         
         except Exception as e:
             st.error(f"❌ 一括再分析中にエラーが発生しました: {e}")
+    
+    def _execute_conversation_migration(self, project_id: str):
+        """会話ログ移行の実行"""
+        try:
+            from core.conversation_migrator import create_migrator
+            
+            with st.spinner("会話ログを移行中..."):
+                migrator = create_migrator()
+                result = migrator.migrate_conversations_for_project(project_id)
+            
+            if result["success"]:
+                migrated_dates = result.get("migrated_dates", [])
+                st.success(f"✅ 移行完了: {len(migrated_dates)}日分の会話ログを移行しました")
+                
+                if migrated_dates:
+                    st.info(f"📅 移行された日付: {', '.join(migrated_dates)}")
+                    st.info("🔄 ページを更新して再分析機能をお試しください")
+                    st.rerun()
+                else:
+                    st.warning("⚠️ このプロジェクト関連の会話ログが見つかりませんでした")
+            else:
+                st.error(f"❌ 移行に失敗: {result['message']}")
+        
+        except Exception as e:
+            st.error(f"❌ 移行中にエラーが発生しました: {e}")
 
 def render_reanalysis_interface(project_id: str):
     """再分析インターフェースの描画（関数版）"""
