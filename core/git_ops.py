@@ -82,9 +82,24 @@ def try_git_commit(file_path: str) -> None:
 # 会話ログ 1 ファイルを即時 push（新規）
 # ---------------------------------------------------------------------------
 
-def commit_and_push_log(log_path: str) -> None:
+def commit_and_push_log(log_path: str = None) -> bool:
     """JSON 会話ログファイルを 1 会話ごとに即 push するヘルパ"""
-    try_git_commit(log_path)
+    try:
+        if log_path:
+            try_git_commit(log_path)
+        else:
+            # 今日の会話ログを自動検出してコミット
+            from datetime import datetime
+            from zoneinfo import ZoneInfo
+            _JST = ZoneInfo("Asia/Tokyo")
+            today = datetime.now(_JST).strftime("%Y%m%d")
+            log_file = CONV_DIR / f"conversation_{today}.json"
+            if log_file.exists():
+                try_git_commit(str(log_file))
+        return True
+    except Exception as e:
+        print(f"❌ 会話ログのコミット失敗: {e}", flush=True)
+        return False
 
 # ---------------------------------------------------------------------------
 # 未処理ログチェック (JSON 版)
@@ -126,6 +141,34 @@ def check_unprocessed_logs() -> None:
 # 重要ファイル一括 push (glob パターン更新)
 # ---------------------------------------------------------------------------
 
+def commit_and_push_project_data(project_id: str) -> bool:
+    """プロジェクトデータと関連ファイルをコミット・プッシュ"""
+    try:
+        subprocess.run(["git", "config", "--global", "user.name", "Kai Bot"], check=True)
+        subprocess.run(["git", "config", "--global", "user.email", "kai@example.com"], check=True)
+        
+        # プロジェクトファイル
+        project_file = f"data/projects/{project_id}.json"
+        subprocess.run(["git", "add", project_file], check=True)
+        
+        # プロジェクト固有会話ログ
+        project_conv_dir = f"data/conversations/{project_id}/"
+        subprocess.run(["git", "add", project_conv_dir], check=True)
+        
+        # コミット
+        commit_msg = f"Update project {project_id} data and conversations"
+        subprocess.run(["git", "commit", "-m", commit_msg], capture_output=True)
+        
+        # プッシュ
+        subprocess.run(["git", "push", f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"], check=True)
+        
+        print(f"✅ プロジェクト {project_id} のデータをプッシュしました", flush=True)
+        return True
+        
+    except subprocess.CalledProcessError as e:
+        print(f"❌ プロジェクトデータのプッシュ失敗: {e}", flush=True)
+        return False
+
 @kai_capability(
     id="push_all_files",
     name="重要ファイル全体をGit Push",
@@ -139,6 +182,8 @@ def push_all_important_files() -> None:
 
         include_paths = [
             "data/*.json",
+            "data/projects/*.json",
+            "data/conversations/**/*",  # プロジェクト固有ログも含める
             "data/structure_snapshot.json",
             "output/*.json",
             "conversations/*.json",  # ← md → json

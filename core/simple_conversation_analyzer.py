@@ -103,7 +103,7 @@ class SimpleConversationAnalyzer:
                 }, updated_count
             
             # 更新を適用
-            updated_count = self._apply_updates(current_fields, updates["fields"], current_project_data)
+            updated_count = self._apply_updates(current_fields, updates["fields"])
             
             # ファイルを保存
             if updated_count > 0:
@@ -112,6 +112,17 @@ class SimpleConversationAnalyzer:
                     json.dump(current_project_data, f, ensure_ascii=False, indent=2)
                 
                 logger.info(f"Updated {updated_count} fields in project {project_id}")
+                
+                # プロジェクトデータをGitにプッシュ
+                try:
+                    from core.git_ops import commit_and_push_project_data
+                    push_success = commit_and_push_project_data(project_id)
+                    if push_success:
+                        logger.info(f"Successfully pushed project {project_id} updates to Git")
+                    else:
+                        logger.warning(f"Failed to push project {project_id} updates to Git")
+                except Exception as e:
+                    logger.error(f"Error pushing project updates to Git: {e}")
             
             return {
                 "success": True, 
@@ -214,7 +225,7 @@ class SimpleConversationAnalyzer:
             logger.debug(f"Response text: {response_text}")
             return {}
     
-    def _apply_updates(self, current_fields: Dict, updates: Dict, project_data: Dict) -> int:
+    def _apply_updates(self, current_fields: Dict, updates: Dict) -> int:
         """更新を適用"""
         updated_count = 0
         

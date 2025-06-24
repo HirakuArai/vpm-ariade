@@ -28,7 +28,7 @@ st.set_page_config(page_title="Kai VPM", page_icon="💬", initial_sidebar_state
 # ────────────────────────────────────────────────────────────────────────────
 # Kai modules
 # ────────────────────────────────────────────────────────────────────────────
-from core.git_ops import commit_and_push_log  # ← NEW: auto‑push helper
+from core.git_ops import commit_and_push_log, commit_and_push_project_data  # ← NEW: auto‑push helpers
 from core.minutes_utils import generate_daily_minutes, safe_push_minutes
 from utils.render_minutes import render_md
 from core.project_service import create_project, set_status, add_task, apply_updates
@@ -524,13 +524,22 @@ def process_chat_input(user_input: str):
     
     # Auto-push after conversation
     try:
+        # Push global conversation log
         success = commit_and_push_log()
         if success:
             logger.info("Successfully pushed conversation log to git")
         else:
             logger.warning("Failed to push conversation log to git")
+        
+        # Push project-specific data if project is selected
+        if current_project_id:
+            project_success = commit_and_push_project_data(current_project_id)
+            if project_success:
+                logger.info(f"Successfully pushed project {current_project_id} data to git")
+            else:
+                logger.warning(f"Failed to push project {current_project_id} data to git")
     except Exception as e:
-        logger.error(f"Error pushing conversation log: {e}")
+        logger.error(f"Error pushing to git: {e}")
     
     # Rerun to display the new messages
     st.rerun()

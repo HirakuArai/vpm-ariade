@@ -132,6 +132,17 @@ class ConversationReanalyzer:
                 # 6. 再分析メタデータの記録
                 self._record_reanalysis_metadata(project_id, date_str, updated_count)
                 
+                # 7. プロジェクトデータをGitにプッシュ
+                try:
+                    from core.git_ops import commit_and_push_project_data
+                    push_success = commit_and_push_project_data(project_id)
+                    if push_success:
+                        logger.info(f"Successfully pushed reanalysis results for {project_id} to Git")
+                    else:
+                        logger.warning(f"Failed to push reanalysis results for {project_id} to Git")
+                except Exception as e:
+                    logger.error(f"Error pushing reanalysis results to Git: {e}")
+                
                 return {
                     "success": True,
                     "message": f"Successfully reanalyzed {date_str}",
