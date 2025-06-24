@@ -151,21 +151,24 @@ def load_project_conversation_history(project_id: str) -> List[Dict]:
     history = []
     
     if project_conv_dir.exists():
-        # 最新の会話ログファイルを取得
-        today = datetime.now(_JST).strftime("%Y%m%d")
-        log_file = project_conv_dir / f"{today}.jsonl"
+        # 全ての会話ログファイルを取得して日付順にソート
+        log_files = sorted([f for f in project_conv_dir.glob("*.jsonl")])
         
-        if log_file.exists():
+        # 最近の3日分のファイルのみを読み込み（パフォーマンス考慮）
+        recent_files = log_files[-3:] if len(log_files) > 3 else log_files
+        
+        for log_file in recent_files:
             try:
                 with open(log_file, 'r', encoding='utf-8') as f:
                     for line in f:
-                        entry = json.loads(line.strip())
-                        history.append({
-                            "role": entry["role"],
-                            "content": entry["content"]
-                        })
+                        if line.strip():  # 空行をスキップ
+                            entry = json.loads(line.strip())
+                            history.append({
+                                "role": entry["role"],
+                                "content": entry["content"]
+                            })
             except Exception as e:
-                print(f"Error loading project history: {e}")
+                print(f"Error loading project history from {log_file}: {e}")
     
     return history
 
