@@ -175,7 +175,10 @@ class ProjectInfoPage:
                     st.chat_message(role).markdown(msg["content"])
                 
                 if len(project_history) > 10:
-                    st.caption(f"（{len(project_history)}件中、最新10件を表示）")
+                    # 会話セット数を計算
+                    total_conversations = len([msg for msg in project_history if msg["role"] == "user"])
+                    displayed_conversations = len([msg for msg in project_history[-10:] if msg["role"] == "user"])
+                    st.caption(f"（{total_conversations}会話中、最新{displayed_conversations}会話を表示）")
             else:
                 st.info("このプロジェクトではまだ会話がありません")
         
@@ -191,28 +194,28 @@ class ProjectInfoPage:
     def _load_project_conversation_history(project_id: str) -> List[Dict]:
         """プロジェクト固有の会話履歴を読み込み"""
         from pathlib import Path
-        from datetime import datetime
-        from zoneinfo import ZoneInfo
         import json
         
-        _JST = ZoneInfo("Asia/Tokyo")
         project_conv_dir = Path(f"data/conversations/{project_id}")
         history = []
         
         if project_conv_dir.exists():
-            # 最新の会話ログファイルを取得
-            today = datetime.now(_JST).strftime("%Y%m%d")
-            log_file = project_conv_dir / f"{today}.jsonl"
+            # 全ての会話ログファイルを取得して日付順にソート
+            log_files = sorted([f for f in project_conv_dir.glob("*.jsonl")])
             
-            if log_file.exists():
+            # 最近の3日分のファイルのみを読み込み（パフォーマンス考慮）
+            recent_files = log_files[-3:] if len(log_files) > 3 else log_files
+            
+            for log_file in recent_files:
                 try:
                     with open(log_file, 'r', encoding='utf-8') as f:
                         for line in f:
-                            entry = json.loads(line.strip())
-                            history.append({
-                                "role": entry["role"],
-                                "content": entry["content"]
-                            })
+                            if line.strip():  # 空行をスキップ
+                                entry = json.loads(line.strip())
+                                history.append({
+                                    "role": entry["role"],
+                                    "content": entry["content"]
+                                })
                 except Exception as e:
                     st.error(f"会話履歴の読み込みエラー: {e}")
         
@@ -517,17 +520,25 @@ class ConversationHistoryPage:
                 return
             
             # 統計情報
-            col1, col2, col3 = st.columns(3)
+            col1, col2, col3, col4 = st.columns(4)
             
             with col1:
                 total_messages = sum(len(conv["messages"]) for conv in conversations)
                 st.metric("総メッセージ数", total_messages)
             
             with col2:
+                # 総会話数（userメッセージの合計）
+                total_conversations = sum(
+                    len([msg for msg in conv["messages"] if msg.get("role") == "user"]) 
+                    for conv in conversations
+                )
+                st.metric("総会話数", total_conversations)
+            
+            with col3:
                 total_days = len(conversations)
                 st.metric("会話日数", f"{total_days}日")
             
-            with col3:
+            with col4:
                 if conversations:
                     latest_date = max(conv["date"] for conv in conversations)
                     st.metric("最新会話", latest_date)
@@ -544,7 +555,10 @@ class ConversationHistoryPage:
                 date_str = conversation["date"]
                 messages = conversation["messages"]
                 
-                with st.expander(f"📅 {date_str} ({len(messages)}件)", expanded=False):
+                # 会話数を計算（userメッセージの数 = 会話セット数）
+                conversation_count = len([msg for msg in messages if msg.get("role") == "user"])
+                
+                with st.expander(f"📅 {date_str} ({conversation_count}会話)", expanded=False):
                     for msg in messages:
                         timestamp = msg.get("timestamp", "")
                         role = msg.get("role", "unknown")
