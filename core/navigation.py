@@ -62,6 +62,10 @@ class HierarchicalNavigator:
                 selected_project_id=None,
                 project_sub_page=None
             )
+        else:
+            # 既存の状態でもcurrent_pageがNoneの場合はHOMEに設定
+            if st.session_state.navigation_state.current_page is None:
+                st.session_state.navigation_state.current_page = PageType.HOME
         
         # Backward compatibility
         if "current_project_id" not in st.session_state:
@@ -175,10 +179,15 @@ class HierarchicalNavigator:
     
     def render_page_header(self):
         """ページヘッダーの描画"""
+        # セッション状態の検証とデバッグ
+        if not hasattr(st.session_state, 'navigation_state'):
+            self.initialize_session_state()
+        
         config = self.get_current_page_config()
         current_page = st.session_state.navigation_state.current_page
         
-        if current_page == PageType.HOME:
+        # デバッグ: current_pageの型と値を確認
+        if current_page == PageType.HOME or current_page == "home":
             st.title("💬 Kai VPM - AI Project Manager")
             
             # 選択されたプロジェクトがある場合、プロジェクト情報を表示
