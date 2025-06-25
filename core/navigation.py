@@ -16,6 +16,8 @@ class PageType(Enum):
     """ページタイプの定義"""
     HOME = "home"
     PROJECT_INFO = "project_info"
+    PROJECT_DETAILS = "project_details"
+    PROJECT_CHAT = "project_chat"
     PHASE_PROGRESS = "phase_progress"
     CONVERSATION_HISTORY = "conversation_history"
     SCHEDULE_MANAGEMENT = "schedule_management"
@@ -43,6 +45,16 @@ class HierarchicalNavigator:
             PageType.PROJECT_INFO: {
                 "title": "📋 プロジェクト情報",
                 "description": "情報収集状況と詳細",
+                "requires_project": True
+            },
+            PageType.PROJECT_DETAILS: {
+                "title": "📄 プロジェクト詳細",
+                "description": "プロジェクトの詳細ドキュメント",
+                "requires_project": True
+            },
+            PageType.PROJECT_CHAT: {
+                "title": "💬 プロジェクト会話",
+                "description": "プロジェクトについて質問・相談",
                 "requires_project": True
             },
             PageType.PHASE_PROGRESS: {
@@ -100,7 +112,6 @@ class HierarchicalNavigator:
                         type="primary" if st.session_state.navigation_state.current_page == PageType.HOME else "secondary"):
                 st.session_state.navigation_state.current_page = PageType.HOME
                 st.session_state.navigation_state.selected_project_id = None
-                st.rerun()
             
             # グローバルページ（プロジェクト非依存）
             global_pages = [
@@ -116,7 +127,6 @@ class HierarchicalNavigator:
                 if st.button(config["title"], use_container_width=True, type=button_type):
                     st.session_state.navigation_state.current_page = page_type
                     st.session_state.navigation_state.selected_project_id = None
-                    st.rerun()
             
             st.divider()
             
@@ -143,7 +153,6 @@ class HierarchicalNavigator:
                         
                         # デフォルトでプロジェクト情報ページを表示
                         st.session_state.navigation_state.current_page = PageType.PROJECT_INFO
-                        st.rerun()
                     
                     # プロジェクトが選択されている場合、サブメニューを表示
                     if is_selected:
@@ -151,6 +160,8 @@ class HierarchicalNavigator:
                         
                         project_pages = [
                             PageType.PROJECT_INFO,
+                            PageType.PROJECT_DETAILS,
+                            PageType.PROJECT_CHAT,
                             PageType.PHASE_PROGRESS,
                             PageType.CONVERSATION_HISTORY
                         ]
@@ -166,7 +177,6 @@ class HierarchicalNavigator:
                                 if st.button(config["title"], use_container_width=True, 
                                            type=button_type, key=f"sub_{page_type.value}_{project_id}"):
                                     st.session_state.navigation_state.current_page = page_type
-                                    st.rerun()
         
         return st.session_state.navigation_state
     
