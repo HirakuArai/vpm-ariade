@@ -499,12 +499,12 @@ def render_home_page():
         
     else:
         st.info("💡 左サイドバーからプロジェクトを選択するか、「プロジェクト作成」と入力して新しいプロジェクトを作成してください。")
-    
-    # セッション履歴表示
-    if st.session_state.get("history"):
-        st.markdown("### 💬 現在のセッション")
-        for msg in st.session_state["history"]:
-            st.chat_message("user" if msg["role"] == "user" else "assistant").markdown(msg["content"])
+        
+        # セッション履歴表示（プロジェクト未選択時のみ）
+        if st.session_state.get("history"):
+            st.markdown("### 💬 現在のセッション")
+            for msg in st.session_state["history"]:
+                st.chat_message("user" if msg["role"] == "user" else "assistant").markdown(msg["content"])
 
 
 def render_chat_interface():
