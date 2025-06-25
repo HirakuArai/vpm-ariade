@@ -623,42 +623,65 @@ class ProjectDetailsPage:
                 st.error("プロジェクトデータが見つかりません")
                 return
             
-            # 基本情報セクション
-            st.markdown("### 🎯 プロジェクト基本情報")
-            ProjectDetailsPage._render_basic_info(project_data)
+            # AIによるプロジェクト説明生成
+            with st.spinner("🤖 AIがプロジェクト詳細を整理中..."):
+                detailed_description = ProjectDetailsPage._generate_ai_description(project_id, project_data)
             
-            # チャーター情報
-            if "charter" in project_data:
-                st.markdown("### 📜 チャーター情報")
-                ProjectDetailsPage._render_charter_info(project_data["charter"])
-            
-            # ダイナミックスキーマ情報
-            if "dynamic_schema" in project_data:
-                st.markdown("### 📋 フィールド情報")
-                ProjectDetailsPage._render_schema_fields(project_data["dynamic_schema"])
-            
-            # タスク情報
-            if "tasks" in project_data and project_data["tasks"]:
-                st.markdown("### 📋 タスク一覧")
-                ProjectDetailsPage._render_tasks(project_data["tasks"])
-            
-            # チーム情報
-            if "team" in project_data and project_data["team"]:
-                st.markdown("### 👥 チームメンバー")
-                ProjectDetailsPage._render_team(project_data["team"])
-            
-            # 機器・設備情報
-            if "equipment_list" in project_data and project_data["equipment_list"]:
-                st.markdown("### 🔧 機器・設備")
-                ProjectDetailsPage._render_equipment(project_data["equipment_list"])
-            
-            # 更新履歴
-            if "updates" in project_data and project_data["updates"]:
-                st.markdown("### 📝 更新履歴")
-                ProjectDetailsPage._render_update_history(project_data["updates"])
+            # AI生成の説明を表示
+            if detailed_description:
+                st.markdown(detailed_description)
+            else:
+                st.error("AIによるプロジェクト説明の生成に失敗しました")
+                
+            # 生データ表示オプション
+            with st.expander("🔍 生データを確認", expanded=False):
+                st.json(project_data)
             
         except Exception as e:
             st.error(f"プロジェクト詳細の読み込みに失敗しました: {e}")
+    
+    @staticmethod
+    def _generate_ai_description(project_id: str, project_data: Dict) -> str:
+        """プロジェクト詳細のAI生成"""
+        try:
+            import openai
+            
+            # プロンプトの作成
+            prompt = f"""
+以下のプロジェクトデータJSONを基に、プロジェクトの詳細をわかりやすく説明してください。
+
+説明には以下の要素を含めてください：
+1. プロジェクトの概要と目的
+2. 現在の状況と進捗
+3. 主要なステークホルダー
+4. 重要なマイルストーンと期限
+5. リスクと課題
+6. チーム構成と役割
+7. 最新の更新内容
+
+マークダウン形式で、見出しや箇条書きを使って読みやすく整理してください。
+絵文字も適切に使用してください。
+
+プロジェクトデータ:
+{json.dumps(project_data, ensure_ascii=False, indent=2)}
+"""
+            
+            # OpenAI APIを使用して説明を生成
+            response = openai.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "あなたはプロジェクトマネジメントの専門家で、複雑なプロジェクト情報をわかりやすく整理して説明することが得意です。"},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7,
+                max_tokens=2000
+            )
+            
+            return response.choices[0].message.content
+            
+        except Exception as e:
+            st.error(f"AI説明の生成エラー: {e}")
+            return None
     
     @staticmethod
     def _load_project_data(project_id: str) -> Optional[Dict]:
@@ -673,240 +696,6 @@ class ProjectDetailsPage:
             st.error(f"プロジェクトファイルの読み込みエラー: {e}")
             return None
     
-    @staticmethod
-    def _render_basic_info(project_data: Dict):
-        """基本情報の表示"""
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.write(f"**プロジェクトID**: {project_data.get('identifier', 'N/A')}")
-            st.write(f"**表示名**: {project_data.get('display_name', 'N/A')}")
-            st.write(f"**ステータス**: {project_data.get('status', 'N/A')}")
-            st.write(f"**フェーズ**: {project_data.get('phase', 'N/A')}")
-        
-        with col2:
-            st.write(f"**作成日**: {project_data.get('created_at', 'N/A')}")
-            st.write(f"**更新日**: {project_data.get('updated_at', 'N/A')}")
-            st.write(f"**完了率**: {project_data.get('completion_percentage', 0):.1f}%")
-        
-        if "overview" in project_data:
-            st.write("**概要**:")
-            st.info(project_data["overview"])
-    
-    @staticmethod
-    def _render_charter_info(charter: Dict):
-        """チャーター情報の表示"""
-        with st.expander("📜 チャーター詳細", expanded=True):
-            # 基本情報
-            st.write(f"**プロジェクト名**: {charter.get('name', 'N/A')}")
-            st.write(f"**目的**: {charter.get('purpose', 'N/A')}")
-            
-            # 成果物
-            if "outcomes" in charter and charter["outcomes"]:
-                st.write("**成果物**:")
-                for outcome in charter["outcomes"]:
-                    st.write(f"- {outcome}")
-            
-            # スコープ
-            if "scope" in charter:
-                col1, col2 = st.columns(2)
-                with col1:
-                    if "in" in charter["scope"] and charter["scope"]["in"]:
-                        st.write("**スコープ内**:")
-                        for item in charter["scope"]["in"]:
-                            st.write(f"- ✅ {item}")
-                
-                with col2:
-                    if "out" in charter["scope"] and charter["scope"]["out"]:
-                        st.write("**スコープ外**:")
-                        for item in charter["scope"]["out"]:
-                            st.write(f"- ❌ {item}")
-            
-            # ステークホルダー
-            if "stakeholders" in charter and charter["stakeholders"]:
-                st.write("**ステークホルダー**:")
-                stakeholder_data = []
-                for sh in charter["stakeholders"]:
-                    if isinstance(sh, dict):
-                        stakeholder_data.append({
-                            "名前": sh.get("name", "N/A"),
-                            "役割": sh.get("role", "N/A"),
-                            "関心事項": sh.get("interest", "N/A")
-                        })
-                    else:
-                        stakeholder_data.append({"名前": str(sh), "役割": "-", "関心事項": "-"})
-                
-                if stakeholder_data:
-                    import pandas as pd
-                    df = pd.DataFrame(stakeholder_data)
-                    st.dataframe(df, use_container_width=True)
-            
-            # 制約条件
-            if "constraints" in charter:
-                st.write("**制約条件**:")
-                constraints = charter["constraints"]
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.metric("予算", constraints.get("budget", "N/A"))
-                with col2:
-                    st.metric("期限", constraints.get("deadline", "N/A"))
-                with col3:
-                    if "tools" in constraints and constraints["tools"]:
-                        st.write("**ツール**:")
-                        for tool in constraints["tools"]:
-                            st.write(f"- {tool}")
-            
-            # マイルストーン
-            if "milestones" in charter and charter["milestones"]:
-                st.write("**マイルストーン**:")
-                milestone_data = []
-                for ms in charter["milestones"]:
-                    if isinstance(ms, dict):
-                        milestone_data.append({
-                            "マイルストーン": ms.get("name", "N/A"),
-                            "期限": ms.get("date", "N/A"),
-                            "成果物": ms.get("deliverable", "N/A")
-                        })
-                    else:
-                        milestone_data.append({"マイルストーン": str(ms), "期限": "-", "成果物": "-"})
-                
-                if milestone_data:
-                    import pandas as pd
-                    df = pd.DataFrame(milestone_data)
-                    st.dataframe(df, use_container_width=True)
-            
-            # 成功指標
-            if "success_metrics" in charter and charter["success_metrics"]:
-                st.write("**成功指標**:")
-                for metric in charter["success_metrics"]:
-                    st.write(f"- 📈 {metric}")
-            
-            # リスク
-            if "risks" in charter and charter["risks"]:
-                st.write("**リスク**:")
-                for risk in charter["risks"]:
-                    if isinstance(risk, dict):
-                        st.write(f"- ⚠️ {risk.get('description', risk)}")
-                    else:
-                        st.write(f"- ⚠️ {risk}")
-    
-    @staticmethod
-    def _render_schema_fields(schema: Dict):
-        """ダイナミックスキーマフィールドの表示"""
-        if "fields" not in schema:
-            return
-        
-        fields = schema["fields"]
-        
-        # ステータスごとにフィールドをグループ化
-        defined_fields = []
-        partial_fields = []
-        undefined_fields = []
-        
-        for field_name, field_info in fields.items():
-            field_data = {
-                "フィールド名": field_info.get("name", field_name),
-                "値": field_info.get("value", "未設定"),
-                "ステータス": field_info.get("status", "UNDEFINED"),
-                "優先度": field_info.get("priority", "OPTIONAL")
-            }
-            
-            if field_info.get("status") == "DEFINED" or field_info.get("status") == "CONFIRMED":
-                defined_fields.append(field_data)
-            elif field_info.get("status") == "PARTIAL":
-                partial_fields.append(field_data)
-            else:
-                undefined_fields.append(field_data)
-        
-        # 定義済みフィールド
-        if defined_fields:
-            st.write("🔵 **定義済みフィールド**")
-            import pandas as pd
-            df = pd.DataFrame(defined_fields)
-            st.dataframe(df, use_container_width=True)
-        
-        # 部分定義フィールド
-        if partial_fields:
-            st.write("🟡 **部分定義フィールド**")
-            import pandas as pd
-            df = pd.DataFrame(partial_fields)
-            st.dataframe(df, use_container_width=True)
-        
-        # 未定義フィールド
-        if undefined_fields:
-            st.write("⚪ **未定義フィールド**")
-            import pandas as pd
-            df = pd.DataFrame(undefined_fields)
-            st.dataframe(df, use_container_width=True)
-    
-    @staticmethod
-    def _render_tasks(tasks: List[Dict]):
-        """タスク一覧の表示"""
-        task_data = []
-        for task in tasks:
-            task_data.append({
-                "ID": task.get("id", "N/A"),
-                "タスク名": task.get("name", "N/A"),
-                "ステータス": task.get("status", "N/A"),
-                "期限": task.get("due_date", "N/A"),
-                "担当者": task.get("assignee", "N/A")
-            })
-        
-        if task_data:
-            import pandas as pd
-            df = pd.DataFrame(task_data)
-            st.dataframe(df, use_container_width=True)
-    
-    @staticmethod
-    def _render_team(team: List[Dict]):
-        """チーム情報の表示"""
-        team_data = []
-        for member in team:
-            team_data.append({
-                "名前": member.get("name", "N/A"),
-                "役割": member.get("role", "N/A"),
-                "スキル": ", ".join(member.get("skills", [])),
-                "可用性": member.get("availability", "N/A")
-            })
-        
-        if team_data:
-            import pandas as pd
-            df = pd.DataFrame(team_data)
-            st.dataframe(df, use_container_width=True)
-    
-    @staticmethod
-    def _render_equipment(equipment_list: List[Dict]):
-        """機器・設備情報の表示"""
-        equipment_data = []
-        for equipment in equipment_list:
-            equipment_data.append({
-                "機器名": equipment.get("name", "N/A"),
-                "種類": equipment.get("type", "N/A"),
-                "ステータス": equipment.get("status", "N/A"),
-                "場所": equipment.get("location", "N/A")
-            })
-        
-        if equipment_data:
-            import pandas as pd
-            df = pd.DataFrame(equipment_data)
-            st.dataframe(df, use_container_width=True)
-    
-    @staticmethod
-    def _render_update_history(updates: List[Dict]):
-        """更新履歴の表示"""
-        # 最新から表示
-        for update in reversed(updates[-5:]):  # 最新5件まで
-            timestamp = update.get("timestamp", "N/A")
-            changes = update.get("changes", {})
-            
-            with st.expander(f"🗓️ {timestamp}", expanded=False):
-                for field, change in changes.items():
-                    st.write(f"**{field}**:")
-                    if isinstance(change, dict) and "old" in change and "new" in change:
-                        st.write(f"- 前: {change['old']}")
-                        st.write(f"- 後: {change['new']}")
-                    else:
-                        st.write(f"- {change}")
 
 
 class ProjectChatPage:
