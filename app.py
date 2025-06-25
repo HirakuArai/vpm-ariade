@@ -43,7 +43,7 @@ try:
     from core.models import ProjectPhase
     from core.ui_components import ProjectVisualization, QuestionVisualization, InteractiveComponents, StatusIndicators
     from core.navigation import navigator, PageType
-    from core.pages import ProjectInfoPage, ProjectDetailsPage, ProjectChatPage, ConversationHistoryPage
+    from core.pages import ProjectDetailsPage, ProjectChatPage, ConversationHistoryPage
 except (ImportError, KeyError) as e:
     logger.error(f"Failed to import Kai modules: {e}")
     st.error(f"モジュールの読み込みに失敗しました: {e}")
@@ -358,13 +358,7 @@ def render_page_content():
     current_page = nav_state.current_page
     selected_project = nav_state.selected_project_id
     
-    if current_page == PageType.PROJECT_INFO:
-        if selected_project:
-            ProjectInfoPage.render(selected_project)
-        else:
-            st.warning("プロジェクトを選択してください")
-    
-    elif current_page == PageType.PROJECT_DETAILS:
+    if current_page == PageType.PROJECT_DETAILS:
         if selected_project:
             ProjectDetailsPage.render(selected_project)
         else:
@@ -416,6 +410,55 @@ def render_home_page():
                 current_phase = lifecycle_manager.get_current_phase(current_project_id)
                 progress_info = lifecycle_manager.get_phase_progress(current_project_id)
                 StatusIndicators.render_phase_progression(current_phase, progress_info)
+                
+                # フェーズ制御
+                st.markdown("#### 🎮 フェーズ制御")
+                col1, col2 = st.columns(2)
+                
+                can_advance = progress_info.get("can_advance", False)
+                
+                with col1:
+                    if can_advance:
+                        if st.button("⏭️ 次のフェーズへ進む", type="primary", key="home_advance_phase"):
+                            try:
+                                result = lifecycle_manager.advance_phase(current_project_id)
+                                if result.get("success"):
+                                    st.success(f"✅ {result.get('new_phase')} フェーズに進みました！")
+                                    st.rerun()
+                                else:
+                                    st.error(f"❌ フェーズ進行に失敗: {result.get('message')}")
+                            except Exception as e:
+                                st.error(f"❌ エラーが発生しました: {e}")
+                    else:
+                        st.button("⏭️ 次のフェーズへ進む", disabled=True, key="home_advance_phase_disabled")
+                        st.caption("進行条件が満たされていません")
+                
+                with col2:
+                    if st.button("🔄 フェーズ条件を再評価", key="home_reevaluate_phase"):
+                        try:
+                            progress_info = lifecycle_manager.get_phase_progress(current_project_id)
+                            if progress_info.get("can_advance"):
+                                st.success("✅ 次のフェーズに進む準備ができています！")
+                            else:
+                                missing = progress_info.get("missing_requirements", [])
+                                if missing:
+                                    st.warning(f"⚠️ 不足要件: {', '.join(missing)}")
+                                else:
+                                    st.info("ℹ️ まだ進行条件が満たされていません")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"❌ 評価中にエラーが発生しました: {e}")
+            
+            # 推奨アクション
+            with st.expander("💡 推奨アクション", expanded=False):
+                pending_questions = schema.get_pending_questions(max_questions=5)
+                
+                if pending_questions:
+                    st.info("💬 **次の会話で聞いてみましょう:**")
+                    for field_name, questions in pending_questions:
+                        st.write(f"**{field_name}**: {questions[0]}")
+                else:
+                    st.success("🎉 必要な情報がすべて収集されています！")
             
         except Exception as e:
             logger.error(f"Error rendering project visualization: {e}")

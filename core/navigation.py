@@ -42,11 +42,6 @@ class HierarchicalNavigator:
                 "description": "メイン会話ページ",
                 "requires_project": False
             },
-            PageType.PROJECT_INFO: {
-                "title": "📊 プロジェクト状況",
-                "description": "情報収集状況と詳細",
-                "requires_project": True
-            },
             PageType.PROJECT_DETAILS: {
                 "title": "📄 プロジェクト詳細",
                 "description": "プロジェクトの詳細ドキュメント",
@@ -153,8 +148,8 @@ class HierarchicalNavigator:
                         st.session_state.navigation_state.selected_project_id = project_id
                         st.session_state.current_project_id = project_id  # Backward compatibility
                         
-                        # デフォルトでプロジェクト情報ページを表示
-                        st.session_state.navigation_state.current_page = PageType.PROJECT_INFO
+                        # ホームページに戻る（プロジェクト概要表示）
+                        st.session_state.navigation_state.current_page = PageType.HOME
                         st.rerun()
                     
                     # プロジェクトが選択されている場合、サブメニューを表示
@@ -162,7 +157,6 @@ class HierarchicalNavigator:
                         st.markdown("  ")  # 少しスペース
                         
                         project_pages = [
-                            PageType.PROJECT_INFO,
                             PageType.PROJECT_DETAILS,
                             PageType.PROJECT_CHAT,
                             PageType.CONVERSATION_HISTORY
