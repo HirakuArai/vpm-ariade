@@ -43,7 +43,7 @@ class HierarchicalNavigator:
                 "requires_project": False
             },
             PageType.PROJECT_INFO: {
-                "title": "📋 プロジェクト情報",
+                "title": "📊 プロジェクト状況",
                 "description": "情報収集状況と詳細",
                 "requires_project": True
             },

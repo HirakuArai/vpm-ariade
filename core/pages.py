@@ -89,13 +89,9 @@ class ProjectInfoPage:
             else:
                 st.success("🎉 必要な情報がすべて収集されています！")
             
-            # プロジェクト専用会話インターフェース
-            st.divider()
-            st.markdown("### 💬 プロジェクト会話")
-            ProjectInfoPage._render_project_chat_interface(project_id)
                 
         except Exception as e:
-            st.error(f"プロジェクト情報の読み込みに失敗しました: {e}")
+            st.error(f"プロジェクト状況の読み込みに失敗しました: {e}")
     
     @staticmethod
     def _get_project_data(project_id: str) -> Dict:
@@ -158,86 +154,6 @@ class ProjectInfoPage:
         except Exception as e:
             st.error(f"再分析機能の読み込みに失敗しました: {e}")
     
-    @staticmethod
-    def _render_project_chat_interface(project_id: str):
-        """プロジェクト専用会話インターフェース"""
-        import streamlit as st
-        
-        # プロジェクト固有の会話履歴を表示
-        project_history = ProjectInfoPage._load_project_conversation_history(project_id)
-        
-        # 履歴表示コンテナ
-        with st.container():
-            if project_history:
-                st.markdown("#### 💭 最近の会話")
-                # 最新10件の会話を表示
-                for msg in project_history[-10:]:
-                    role = "user" if msg["role"] == "user" else "assistant"
-                    st.chat_message(role).markdown(msg["content"])
-                
-                if len(project_history) > 10:
-                    # 会話セット数を計算
-                    total_conversations = len([msg for msg in project_history if msg["role"] == "user"])
-                    displayed_conversations = len([msg for msg in project_history[-10:] if msg["role"] == "user"])
-                    st.caption(f"（{total_conversations}会話中、最新{displayed_conversations}会話を表示）")
-            else:
-                st.info("このプロジェクトではまだ会話がありません")
-        
-        # 会話入力
-        st.markdown("#### ✏️ プロジェクトについて質問・相談")
-        user_input = st.chat_input(f"プロジェクト「{project_id}」について質問してください...")
-        
-        if user_input:
-            # app.pyの会話処理と同じロジックを呼び出し
-            ProjectInfoPage._process_project_chat(project_id, user_input)
-    
-    @staticmethod
-    def _load_project_conversation_history(project_id: str) -> List[Dict]:
-        """プロジェクト固有の会話履歴を読み込み"""
-        from pathlib import Path
-        import json
-        
-        project_conv_dir = Path(f"data/conversations/{project_id}")
-        history = []
-        
-        if project_conv_dir.exists():
-            # 全ての会話ログファイルを取得して日付順にソート
-            log_files = sorted([f for f in project_conv_dir.glob("*.jsonl")])
-            
-            # 最近の3日分のファイルのみを読み込み（パフォーマンス考慮）
-            recent_files = log_files[-3:] if len(log_files) > 3 else log_files
-            
-            for log_file in recent_files:
-                try:
-                    with open(log_file, 'r', encoding='utf-8') as f:
-                        for line in f:
-                            if line.strip():  # 空行をスキップ
-                                entry = json.loads(line.strip())
-                                history.append({
-                                    "role": entry["role"],
-                                    "content": entry["content"]
-                                })
-                except Exception as e:
-                    st.error(f"会話履歴の読み込みエラー: {e}")
-        
-        return history
-    
-    @staticmethod  
-    def _process_project_chat(project_id: str, user_input: str):
-        """プロジェクト専用会話処理"""
-        import streamlit as st
-        
-        # ナビゲーション状態を更新してプロジェクトを選択
-        if hasattr(st.session_state, 'navigation_state'):
-            st.session_state.navigation_state.selected_project_id = project_id
-        st.session_state["current_project_id"] = project_id  # 後方互換性
-        
-        # 会話処理を実行
-        try:
-            from core.chat_processor import process_project_chat_input
-            process_project_chat_input(project_id, user_input)
-        except Exception as e:
-            st.error(f"会話処理中にエラーが発生しました: {e}")
 
 class PhaseProgressPage:
     """フェーズ進捗ページ"""
