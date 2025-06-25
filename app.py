@@ -28,21 +28,32 @@ st.set_page_config(page_title="Kai VPM", page_icon="💬", initial_sidebar_state
 # ────────────────────────────────────────────────────────────────────────────
 # Kai modules
 # ────────────────────────────────────────────────────────────────────────────
-from core.git_ops import commit_and_push_log, commit_and_push_project_data  # ← NEW: auto‑push helpers
-from core.minutes_utils import generate_daily_minutes, safe_push_minutes
-from utils.render_minutes import render_md
-from core.project_service import create_project, set_status, add_task, apply_updates
-from core.project_diff import generate_update_candidates, extract_new_data_from_chat, generate_diff_summary, validate_update_candidate
-from core.project_prompt import get_project_prompt, get_available_project_ids, get_project_summary
-from core.lifecycle_manager import ProjectLifecycleManager
-from core.conversation_engine import PhaseAwareConversationEngine
-from core.auto_update_engine import AutoUpdateEngine
-from core.progress_monitor import ProgressMonitor
-from core.notification_system import NotificationSystem
-from core.models import ProjectPhase
-from core.ui_components import ProjectVisualization, QuestionVisualization, InteractiveComponents, StatusIndicators
-from core.navigation import navigator, PageType
-from core.pages import ProjectInfoPage, PhaseProgressPage, ConversationHistoryPage
+try:
+    from core.git_ops import commit_and_push_log, commit_and_push_project_data  # ← NEW: auto‑push helpers
+    from core.minutes_utils import generate_daily_minutes, safe_push_minutes
+    from utils.render_minutes import render_md
+    from core.project_service import create_project, set_status, add_task, apply_updates
+    # from core.project_diff import generate_update_candidates, extract_new_data_from_chat, generate_diff_summary, validate_update_candidate
+    from core.project_prompt import get_project_prompt, get_available_project_ids, get_project_summary
+    from core.lifecycle_manager import ProjectLifecycleManager
+    from core.conversation_engine import PhaseAwareConversationEngine
+    from core.auto_update_engine import AutoUpdateEngine
+    from core.progress_monitor import ProgressMonitor
+    from core.notification_system import NotificationSystem
+    from core.models import ProjectPhase
+    from core.ui_components import ProjectVisualization, QuestionVisualization, InteractiveComponents, StatusIndicators
+    from core.navigation import navigator, PageType
+    from core.pages import ProjectInfoPage, PhaseProgressPage, ConversationHistoryPage
+except (ImportError, KeyError) as e:
+    logger.error(f"Failed to import Kai modules: {e}")
+    st.error(f"モジュールの読み込みに失敗しました: {e}")
+    # Try adding path and reimport
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    # Import minimal required modules
+    from core.project_service import create_project, set_status, add_task
+    from core.project_prompt import get_project_prompt, get_available_project_ids
+    from core.navigation import navigator, PageType
 
 # ────────────────────────────────────────────────────────────────────────────
 # Paths & basic setup
