@@ -745,8 +745,8 @@ if "update_candidates" not in st.session_state:
 # メインコンテンツの描画
 render_page_content()
 
-# ホームページの場合のみ会話機能を表示
-if nav_state.current_page == PageType.HOME:
+# ホームページの場合のみ会話機能を表示（プロジェクト未選択時のみ）
+if nav_state.current_page == PageType.HOME and not nav_state.selected_project_id:
     render_chat_interface()
 
 # 履歴表示（プロジェクト固有履歴＋セッション履歴）  
