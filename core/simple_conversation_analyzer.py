@@ -156,11 +156,13 @@ class SimpleConversationAnalyzer:
 
 # プロジェクト情報のフィールド
 
-- **participants**: 参加者数（例: "4名"）
-- **timeline**: 日程・スケジュール（例: "2025年8月第2週、2泊3日"）
-- **budget**: 予算
-- **route_preference**: ルート希望（例: "赤岳天狗尾根ルート（中級者向け）"）
-- **accommodation**: 宿泊方法（例: "行者小屋（山小屋泊）"）
+- **participants**: 参加者数・構成（例: "4名"、"4名（初心者2名、経験者2名）"）
+- **timeline**: 日程・スケジュール（例: "2025年7月27日（日）～7月28日（月）の2日間"）
+- **budget**: 予算（例: "1人当たり2万円程度"）
+- **route_preference**: ルート希望（例: "美濃戸登山口（南沢ルート）→行者小屋→赤岳（ピストン）"）
+- **accommodation**: 宿泊方法（例: "行者小屋（山小屋泊・個室・夕朝食付き・予約済み）"）
+- **equipment_list**: 装備リスト（例: "1泊2日・山小屋泊（夕朝食付き）の基本装備リスト"）
+- **post_activity**: 下山後の活動・温泉等（例: "もみの湯（茅野市）を第一候補"）
 - **itinerary_details**: 行程詳細（標高、距離、所要時間など）
 - **elevation_info**: 標高情報（登山口、山頂、宿泊地の標高）
 - **time_estimates**: 各区間の想定所要時間
@@ -177,6 +179,8 @@ class SimpleConversationAnalyzer:
 - 「参加者の『（初心者2名、経験者2名）』を削除」→ participants を "4名" に更新
 - 「スケジュールは2025/7/27から28の2日間です」→ timeline を更新
 - 「行者小屋で一泊」→ accommodation を "行者小屋（山小屋泊）" に更新
+- 「装備リストを基本として」「装備を受け取りました」→ equipment_list に装備情報を保存
+- 「もみの湯を第一候補に」「温泉候補として」→ post_activity に温泉情報を保存
 - 標高や所要時間の詳細情報 → itinerary_details に保存
 - 各地点の標高情報 → elevation_info に保存
 - 区間ごとの想定時間 → time_estimates に保存
@@ -231,7 +235,20 @@ class SimpleConversationAnalyzer:
         
         for field_name, update_info in updates.items():
             if field_name not in current_fields:
-                # 新規フィールドの場合は作成
+                # 新規フィールドの場合は作成（適切なデフォルト値を設定）
+                default_questions = {
+                    "participants": ["参加者は何名ですか？"],
+                    "timeline": ["実施予定時期はいつ頃ですか？"],
+                    "budget": ["予算の目安はありますか？"],
+                    "route_preference": ["希望する登山ルートはありますか？"],
+                    "accommodation": ["宿泊方法の希望はありますか？"],
+                    "equipment_list": ["装備リストはありますか？"],
+                    "post_activity": ["下山後の予定はありますか？"],
+                    "itinerary_details": ["行程の詳細情報はありますか？"],
+                    "elevation_info": ["標高情報はありますか？"],
+                    "time_estimates": ["各区間の想定時間はありますか？"]
+                }
+                
                 current_fields[field_name] = {
                     "value": None,
                     "priority": "recommended",
@@ -239,7 +256,7 @@ class SimpleConversationAnalyzer:
                     "confidence": 0.0,
                     "source": None,
                     "last_updated": None,
-                    "questions": [],
+                    "questions": default_questions.get(field_name, []),
                     "ask_after": None
                 }
             

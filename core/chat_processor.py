@@ -207,8 +207,12 @@ def _process_ai_conversation(user_input: str, project_id: str) -> str:
                 from core.dynamic_schema import get_project_schema
                 from core.models import ProjectPhase
                 
-                # 会話分析と情報抽出
-                from core.conversation_analyzer import analyze_conversation_and_update_project
+                # AI依存の会話分析と情報抽出（再分析機能と同じアプローチ）
+                from core.simple_conversation_analyzer import analyze_conversation_simple
+                from core.dynamic_schema import add_missing_fields_to_project
+                
+                # 動的スキーマに不足フィールドを追加
+                add_missing_fields_to_project(project_id)
                 
                 # 会話メッセージを準備
                 conversation_messages = st.session_state.get("history", []) + [
@@ -216,14 +220,18 @@ def _process_ai_conversation(user_input: str, project_id: str) -> str:
                     {"role": "assistant", "content": assistant_reply}
                 ]
                 
-                # 情報抽出と更新
-                updated_count, conflicts = analyze_conversation_and_update_project(
+                # AI依存の情報抽出と更新（最新3往復を分析）
+                result, updated_count = analyze_conversation_simple(
                     conversation_messages[-6:],  # 最新3往復
                     project_id
                 )
                 
                 if updated_count > 0:
-                    logger.info(f"Updated {updated_count} project fields from conversation")
+                    logger.info(f"AI analysis updated {updated_count} project fields from conversation")
+                    if result.get("success"):
+                        logger.info(f"Update summary: {result.get('summary', 'No summary')}")
+                else:
+                    logger.debug("AI analysis found no updates needed")
                 
                 # 質問生成の実行
                 if "session_start_time" not in st.session_state:
