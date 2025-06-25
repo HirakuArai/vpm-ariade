@@ -592,34 +592,9 @@ class ConversationHistoryPage:
                             </div>
                             """, unsafe_allow_html=True)
             
-            # 会話履歴ページにも会話機能を追加
-            st.divider()
-            st.markdown("### 💬 このプロジェクトで会話を続ける")
-            ConversationHistoryPage._render_project_chat_interface(project_id)
-            
         except Exception as e:
             st.error(f"会話履歴の読み込みに失敗しました: {e}")
     
-    @staticmethod
-    def _render_project_chat_interface(project_id: str):
-        """会話履歴ページ用の会話インターフェース"""
-        import streamlit as st
-        
-        # 会話入力
-        user_input = st.chat_input(f"プロジェクト「{project_id}」について質問してください...")
-        
-        if user_input:
-            # ナビゲーション状態を更新してプロジェクトを選択
-            if hasattr(st.session_state, 'navigation_state'):
-                st.session_state.navigation_state.selected_project_id = project_id
-            st.session_state["current_project_id"] = project_id  # 後方互換性
-            
-            # 会話処理を実行
-            try:
-                from core.chat_processor import process_project_chat_input
-                process_project_chat_input(project_id, user_input)
-            except Exception as e:
-                st.error(f"会話処理中にエラーが発生しました: {e}")
     
     @staticmethod
     def _get_project_conversations(project_id: str) -> List[Dict]:
