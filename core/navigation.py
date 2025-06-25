@@ -112,6 +112,7 @@ class HierarchicalNavigator:
                         type="primary" if st.session_state.navigation_state.current_page == PageType.HOME else "secondary"):
                 st.session_state.navigation_state.current_page = PageType.HOME
                 st.session_state.navigation_state.selected_project_id = None
+                st.rerun()
             
             # グローバルページ（プロジェクト非依存）
             global_pages = [
@@ -127,6 +128,7 @@ class HierarchicalNavigator:
                 if st.button(config["title"], use_container_width=True, type=button_type):
                     st.session_state.navigation_state.current_page = page_type
                     st.session_state.navigation_state.selected_project_id = None
+                    st.rerun()
             
             st.divider()
             
@@ -153,6 +155,7 @@ class HierarchicalNavigator:
                         
                         # デフォルトでプロジェクト情報ページを表示
                         st.session_state.navigation_state.current_page = PageType.PROJECT_INFO
+                        st.rerun()
                     
                     # プロジェクトが選択されている場合、サブメニューを表示
                     if is_selected:
@@ -177,6 +180,7 @@ class HierarchicalNavigator:
                                 if st.button(config["title"], use_container_width=True, 
                                            type=button_type, key=f"sub_{page_type.value}_{project_id}"):
                                     st.session_state.navigation_state.current_page = page_type
+                                    st.rerun()
         
         return st.session_state.navigation_state
     
