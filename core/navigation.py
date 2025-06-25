@@ -15,14 +15,9 @@ from .project_prompt import get_available_project_ids
 class PageType(Enum):
     """ページタイプの定義"""
     HOME = "home"
-    PROJECT_INFO = "project_info"
     PROJECT_DETAILS = "project_details"
     PROJECT_CHAT = "project_chat"
-    PHASE_PROGRESS = "phase_progress"
     CONVERSATION_HISTORY = "conversation_history"
-    SCHEDULE_MANAGEMENT = "schedule_management"
-    PROGRESS_DASHBOARD = "progress_dashboard"
-    SYSTEM_MONITOR = "system_monitor"
 
 @dataclass
 class NavigationState:
@@ -52,30 +47,10 @@ class HierarchicalNavigator:
                 "description": "プロジェクトについて質問・相談",
                 "requires_project": True
             },
-            PageType.PHASE_PROGRESS: {
-                "title": "📈 フェーズ進捗",
-                "description": "プロジェクトフェーズ管理",
-                "requires_project": True
-            },
             PageType.CONVERSATION_HISTORY: {
                 "title": "💬 会話履歴",
                 "description": "プロジェクト会話ログ",
                 "requires_project": True
-            },
-            PageType.SCHEDULE_MANAGEMENT: {
-                "title": "📅 スケジュール管理",
-                "description": "タスクとスケジュール",
-                "requires_project": False
-            },
-            PageType.PROGRESS_DASHBOARD: {
-                "title": "📊 進捗ダッシュボード",
-                "description": "全体進捗とメトリクス",
-                "requires_project": False
-            },
-            PageType.SYSTEM_MONITOR: {
-                "title": "🖥️ システム監視",
-                "description": "システム状態監視",
-                "requires_project": False
             }
         }
     
@@ -108,22 +83,6 @@ class HierarchicalNavigator:
                 st.session_state.navigation_state.current_page = PageType.HOME
                 st.session_state.navigation_state.selected_project_id = None
                 st.rerun()
-            
-            # グローバルページ（プロジェクト非依存）
-            global_pages = [
-                PageType.PROGRESS_DASHBOARD,
-                PageType.SCHEDULE_MANAGEMENT,
-                PageType.SYSTEM_MONITOR
-            ]
-            
-            for page_type in global_pages:
-                config = self.page_config[page_type]
-                button_type = "primary" if st.session_state.navigation_state.current_page == page_type else "secondary"
-                
-                if st.button(config["title"], use_container_width=True, type=button_type):
-                    st.session_state.navigation_state.current_page = page_type
-                    st.session_state.navigation_state.selected_project_id = None
-                    st.rerun()
             
             st.divider()
             

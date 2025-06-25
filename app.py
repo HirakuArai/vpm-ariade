@@ -377,15 +377,6 @@ def render_page_content():
         else:
             st.warning("プロジェクトを選択してください")
     
-    elif current_page == PageType.PROGRESS_DASHBOARD:
-        render_progress_dashboard()
-    
-    elif current_page == PageType.SCHEDULE_MANAGEMENT:
-        render_schedule_management()
-    
-    elif current_page == PageType.SYSTEM_MONITOR:
-        render_system_monitor()
-    
     else:  # PageType.HOME
         render_home_page()
 
@@ -489,17 +480,6 @@ def render_home_page():
         for msg in st.session_state["history"]:
             st.chat_message("user" if msg["role"] == "user" else "assistant").markdown(msg["content"])
 
-def render_progress_dashboard():
-    """進捗ダッシュボードページ"""
-    st.info("🚧 進捗ダッシュボードページ（実装予定）")
-
-def render_schedule_management():
-    """スケジュール管理ページ"""
-    st.info("🚧 スケジュール管理ページ（実装予定）")
-
-def render_system_monitor():
-    """システム監視ページ"""
-    st.info("🚧 システム監視ページ（実装予定）")
 
 def render_chat_interface():
     """チャットインターフェースの描画"""
@@ -600,7 +580,7 @@ def process_chat_input(user_input: str):
             if re.match(r'\d{4}-\d{2}-\d{2}', due_date):
                 if current_project_id:
                     try:
-                        task = add_task(current_project_id, description, due_date)
+                        add_task(current_project_id, description, due_date)
                         
                         # Get current tasks for display
                         import json
@@ -700,7 +680,7 @@ def process_ai_conversation(user_input: str, current_project_id: Optional[str]) 
                 ]
                 
                 # 情報抽出と更新
-                updated_count, conflicts = analyze_conversation_and_update_project(
+                updated_count, _ = analyze_conversation_and_update_project(
                     conversation_messages[-6:],  # 最新3往復
                     current_project_id
                 )
