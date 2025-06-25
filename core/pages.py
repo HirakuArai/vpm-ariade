@@ -296,36 +296,9 @@ class PhaseProgressPage:
             st.markdown("### 🎮 フェーズ制御")
             PhaseProgressPage._render_phase_controls(project_id, lifecycle_manager, can_advance)
             
-            # フェーズ進捗ページにも会話機能
-            st.divider()
-            st.markdown("### 💬 フェーズについて相談")
-            PhaseProgressPage._render_project_chat_interface(project_id)
-            
         except Exception as e:
             st.error(f"フェーズ情報の読み込みに失敗しました: {e}")
     
-    @staticmethod
-    def _render_project_chat_interface(project_id: str):
-        """フェーズ進捗ページ用の会話インターフェース"""
-        import streamlit as st
-        
-        st.info("💡 プロジェクトフェーズや進捗について質問・相談できます")
-        
-        # 会話入力
-        user_input = st.chat_input(f"フェーズ進捗について質問してください...")
-        
-        if user_input:
-            # ナビゲーション状態を更新してプロジェクトを選択
-            if hasattr(st.session_state, 'navigation_state'):
-                st.session_state.navigation_state.selected_project_id = project_id
-            st.session_state["current_project_id"] = project_id  # 後方互換性
-            
-            # 会話処理を実行
-            try:
-                from core.chat_processor import process_project_chat_input
-                process_project_chat_input(project_id, user_input)
-            except Exception as e:
-                st.error(f"会話処理中にエラーが発生しました: {e}")
     
     @staticmethod
     def _render_phase_timeline(current_phase: ProjectPhase):
