@@ -54,7 +54,7 @@
   ],
   "dynamic_info": {
     "schema_version": "1.0",
-    "last_analyzed": "2025-06-25T08:51:20.434610",
+    "last_analyzed": "2025-06-25T08:54:42.826860",
     "fields": {
       "participants": {
         "value": "4名",
@@ -75,7 +75,7 @@
         "status": "defined",
         "confidence": 1.0,
         "source": "conversation",
-        "last_updated": "2025-06-25T08:51:20.433410",
+        "last_updated": "2025-06-25T08:54:42.826344",
         "questions": [
           "実施予定時期はいつ頃ですか？",
           "何日間の予定ですか？"
@@ -96,12 +96,12 @@
         "ask_after": "timeline"
       },
       "route_preference": {
-        "value": "八ヶ岳（美濃戸登山口～行者小屋～赤岳ピストン）",
+        "value": "美濃戸登山口～行者小屋～赤岳ピストン",
         "priority": "recommended",
         "status": "defined",
         "confidence": 1.0,
         "source": "conversation",
-        "last_updated": "2025-06-25T08:51:20.433774",
+        "last_updated": "2025-06-25T08:54:42.826599",
         "questions": [
           "希望する登山ルートはありますか？",
           "難易度の希望はありますか？"
@@ -114,7 +114,7 @@
         "status": "defined",
         "confidence": 1.0,
         "source": "conversation",
-        "last_updated": "2025-06-25T08:51:20.433667",
+        "last_updated": "2025-06-25T08:54:42.826465",
         "questions": [
           "宿泊方法の希望はありますか？（山小屋/テント/日帰り）"
         ],
