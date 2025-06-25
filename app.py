@@ -451,6 +451,48 @@ def render_home_page():
                 else:
                     st.success("🎉 必要な情報がすべて収集されています！")
             
+            # プロジェクト削除
+            with st.expander("🗑️ プロジェクト管理", expanded=False):
+                st.warning("⚠️ **危険な操作**")
+                
+                # 削除確認の状態管理
+                if f"confirm_delete_{current_project_id}" not in st.session_state:
+                    st.session_state[f"confirm_delete_{current_project_id}"] = False
+                
+                if not st.session_state[f"confirm_delete_{current_project_id}"]:
+                    if st.button("🗑️ このプロジェクトを削除する", type="secondary", key=f"delete_btn_{current_project_id}"):
+                        st.session_state[f"confirm_delete_{current_project_id}"] = True
+                        st.rerun()
+                else:
+                    st.error("**本当に削除しますか？**")
+                    st.write("このプロジェクトはアーカイブされ、画面上から非表示になります。")
+                    
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if st.button("✅ はい、削除する", type="primary", key=f"confirm_yes_{current_project_id}"):
+                            try:
+                                # プロジェクトをARCHIVEDステータスに変更
+                                set_status(current_project_id, "ARCHIVED")
+                                
+                                # ナビゲーション状態をリセット
+                                st.session_state.navigation_state.selected_project_id = None
+                                st.session_state.navigation_state.current_page = PageType.HOME
+                                st.session_state["current_project_id"] = None
+                                
+                                # 確認状態をリセット
+                                st.session_state[f"confirm_delete_{current_project_id}"] = False
+                                
+                                st.success(f"プロジェクト {current_project_id} を削除しました")
+                                st.rerun()
+                                
+                            except Exception as e:
+                                st.error(f"削除に失敗しました: {e}")
+                    
+                    with col2:
+                        if st.button("❌ いいえ、キャンセル", key=f"confirm_no_{current_project_id}"):
+                            st.session_state[f"confirm_delete_{current_project_id}"] = False
+                            st.rerun()
+            
         except Exception as e:
             logger.error(f"Error rendering project visualization: {e}")
             st.warning("プロジェクト視覚化の表示でエラーが発生しました")
