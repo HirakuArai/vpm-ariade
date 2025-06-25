@@ -14,7 +14,6 @@ from .navigation import PageType, navigator
 from .dynamic_schema import get_project_schema
 from .ui_components import ProjectVisualization, StatusIndicators
 from .lifecycle_manager import ProjectLifecycleManager
-from .models import ProjectPhase
 import yaml
 
 class ProjectInfoPage:
@@ -89,6 +88,10 @@ class ProjectInfoPage:
             else:
                 st.success("🎉 必要な情報がすべて収集されています！")
             
+            # フェーズ進捗セクションを追加
+            st.divider()
+            st.markdown("### 📈 フェーズ進捗")
+            ProjectInfoPage._render_phase_progress(project_id)
                 
         except Exception as e:
             st.error(f"プロジェクト状況の読み込みに失敗しました: {e}")
@@ -154,15 +157,9 @@ class ProjectInfoPage:
         except Exception as e:
             st.error(f"再分析機能の読み込みに失敗しました: {e}")
     
-
-class PhaseProgressPage:
-    """フェーズ進捗ページ"""
-    
     @staticmethod
-    def render(project_id: str):
-        """フェーズ進捗ページの描画"""
-        st.subheader("📈 プロジェクトフェーズ進捗")
-        
+    def _render_phase_progress(project_id: str):
+        """フェーズ進捗の表示"""
         try:
             lifecycle_manager = ProjectLifecycleManager()
             
@@ -196,202 +193,46 @@ class PhaseProgressPage:
                 status_text = "✅ 進行可能" if can_advance else "⏳ 準備中"
                 st.metric("進行状況", status_text)
             
-            st.divider()
-            
-            # フェーズ進行チャート
-            st.markdown("### 📊 フェーズ進行チャート")
-            PhaseProgressPage._render_phase_timeline(current_phase)
-            
-            st.divider()
-            
-            # 現在フェーズの詳細
-            st.markdown(f"### 🎯 {current_phase.value} フェーズ詳細")
-            PhaseProgressPage._render_current_phase_details(project_id, lifecycle_manager)
-            
-            # フェーズ進行コントロール
-            st.markdown("### 🎮 フェーズ制御")
-            PhaseProgressPage._render_phase_controls(project_id, lifecycle_manager, can_advance)
-            
-        except Exception as e:
-            st.error(f"フェーズ情報の読み込みに失敗しました: {e}")
-    
-    
-    @staticmethod
-    def _render_phase_timeline(current_phase: ProjectPhase):
-        """フェーズタイムライン表示"""
-        phases = [
-            ("💡", "INCEPTION", "プロジェクト発足"),
-            ("📋", "DEFINITION", "要件定義"),
-            ("📅", "PLANNING", "計画策定"),
-            ("🚀", "EXECUTION", "実行"),
-            ("📊", "MONITORING", "監視"),
-            ("✅", "CLOSURE", "完了")
-        ]
-        
-        current_index = None
-        for i, (_, phase_name, _) in enumerate(phases):
-            if phase_name == current_phase.value:
-                current_index = i
-                break
-        
-        if current_index is not None:
-            progress = (current_index + 1) / len(phases)
-            st.progress(progress, text=f"進捗: {current_index + 1}/{len(phases)} フェーズ")
-        
-        # フェーズカード表示
-        cols = st.columns(len(phases))
-        for i, (emoji, phase_name, description) in enumerate(phases):
-            with cols[i]:
-                if i == current_index:
-                    st.markdown(f"""
-                    <div style="
-                        border: 2px solid #1f77b4;
-                        border-radius: 8px;
-                        padding: 10px;
-                        text-align: center;
-                        background-color: #e6f3ff;
-                    ">
-                        <h3>{emoji}</h3>
-                        <strong>{phase_name}</strong><br>
-                        <small>{description}</small>
-                    </div>
-                    """, unsafe_allow_html=True)
-                elif i < current_index:
-                    st.markdown(f"""
-                    <div style="
-                        border: 1px solid #90EE90;
-                        border-radius: 8px;
-                        padding: 10px;
-                        text-align: center;
-                        background-color: #f0fff0;
-                        opacity: 0.7;
-                    ">
-                        <h3>{emoji}</h3>
-                        <strong>{phase_name}</strong><br>
-                        <small>{description}</small>
-                    </div>
-                    """, unsafe_allow_html=True)
-                else:
-                    st.markdown(f"""
-                    <div style="
-                        border: 1px solid #ddd;
-                        border-radius: 8px;
-                        padding: 10px;
-                        text-align: center;
-                        opacity: 0.5;
-                    ">
-                        <h3>{emoji}</h3>
-                        <strong>{phase_name}</strong><br>
-                        <small>{description}</small>
-                    </div>
-                    """, unsafe_allow_html=True)
-    
-    @staticmethod
-    def _render_current_phase_details(project_id: str, lifecycle_manager):
-        """現在フェーズの詳細表示"""
-        current_phase = lifecycle_manager.get_current_phase(project_id)
-        
-        phase_descriptions = {
-            ProjectPhase.INCEPTION: {
-                "description": "プロジェクトのアイデアと基本的な方向性を決定",
-                "key_activities": [
-                    "プロジェクト概要の定義",
-                    "ステークホルダーの特定",
-                    "初期リスクの評価",
-                    "プロジェクト価値の検証"
-                ]
-            },
-            ProjectPhase.DEFINITION: {
-                "description": "プロジェクトの詳細要件と範囲を定義",
-                "key_activities": [
-                    "詳細要件の収集",
-                    "スコープの明確化",
-                    "成功指標の設定",
-                    "制約条件の整理"
-                ]
-            },
-            ProjectPhase.PLANNING: {
-                "description": "実行計画とリソース計画を策定",
-                "key_activities": [
-                    "作業分解構造の作成",
-                    "スケジュール策定",
-                    "リソース配分",
-                    "リスク対策計画"
-                ]
-            },
-            ProjectPhase.EXECUTION: {
-                "description": "計画に基づいてプロジェクトを実行",
-                "key_activities": [
-                    "タスクの実行",
-                    "進捗の追跡",
-                    "品質管理",
-                    "チーム管理"
-                ]
-            },
-            ProjectPhase.MONITORING: {
-                "description": "プロジェクトの進捗と品質を監視",
-                "key_activities": [
-                    "KPI監視",
-                    "リスク監視",
-                    "品質検証",
-                    "ステークホルダー報告"
-                ]
-            },
-            ProjectPhase.CLOSURE: {
-                "description": "プロジェクトの完了と成果の引き渡し",
-                "key_activities": [
-                    "最終成果物の確認",
-                    "プロジェクトの評価",
-                    "教訓の整理",
-                    "チームの解散"
-                ]
-            }
-        }
-        
-        phase_info = phase_descriptions.get(current_phase)
-        if phase_info:
-            st.write(f"**概要**: {phase_info['description']}")
-            
-            st.write("**主要活動**:")
-            for activity in phase_info["key_activities"]:
-                st.write(f"• {activity}")
-    
-    @staticmethod
-    def _render_phase_controls(project_id: str, lifecycle_manager, can_advance: bool):
-        """フェーズ制御UI"""
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            if can_advance:
-                if st.button("⏭️ 次のフェーズへ進む", type="primary"):
-                    try:
-                        result = lifecycle_manager.advance_phase(project_id)
-                        if result.get("success"):
-                            st.success(f"✅ {result.get('new_phase')} フェーズに進みました！")
-                            st.rerun()
-                        else:
-                            st.error(f"❌ フェーズ進行に失敗: {result.get('message')}")
-                    except Exception as e:
-                        st.error(f"❌ エラーが発生しました: {e}")
-            else:
-                st.button("⏭️ 次のフェーズへ進む", disabled=True)
-                st.caption("進行条件が満たされていません")
-        
-        with col2:
-            if st.button("🔄 フェーズ条件を再評価"):
-                try:
-                    progress_info = lifecycle_manager.get_phase_progress(project_id)
-                    if progress_info.get("can_advance"):
-                        st.success("✅ 次のフェーズに進む準備ができています！")
+            # フェーズ制御
+            with st.expander("🎮 フェーズ制御", expanded=False):
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    if can_advance:
+                        if st.button("⏭️ 次のフェーズへ進む", type="primary"):
+                            try:
+                                result = lifecycle_manager.advance_phase(project_id)
+                                if result.get("success"):
+                                    st.success(f"✅ {result.get('new_phase')} フェーズに進みました！")
+                                    st.rerun()
+                                else:
+                                    st.error(f"❌ フェーズ進行に失敗: {result.get('message')}")
+                            except Exception as e:
+                                st.error(f"❌ エラーが発生しました: {e}")
                     else:
-                        missing = progress_info.get("missing_requirements", [])
-                        if missing:
-                            st.warning(f"⚠️ 不足要件: {', '.join(missing)}")
-                        else:
-                            st.info("ℹ️ まだ進行条件が満たされていません")
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"❌ 評価中にエラーが発生しました: {e}")
+                        st.button("⏭️ 次のフェーズへ進む", disabled=True)
+                        st.caption("進行条件が満たされていません")
+                
+                with col2:
+                    if st.button("🔄 フェーズ条件を再評価"):
+                        try:
+                            progress_info = lifecycle_manager.get_phase_progress(project_id)
+                            if progress_info.get("can_advance"):
+                                st.success("✅ 次のフェーズに進む準備ができています！")
+                            else:
+                                missing = progress_info.get("missing_requirements", [])
+                                if missing:
+                                    st.warning(f"⚠️ 不足要件: {', '.join(missing)}")
+                                else:
+                                    st.info("ℹ️ まだ進行条件が満たされていません")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"❌ 評価中にエラーが発生しました: {e}")
+                            
+        except Exception as e:
+            st.error(f"フェーズ進捗の表示でエラーが発生しました: {e}")
+    
+
 
 class ConversationHistoryPage:
     """会話履歴ページ"""

@@ -165,7 +165,6 @@ class HierarchicalNavigator:
                             PageType.PROJECT_INFO,
                             PageType.PROJECT_DETAILS,
                             PageType.PROJECT_CHAT,
-                            PageType.PHASE_PROGRESS,
                             PageType.CONVERSATION_HISTORY
                         ]
                         

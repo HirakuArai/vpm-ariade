@@ -43,7 +43,7 @@ try:
     from core.models import ProjectPhase
     from core.ui_components import ProjectVisualization, QuestionVisualization, InteractiveComponents, StatusIndicators
     from core.navigation import navigator, PageType
-    from core.pages import ProjectInfoPage, ProjectDetailsPage, ProjectChatPage, PhaseProgressPage, ConversationHistoryPage
+    from core.pages import ProjectInfoPage, ProjectDetailsPage, ProjectChatPage, ConversationHistoryPage
 except (ImportError, KeyError) as e:
     logger.error(f"Failed to import Kai modules: {e}")
     st.error(f"モジュールの読み込みに失敗しました: {e}")
@@ -376,11 +376,6 @@ def render_page_content():
         else:
             st.warning("プロジェクトを選択してください")
     
-    elif current_page == PageType.PHASE_PROGRESS:
-        if selected_project:
-            PhaseProgressPage.render(selected_project)
-        else:
-            st.warning("プロジェクトを選択してください")
     
     elif current_page == PageType.CONVERSATION_HISTORY:
         if selected_project:
