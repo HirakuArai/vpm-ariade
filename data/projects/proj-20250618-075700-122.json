@@ -54,7 +54,7 @@
   ],
   "dynamic_info": {
     "schema_version": "1.0",
-    "last_analyzed": "2025-06-24T01:11:37.146840",
+    "last_analyzed": "2025-06-25T17:38:57.966745",
     "fields": {
       "participants": {
         "value": "4名",
@@ -75,7 +75,7 @@
         "status": "defined",
         "confidence": 1.0,
         "source": "conversation",
-        "last_updated": "2025-06-24T01:11:37.146430",
+        "last_updated": "2025-06-25T16:49:21.802827",
         "questions": [
           "実施予定時期はいつ頃ですか？",
           "何日間の予定ですか？"
@@ -101,7 +101,7 @@
         "status": "defined",
         "confidence": 1.0,
         "source": "conversation",
-        "last_updated": "2025-06-24T01:11:37.146575",
+        "last_updated": "2025-06-25T16:49:21.802999",
         "questions": [
           "希望する登山ルートはありますか？",
           "難易度の希望はありますか？"
@@ -114,7 +114,7 @@
         "status": "defined",
         "confidence": 1.0,
         "source": "conversation",
-        "last_updated": "2025-06-24T01:11:37.146619",
+        "last_updated": "2025-06-25T16:49:21.803039",
         "questions": [
           "宿泊方法の希望はありますか？（山小屋/テント/日帰り）"
         ],
@@ -153,6 +153,19 @@
         "last_updated": "2025-06-24T01:10:46.051965",
         "questions": [
           "各区間の想定時間はありますか？"
+        ],
+        "ask_after": null
+      },
+      "post_activity": {
+        "value": "もみの湯（茅野市）、鹿の湯（八ヶ岳ロイヤルホテル）を温泉候補として保存",
+        "priority": "optional",
+        "status": "defined",
+        "confidence": 1.0,
+        "source": "conversation",
+        "last_updated": "2025-06-25T17:38:57.966370",
+        "questions": [
+          "下山後の予定はありますか？",
+          "温泉の希望はありますか？"
         ],
         "ask_after": null
       }
