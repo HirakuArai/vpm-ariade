@@ -23,7 +23,12 @@ import streamlit as st
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-st.set_page_config(page_title="Kai VPM", page_icon="💬", initial_sidebar_state="expanded")
+st.set_page_config(
+    page_title="Kai VPM", 
+    page_icon="💬", 
+    initial_sidebar_state="expanded",
+    layout="wide"
+)
 
 # ────────────────────────────────────────────────────────────────────────────
 # Kai modules
@@ -342,6 +347,10 @@ def get_full_system_prompt() -> str:
 # ────────────────────────────────────────────────────────────────────────────
 # Hierarchical Navigation UI
 # ────────────────────────────────────────────────────────────────────────────
+
+# Streamlitのデフォルトページ制御を無効化
+if "page" in st.query_params:
+    st.query_params.clear()
 
 # サイドバーナビゲーションの描画
 nav_state = navigator.render_sidebar_navigation()
