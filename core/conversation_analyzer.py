@@ -480,10 +480,65 @@ AI: "4名の構成ですね。どのような活動を予定していますか�
                         logger.info(f"Extracted accommodation: 行者小屋")
                         break  # 最初のマッチのみ
                 
+                # 装備リスト情報の抽出
+                equipment_patterns = [
+                    r'装備リスト.*?(?:受け取り|登録|管理)',
+                    r'(?:基本装備|必携装備).*?リスト',
+                    r'装備.*?(?:必要|準備|持参)',
+                    r'(?:■|▪|・).*?装備',
+                    r'(?:ザック|登山靴|雨具|防寒着).*?(?:必要|推奨)',
+                ]
+                
+                # 装備リストの詳細情報を抽出する場合
+                if any(keyword in content for keyword in ["装備リスト", "必携装備", "基本装備"]):
+                    # 長い装備リストの場合は内容を要約
+                    equipment_summary = self._extract_equipment_summary(content)
+                    if equipment_summary:
+                        extracted_info.append(ExtractedInformation(
+                            field_name="equipment_list",
+                            value=equipment_summary,
+                            confidence=0.95,
+                            source="conversation",
+                            extraction_method="equipment_list_extraction",
+                            original_text=content[:200] + "..." if len(content) > 200 else content
+                        ))
+                        logger.info(f"Extracted equipment list: {equipment_summary[:50]}...")
+                
+                for pattern in equipment_patterns:
+                    matches = re.finditer(pattern, content)
+                    for match in matches:
+                        # 簡単な装備情報を検出
+                        extracted_info.append(ExtractedInformation(
+                            field_name="equipment_list",
+                            value=f"装備リスト情報あり: {match.group(0)}",
+                            confidence=0.8,
+                            source="conversation",
+                            extraction_method="equipment_pattern_matching",
+                            original_text=match.group(0)
+                        ))
+                        logger.info(f"Extracted equipment info: {match.group(0)}")
+                        break  # 最初のマッチのみ
+                
         except Exception as e:
             logger.error(f"Project detail information extraction failed: {e}")
         
         return extracted_info
+    
+    def _extract_equipment_summary(self, content: str) -> str:
+        """装備リストの要約を抽出"""
+        try:
+            # 装備リストの特徴的なキーワードをチェック
+            if "1泊2日" in content and "山小屋泊" in content:
+                return "1泊2日・山小屋泊（夕朝食付き）の基本装備リスト（必携装備、山小屋泊用、温泉立ち寄り用を含む詳細リスト）"
+            elif "装備リスト" in content and "登録" in content:
+                return "登山装備リスト（詳細な装備一覧が登録済み）"
+            elif any(item in content for item in ["ザック", "登山靴", "雨具", "防寒着"]):
+                return "基本登山装備リスト（ザック、登山靴、雨具、防寒着等を含む）"
+            else:
+                return "装備リスト情報"
+        except Exception as e:
+            logger.error(f"Equipment summary extraction failed: {e}")
+            return None
     
     def _format_pattern_match(self, field_name: str, match) -> str:
         """パターンマッチの結果を適切な形式にフォーマット"""

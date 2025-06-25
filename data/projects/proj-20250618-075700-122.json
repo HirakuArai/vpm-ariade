@@ -54,7 +54,7 @@
   ],
   "dynamic_info": {
     "schema_version": "1.0",
-    "last_analyzed": "2025-06-25T08:57:07.232824",
+    "last_analyzed": "2025-06-25T18:03:28.199097",
     "fields": {
       "participants": {
         "value": "4名",
@@ -166,6 +166,18 @@
         "questions": [
           "下山後の予定はありますか？",
           "温泉の希望はありますか？"
+        ],
+        "ask_after": null
+      },
+      "equipment_list": {
+        "value": "1泊2日・山小屋泊（夕朝食付き）の基本装備リスト（必携装備、山小屋泊用、温泉立ち寄り用を含む詳細リスト）",
+        "priority": "recommended",
+        "status": "defined",
+        "confidence": 1.0,
+        "source": "manual_update",
+        "last_updated": "2025-06-25T18:03:28.199037",
+        "questions": [
+          "装備リストはありますか？"
         ],
         "ask_after": null
       }

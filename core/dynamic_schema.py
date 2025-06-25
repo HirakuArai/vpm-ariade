@@ -325,6 +325,7 @@ def initialize_schema_for_project(project_id: str, project_description: str,
         ("budget", FieldPriority.RECOMMENDED, ["予算の目安はありますか？"]),
         ("route_preference", FieldPriority.RECOMMENDED, ["希望する登山ルートはありますか？"]),
         ("accommodation", FieldPriority.RECOMMENDED, ["宿泊方法の希望はありますか？"]),
+        ("equipment_list", FieldPriority.RECOMMENDED, ["装備リストはありますか？"]),
         ("itinerary_details", FieldPriority.OPTIONAL, ["行程の詳細情報はありますか？"]),
         ("elevation_info", FieldPriority.OPTIONAL, ["標高情報はありますか？"]),
         ("time_estimates", FieldPriority.OPTIONAL, ["各区間の想定時間はありますか？"])
@@ -348,6 +349,7 @@ def add_missing_fields_to_project(project_id: str, projects_dir: Path = None) ->
             ("budget", FieldPriority.RECOMMENDED, ["予算の目安はありますか？"]),
             ("route_preference", FieldPriority.RECOMMENDED, ["希望する登山ルートはありますか？"]),
             ("accommodation", FieldPriority.RECOMMENDED, ["宿泊方法の希望はありますか？"]),
+            ("equipment_list", FieldPriority.RECOMMENDED, ["装備リストはありますか？"]),
             ("itinerary_details", FieldPriority.OPTIONAL, ["行程の詳細情報はありますか？"]),
             ("elevation_info", FieldPriority.OPTIONAL, ["標高情報はありますか？"]),
             ("time_estimates", FieldPriority.OPTIONAL, ["各区間の想定時間はありますか？"])
