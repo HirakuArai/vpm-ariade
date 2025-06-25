@@ -97,14 +97,24 @@ def process_project_chat_input(project_id: str, user_input: str):
     
     # Auto-push after conversation
     try:
-        from core.git_ops import commit_and_push_log
+        from core.git_ops import commit_and_push_log, commit_and_push_project_data
+        
+        # Push global conversation log
         success = commit_and_push_log()
         if success:
             logger.info("Successfully pushed conversation log to git")
         else:
             logger.warning("Failed to push conversation log to git")
+        
+        # Push project-specific data
+        project_success = commit_and_push_project_data(project_id)
+        if project_success:
+            logger.info(f"Successfully pushed project {project_id} data to git")
+        else:
+            logger.warning(f"Failed to push project {project_id} data to git")
+            
     except Exception as e:
-        logger.error(f"Error pushing conversation log: {e}")
+        logger.error(f"Error pushing to git: {e}")
     
     # Rerun to display the new messages
     st.rerun()
