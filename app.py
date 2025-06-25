@@ -538,6 +538,10 @@ def process_chat_input(user_input: str):
         _append_project_log(current_project_id, "user", user_input)
         # Backward compatibility
         st.session_state["current_project_id"] = current_project_id
+    else:
+        # ホームページでの会話を明示的に保持
+        st.session_state.navigation_state.current_page = PageType.HOME
+        st.session_state.navigation_state.selected_project_id = None
 
     # Handle project creation flow
     assistant_reply = None
