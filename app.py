@@ -662,8 +662,7 @@ def process_chat_input(user_input: str):
     except Exception as e:
         logger.error(f"Error pushing to git: {e}")
     
-    # Rerun to display the new messages
-    st.rerun()
+    # Note: st.rerun() is removed to keep chat input visible after conversation
 
 def process_ai_conversation(user_input: str, current_project_id: Optional[str]) -> str:
     """AI会話処理"""
