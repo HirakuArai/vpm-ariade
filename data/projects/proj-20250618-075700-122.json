@@ -54,7 +54,7 @@
   ],
   "dynamic_info": {
     "schema_version": "1.0",
-    "last_analyzed": "2025-06-25T17:38:57.966745",
+    "last_analyzed": "2025-06-25T08:51:20.434610",
     "fields": {
       "participants": {
         "value": "4名",
@@ -70,12 +70,12 @@
         "ask_after": null
       },
       "timeline": {
-        "value": "2025年7月27日（日）～7月28日（月）の2日間",
+        "value": "1泊2日",
         "priority": "required",
         "status": "defined",
         "confidence": 1.0,
         "source": "conversation",
-        "last_updated": "2025-06-25T16:49:21.802827",
+        "last_updated": "2025-06-25T08:51:20.433410",
         "questions": [
           "実施予定時期はいつ頃ですか？",
           "何日間の予定ですか？"
@@ -96,12 +96,12 @@
         "ask_after": "timeline"
       },
       "route_preference": {
-        "value": "美濃戸登山口（南沢ルート）→行者小屋→赤岳（ピストン）→行者小屋→美濃戸登山口",
+        "value": "八ヶ岳（美濃戸登山口～行者小屋～赤岳ピストン）",
         "priority": "recommended",
         "status": "defined",
         "confidence": 1.0,
         "source": "conversation",
-        "last_updated": "2025-06-25T16:49:21.802999",
+        "last_updated": "2025-06-25T08:51:20.433774",
         "questions": [
           "希望する登山ルートはありますか？",
           "難易度の希望はありますか？"
@@ -109,12 +109,12 @@
         "ask_after": "participants"
       },
       "accommodation": {
-        "value": "行者小屋（山小屋泊・個室・夕朝食付き・予約済み）",
+        "value": "山小屋泊・個室・夕朝食付き",
         "priority": "recommended",
         "status": "defined",
         "confidence": 1.0,
         "source": "conversation",
-        "last_updated": "2025-06-25T16:49:21.803039",
+        "last_updated": "2025-06-25T08:51:20.433667",
         "questions": [
           "宿泊方法の希望はありますか？（山小屋/テント/日帰り）"
         ],
