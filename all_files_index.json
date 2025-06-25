@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-25T08:29:37Z",
+  "generated_at": "2025-06-25T08:45:29Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -900,6 +900,10 @@
     {
       "path": "snapshots/snapshot_manifest.json",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/snapshots/snapshot_manifest.json"
+    },
+    {
+      "path": "streamlit.log",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/streamlit.log"
     },
     {
       "path": "streamlit_v2.py",
