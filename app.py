@@ -500,15 +500,18 @@ def render_home_page():
     else:
         st.info("💡 左サイドバーからプロジェクトを選択するか、「プロジェクト作成」と入力して新しいプロジェクトを作成してください。")
         
-        # セッション履歴表示（プロジェクト未選択時のみ）
-        if st.session_state.get("history"):
-            st.markdown("### 💬 現在のセッション")
-            for msg in st.session_state["history"]:
-                st.chat_message("user" if msg["role"] == "user" else "assistant").markdown(msg["content"])
+        # 会話インターフェースの後にセッション履歴を表示
+        # （render_chat_interface() が下で呼ばれる）
 
 
 def render_chat_interface():
     """チャットインターフェースの描画"""
+    # セッション履歴表示（プロジェクト未選択時のホーム画面）
+    if st.session_state.get("history"):
+        st.markdown("### 💬 現在のセッション")
+        for msg in st.session_state["history"]:
+            st.chat_message("user" if msg["role"] == "user" else "assistant").markdown(msg["content"])
+    
     st.divider()
     st.markdown("### 💬 AI との会話")
     
@@ -662,7 +665,8 @@ def process_chat_input(user_input: str):
     except Exception as e:
         logger.error(f"Error pushing to git: {e}")
     
-    # Note: st.rerun() is removed to keep chat input visible after conversation
+    # Rerun to display the new messages
+    st.rerun()
 
 def process_ai_conversation(user_input: str, current_project_id: Optional[str]) -> str:
     """AI会話処理"""
