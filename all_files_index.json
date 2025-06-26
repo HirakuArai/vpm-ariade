@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-25T19:57:35Z",
+  "generated_at": "2025-06-26T17:06:03Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -136,6 +136,10 @@
     {
       "path": "conversations/conversation_20250626.json",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/conversations/conversation_20250626.json"
+    },
+    {
+      "path": "conversations/conversation_20250627.json",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/conversations/conversation_20250627.json"
     },
     {
       "path": "core/__init__.py",
