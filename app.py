@@ -354,12 +354,12 @@ def get_full_system_prompt() -> str:
 # Hierarchical Navigation UI
 # ────────────────────────────────────────────────────────────────────────────
 
-# Streamlitのデフォルトページ制御を無効化
-if "page" in st.query_params:
-    st.query_params.clear()
-
 # ナビゲーション状態の初期化を確実に行う
 navigator.initialize_session_state()
+
+# Streamlitのデフォルトページ制御を無効化（初期化後）
+if "page" in st.query_params:
+    st.query_params.clear()
 
 # サイドバーナビゲーションの描画
 nav_state = navigator.render_sidebar_navigation()
@@ -367,14 +367,19 @@ nav_state = navigator.render_sidebar_navigation()
 # ナビゲーション状態の妥当性チェック
 navigator.validate_navigation_state()
 
+# ナビゲーション状態を再確認（rerun後の状態を反映）
+nav_state = st.session_state.navigation_state
+
 # ページヘッダーの描画
 navigator.render_page_header()
 
 # ページコンテンツの描画
 def render_page_content():
     """現在のページコンテンツを描画"""
-    current_page = nav_state.current_page
-    selected_project = nav_state.selected_project_id
+    # 最新のナビゲーション状態を取得
+    current_nav_state = st.session_state.navigation_state
+    current_page = current_nav_state.current_page
+    selected_project = current_nav_state.selected_project_id
     
     if current_page == PageType.PROJECT_DETAILS:
         if selected_project:
@@ -775,6 +780,9 @@ def process_chat_input(user_input: str):
     if not current_project_id:
         st.session_state.navigation_state.current_page = PageType.HOME
         st.session_state.navigation_state.selected_project_id = None
+        # Also clear any potential URL parameters that might interfere
+        if "page" in st.query_params:
+            st.query_params.clear()
     
     # Rerun to display the new messages
     st.rerun()
@@ -894,7 +902,9 @@ if "ai_intent_detector" not in st.session_state:
 render_page_content()
 
 # ホームページの場合のみ会話機能を表示（プロジェクト未選択時のみ）
-if nav_state.current_page == PageType.HOME and not nav_state.selected_project_id:
+# 最新のナビゲーション状態を取得
+current_nav_state = st.session_state.navigation_state
+if current_nav_state.current_page == PageType.HOME and not current_nav_state.selected_project_id:
     render_chat_interface()
 
 # 履歴表示（プロジェクト固有履歴＋セッション履歴）  
