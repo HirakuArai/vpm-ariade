@@ -634,7 +634,7 @@ def process_chat_input(user_input: str):
             
         task_intent = detector.detect_task_addition_intent(user_input, project_context)
         
-        if task_intent["is_task_intent"] and task_intent["confidence"] > 0.6:
+        if task_intent["is_task_intent"] and task_intent["confidence"] > 0.7:
             try:
                 description = task_intent["task_description"]
                 due_date = task_intent["due_date"]
@@ -707,7 +707,7 @@ def process_chat_input(user_input: str):
         detector = st.session_state["ai_intent_detector"]
         project_intent = detector.detect_project_creation_intent(user_input)
         
-        if project_intent["is_creation_intent"] and project_intent["confidence"] > 0.6:
+        if project_intent["is_creation_intent"] and project_intent["confidence"] > 0.8:
             try:
                 display_name = project_intent["project_name"]
                 overview = project_intent["project_description"]
