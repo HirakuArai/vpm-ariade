@@ -327,6 +327,9 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
         # Also clear any potential URL parameters that might interfere
         if "page" in st.query_params:
             st.query_params.clear()
+    
+    # Rerun to display the new messages
+    st.rerun()
 
 def process_ai_conversation(user_input: str, current_project_id: Optional[str]) -> str:
     """AI会話処理"""
