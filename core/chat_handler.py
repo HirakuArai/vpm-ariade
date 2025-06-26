@@ -340,7 +340,7 @@ def process_ai_conversation(user_input: str, current_project_id: Optional[str]) 
             return "❌ OpenAI API キーが設定されていません。"
         
         # 1. 基本的なAI応答生成
-        system_prompt = get_full_system_prompt()
+        system_prompt = get_full_system_prompt(current_project_id)
         messages = [{"role": "system", "content": system_prompt}] + \
                   st.session_state.get("history", []) + \
                   [{"role": "user", "content": user_input}]

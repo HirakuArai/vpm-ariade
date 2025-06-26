@@ -4,9 +4,15 @@ project_prompt.py - Generate project-specific context for system prompts
 """
 
 import json
+import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
+from zoneinfo import ZoneInfo
 from .models import DEFAULT_UNDEF
+
+logger = logging.getLogger(__name__)
+_JST = ZoneInfo("Asia/Tokyo")
 
 PROJECTS_DIR = Path("data/projects")
 
@@ -240,3 +246,64 @@ def get_project_summary(project_id: str, projects_dir: Path | None = None) -> Op
         
     except Exception:
         return f"{project_id} (読み込みエラー)"
+
+
+def _read(path: Path | str) -> str:
+    """Helper function to read file content"""
+    return Path(path).read_text(encoding="utf-8")
+
+
+def get_system_prompt() -> str:
+    """Get system prompt with caching for performance optimization"""
+    try:
+        ROOT = Path(__file__).resolve().parent.parent
+        DOCS = ROOT / "docs"
+        DSL_DIR = ROOT / "dsl"
+        
+        rules = _read(DOCS / "base_os_rules.md")
+        dsl_readme_path = DSL_DIR / "README.md"
+        dsl_readme = dsl_readme_path.read_text(encoding="utf-8") if dsl_readme_path.exists() else ""
+        dsl_lines: list[str] = []
+        try:
+            for raw in (DSL_DIR / "integrated_dsl.jsonl").read_text(encoding="utf-8").splitlines():
+                item = json.loads(raw)
+                name, desc = item.get("name"), item.get("description")
+                if name and desc:
+                    dsl_lines.append(f"- **{name}**: {desc}")
+        except FileNotFoundError:
+            pass
+        dsl_block = "\n".join([dsl_readme.strip()] + dsl_lines if dsl_readme else dsl_lines)
+        proj = _read(DOCS / "project_definition.md")
+        arch = _read(DOCS / "architecture_overview.md")
+        
+        base_prompt = "\n\n".join([rules, dsl_block, proj, arch])
+        return base_prompt
+        
+    except Exception as e:
+        logger.error(f"Error generating system prompt: {str(e)}")
+        return "You are Kai, a Virtual Project Manager AI assistant."
+
+
+def get_cached_project_context(project_id: str) -> str:
+    """Get project context with caching"""
+    try:
+        return get_project_prompt(project_id)
+    except Exception as e:
+        logger.error(f"Error getting project context for {project_id}: {str(e)}")
+        return ""
+
+
+def get_full_system_prompt(current_project_id: Optional[str] = None) -> str:
+    """Get full system prompt including project context"""
+    base_prompt = get_system_prompt()
+    
+    # 現在日時を明示的に追加
+    current_time = datetime.now(_JST)
+    date_context = f"\n\n**現在日時**: {current_time.strftime('%Y年%m月%d日 %H:%M')} (JST)\n今日は{current_time.strftime('%Y年%m月%d日')}です。"
+    
+    if current_project_id:
+        project_context = get_cached_project_context(current_project_id)
+        if project_context:
+            return f"{base_prompt}{date_context}\n\n{project_context}"
+    
+    return f"{base_prompt}{date_context}"

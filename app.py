@@ -298,57 +298,7 @@ def render_phase_management_ui(project_id: str):
 # Prompt generator
 # ────────────────────────────────────────────────────────────────────────────
 
-@st.cache_data(ttl=300)  # Cache for 5 minutes
-def get_system_prompt() -> str:
-    """Get system prompt with caching for performance optimization"""
-    try:
-        rules = _read(DOCS / "base_os_rules.md")
-        dsl_readme_path = DSL_DIR / "README.md"
-        dsl_readme = dsl_readme_path.read_text(encoding="utf-8") if dsl_readme_path.exists() else ""
-        dsl_lines: list[str] = []
-        try:
-            for raw in (DSL_DIR / "integrated_dsl.jsonl").read_text(encoding="utf-8").splitlines():
-                item = json.loads(raw)
-                name, desc = item.get("name"), item.get("description")
-                if name and desc:
-                    dsl_lines.append(f"- **{name}**: {desc}")
-        except FileNotFoundError:
-            pass
-        dsl_block = "\n".join([dsl_readme.strip()] + dsl_lines if dsl_readme else dsl_lines)
-        proj = _read(DOCS / "project_definition.md")
-        arch = _read(DOCS / "architecture_overview.md")
-        
-        base_prompt = "\n\n".join([rules, dsl_block, proj, arch])
-        return base_prompt
-        
-    except Exception as e:
-        logger.error(f"Error generating system prompt: {str(e)}")
-        return "You are Kai, a Virtual Project Manager AI assistant."
-
-@st.cache_data(ttl=10)  # Cache for 10 seconds (shorter for frequent updates)
-def get_cached_project_context(project_id: str) -> str:
-    """Get project context with caching"""
-    try:
-        return get_project_prompt(project_id)
-    except Exception as e:
-        logger.error(f"Error getting project context for {project_id}: {str(e)}")
-        return ""
-
-def get_full_system_prompt() -> str:
-    """Get full system prompt including project context"""
-    base_prompt = get_system_prompt()
-    
-    # 現在日時を明示的に追加
-    current_time = datetime.now(_JST)
-    date_context = f"\n\n**現在日時**: {current_time.strftime('%Y年%m月%d日 %H:%M')} (JST)\n今日は{current_time.strftime('%Y年%m月%d日')}です。"
-    
-    current_project_id = st.session_state.get("current_project_id")
-    if current_project_id:
-        project_context = get_cached_project_context(current_project_id)
-        if project_context:
-            return f"{base_prompt}{date_context}\n\n{project_context}"
-    
-    return f"{base_prompt}{date_context}"
+# System prompt functions moved to core.project_prompt
 
 # ────────────────────────────────────────────────────────────────────────────
 # Hierarchical Navigation UI
