@@ -83,7 +83,8 @@ class HierarchicalNavigator:
             
             # ホームページ
             if st.button("🏠 ホーム", use_container_width=True, 
-                        type="primary" if st.session_state.navigation_state.current_page == PageType.HOME else "secondary"):
+                        type="primary" if st.session_state.navigation_state.current_page == PageType.HOME else "secondary",
+                        key="nav_home_button"):
                 st.session_state.navigation_state.current_page = PageType.HOME
                 st.session_state.navigation_state.selected_project_id = None
                 st.rerun()
@@ -107,7 +108,8 @@ class HierarchicalNavigator:
                     is_selected = st.session_state.navigation_state.selected_project_id == project_id
                     button_style = "primary" if is_selected else "secondary"
                     
-                    if st.button(f"📋 {project_name}", use_container_width=True, type=button_style):
+                    if st.button(f"📋 {project_name}", use_container_width=True, type=button_style,
+                                key=f"nav_project_{project_id}"):
                         st.session_state.navigation_state.selected_project_id = project_id
                         st.session_state.current_project_id = project_id  # Backward compatibility
                         

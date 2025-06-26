@@ -289,15 +289,15 @@ class ProjectChatPage:
             
             suggested_input = None
             with col1:
-                if st.button("📈 進捗を教えて", use_container_width=True):
+                if st.button("📈 進捗を教えて", use_container_width=True, key=f"progress_btn_{project_id}"):
                     suggested_input = "このプロジェクトの現在の進捗状況を教えてください。"
             
             with col2:
-                if st.button("⚠️ リスクを確認", use_container_width=True):
+                if st.button("⚠️ リスクを確認", use_container_width=True, key=f"risk_btn_{project_id}"):
                     suggested_input = "このプロジェクトの現在のリスクや課題を教えてください。"
             
             with col3:
-                if st.button("📅 次のステップ", use_container_width=True):
+                if st.button("📅 次のステップ", use_container_width=True, key=f"next_step_btn_{project_id}"):
                     suggested_input = "次にやるべきことは何ですか？"
             
             # チャット入力
