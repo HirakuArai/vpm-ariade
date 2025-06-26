@@ -548,33 +548,10 @@ def render_chat_interface():
     
     if user_input:
         # 会話処理を実行
+        from core.chat_handler import process_chat_input
         process_chat_input(user_input)
 
-def process_chat_input(user_input: str):
-    """チャット入力の処理"""
-    # Ensure navigation state is properly initialized
-    if not hasattr(st.session_state, 'navigation_state') or st.session_state.navigation_state is None:
-        navigator.initialize_session_state()
-    
-    # 1) ログへ保存
-    _append_log("user", user_input)
-    
-    # Also log to project-specific log if project is selected
-    current_project_id = nav_state.selected_project_id
-    if current_project_id:
-        _append_project_log(current_project_id, "user", user_input)
-        # Backward compatibility
-        st.session_state["current_project_id"] = current_project_id
-    else:
-        # ホームページでの会話を明示的に保持
-        st.session_state.navigation_state.current_page = PageType.HOME
-        st.session_state.navigation_state.selected_project_id = None
-        st.session_state["current_project_id"] = None
-
-    # Handle project creation flow
-    assistant_reply = None
-    
-    # Check if we're waiting for project overview
+# Removed: process_chat_input and process_ai_conversation functions moved to core.chat_handler
     if st.session_state["awaiting_project_overview"]:
         try:
             # Extract display name from input if provided in format "title: description"
