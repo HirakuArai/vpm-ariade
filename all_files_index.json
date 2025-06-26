@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-26T17:22:14Z",
+  "generated_at": "2025-06-26T17:39:40Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -144,6 +144,10 @@
     {
       "path": "core/__init__.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/__init__.py"
+    },
+    {
+      "path": "core/ai_intent_detector.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/ai_intent_detector.py"
     },
     {
       "path": "core/append_to_log.py",
