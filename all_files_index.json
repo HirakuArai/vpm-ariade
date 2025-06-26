@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-26T18:14:47Z",
+  "generated_at": "2025-06-26T18:22:59Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -172,6 +172,10 @@
     {
       "path": "core/capability_proposal.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/capability_proposal.py"
+    },
+    {
+      "path": "core/chat_handler.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/chat_handler.py"
     },
     {
       "path": "core/chat_processor.py",
