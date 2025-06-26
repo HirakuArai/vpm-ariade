@@ -1,0 +1,19 @@
+{
+  "identifier": "proj-20250626-185112-548",
+  "overview": "\u300c\u30e2\u30d0\u30a4\u30eb\u30ad\u30e3\u30d3\u30f3\u300d\u306b\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+  "display_name": "\u30e2\u30d0\u30a4\u30eb\u30ad\u30e3\u30d3\u30f3",
+  "created_at": "2025-06-26T18:51:12.549015",
+  "created_by": "human_user",
+  "status": "DRAFT",
+  "schema_version": "1.0",
+  "updated_at": "2025-06-26T18:51:12.549032",
+  "change_log": [],
+  "uuid": "39a9a85e-a3b5-41e1-b6f9-4b64d5189847",
+  "tasks": [],
+  "phase": "INCEPTION",
+  "completion_percentage": "__UNDEFINED__",
+  "next_actions": [],
+  "blocking_issues": [],
+  "phase_requirements": "__UNDEFINED__",
+  "phase_history": []
+}
