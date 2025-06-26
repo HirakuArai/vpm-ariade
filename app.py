@@ -54,6 +54,7 @@ try:
     from core.ui_components import ProjectVisualization, QuestionVisualization, InteractiveComponents, StatusIndicators
     from core.navigation import navigator, PageType
     from core.pages import ProjectDetailsPage, ProjectChatPage, ConversationHistoryPage
+    from core.ai_intent_detector import AIIntentDetector
 except (ImportError, KeyError) as e:
     logger.error(f"Failed to import Kai modules: {e}")
     st.error(f"モジュールの読み込みに失敗しました: {e}")
@@ -515,7 +516,7 @@ def render_home_page():
             st.warning("プロジェクト視覚化の表示でエラーが発生しました")
         
     else:
-        st.info("💡 左サイドバーからプロジェクトを選択するか、「プロジェクト作成」「新規プロジェクト」「〜プロジェクトとして作成」などと入力して新しいプロジェクトを作成してください。")
+        st.info("💡 左サイドバーからプロジェクトを選択するか、自然な言葉でプロジェクト作成を依頼してください。\n例：「ウェブサイト開発プロジェクトを始めたい」「会社研修を企画したい」")
         
         # 会話インターフェースの後にセッション履歴を表示
         # （render_chat_interface() が下で呼ばれる）
@@ -535,10 +536,10 @@ def render_chat_interface():
     # プロジェクト作成のヒント
     current_project_id = nav_state.selected_project_id
     if not current_project_id:
-        st.info("💡 プロジェクト作成は「プロジェクト作成」「新規プロジェクト」「〜として作成」などと入力してください。\n作成時は「タイトル: 詳細説明」の形式がおすすめです。")
+        st.info("💡 自然な言葉でプロジェクト作成やタスク追加を依頼してください。\n例：「ウェブサイト開発を始めたい」「データベース設計を来週までに完了したい」")
     
     # チャット入力
-    user_input = st.chat_input("メッセージを入力してください…（プロジェクト作成は「〜プロジェクトとして作成」など）")
+    user_input = st.chat_input("メッセージを入力してください…（自然な言葉でプロジェクト作成やタスク追加可能）")
     
     if user_input:
         # 会話処理を実行
@@ -621,7 +622,54 @@ def process_chat_input(user_input: str):
         st.session_state["awaiting_activate_confirm"] = False
         st.session_state["created_project_id"] = None
     
-    # Check for task addition command: "タスク <説明> <YYYY-MM-DD>"
+    # AI-based task addition intent detection
+    elif current_project_id and st.session_state.get("ai_intent_detector"):
+        detector = st.session_state["ai_intent_detector"]
+        
+        # Get project context for better task detection
+        try:
+            project_context = get_cached_project_context(current_project_id)
+        except:
+            project_context = None
+            
+        task_intent = detector.detect_task_addition_intent(user_input, project_context)
+        
+        if task_intent["is_task_intent"] and task_intent["confidence"] > 0.6:
+            try:
+                description = task_intent["task_description"]
+                due_date = task_intent["due_date"]
+                
+                if due_date:
+                    # 期限付きタスク
+                    add_task(current_project_id, description, due_date)
+                else:
+                    # 期限なしタスク（現在のadd_task関数を拡張する必要がある場合）
+                    import datetime
+                    default_due = (datetime.datetime.now() + datetime.timedelta(days=7)).strftime("%Y-%m-%d")
+                    add_task(current_project_id, description, default_due)
+                
+                # Get current tasks for display
+                import json
+                path = Path(f"data/projects/{current_project_id}.json")
+                data = json.loads(path.read_text())
+                tasks = data.get("tasks", [])
+                
+                task_list = "\n".join([f"- {t['id']}: {t['description']} (期日: {t['due_date']})" for t in tasks])
+                
+                # 抽出されたデータがあれば追加情報として表示
+                extracted_info = ""
+                if task_intent["extracted_data"]:
+                    extracted_info = "\n\n**検出された情報:**\n"
+                    for key, value in task_intent["extracted_data"].items():
+                        if value:
+                            extracted_info += f"- {key}: {value}\n"
+                
+                assistant_reply = f"タスクを追加しました: **{description}**\n\n現在のタスク一覧:\n{task_list}{extracted_info}"
+                
+            except Exception as e:
+                assistant_reply = f"タスク追加中にエラーが発生しました: {str(e)}"
+        
+    # Fallback: Check for traditional task command pattern
     elif user_input.startswith("タスク "):
         import re
         # Parse task command: タスク <description> <YYYY-MM-DD>
@@ -654,30 +702,15 @@ def process_chat_input(user_input: str):
         else:
             assistant_reply = "使用方法: タスク <説明> <YYYY-MM-DD>"
     
-    # Check for project creation trigger (more flexible patterns)
-    elif any(pattern in user_input for pattern in [
-        "プロジェクト作成", "新規プロジェクト", "プロジェクトを作成", "プロジェクトとして作成", 
-        "新規に作成", "プロジェクトを新規", "新しいプロジェクト"
-    ]):
-        # If the message already contains substantial project description, create directly
-        if len(user_input.strip()) > 20 and any(word in user_input for word in ["プロジェクト", "計画", "企画", "開発", "事業"]):
+    # AI-based project creation intent detection
+    elif st.session_state.get("ai_intent_detector"):
+        detector = st.session_state["ai_intent_detector"]
+        project_intent = detector.detect_project_creation_intent(user_input)
+        
+        if project_intent["is_creation_intent"] and project_intent["confidence"] > 0.6:
             try:
-                # Extract display name from input if provided in format with project keyword
-                import re
-                # Look for pattern like "XXプロジェクト" or "XXとして作成"
-                project_match = re.search(r'(\w+(?:プロジェクト|計画|企画|開発|事業))', user_input)
-                if project_match:
-                    potential_name = project_match.group(1)
-                    display_name = potential_name
-                    overview = user_input.strip()
-                else:
-                    # Extract meaningful name from beginning
-                    words = user_input.strip().split()
-                    if len(words) <= 5:
-                        display_name = user_input.strip()
-                    else:
-                        display_name = " ".join(words[:3])
-                    overview = user_input.strip()
+                display_name = project_intent["project_name"]
+                overview = project_intent["project_description"]
                 
                 # Create project directly
                 project = create_project(None, overview, "human_user", display_name)
@@ -688,12 +721,19 @@ def process_chat_input(user_input: str):
                 st.session_state["current_project_id"] = project.identifier
                 
                 st.session_state["awaiting_activate_confirm"] = True
-                assistant_reply = f"プロジェクト **{display_name}** を DRAFT で作成しました。次は ACTIVE にしますか？"
+                
+                # 抽出されたデータがあれば追加情報として表示
+                extracted_info = ""
+                if project_intent["extracted_data"]:
+                    extracted_info = "\n\n**検出された情報:**\n"
+                    for key, value in project_intent["extracted_data"].items():
+                        if value:
+                            extracted_info += f"- {key}: {value}\n"
+                
+                assistant_reply = f"プロジェクト **{display_name}** を DRAFT で作成しました。次は ACTIVE にしますか？{extracted_info}"
+                
             except Exception as e:
                 assistant_reply = f"プロジェクト作成中にエラーが発生しました: {str(e)}"
-        else:
-            st.session_state["awaiting_project_overview"] = True
-            assistant_reply = "プロジェクトの概要を教えてください。\n\n**入力形式:**\n- 短い名前: `会社研修`\n- タイトル付き: `会社研修: 新入社員向けの研修プログラムを企画・実施する`\n- 詳細のみ: `新入社員向けの研修プログラムを企画・実施する`"
     
     # Enhanced conversation flow with question generation
     if assistant_reply is None:
@@ -841,6 +881,14 @@ if "current_project_id" not in st.session_state:
     st.session_state["current_project_id"] = None
 if "update_candidates" not in st.session_state:
     st.session_state["update_candidates"] = []
+
+# AI Intent Detector初期化
+if "ai_intent_detector" not in st.session_state:
+    try:
+        st.session_state["ai_intent_detector"] = AIIntentDetector(get_openai_api_key())
+    except Exception as e:
+        logger.error(f"Failed to initialize AI Intent Detector: {e}")
+        st.session_state["ai_intent_detector"] = None
 
 # メインコンテンツの描画
 render_page_content()
