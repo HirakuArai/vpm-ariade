@@ -288,16 +288,21 @@ class ProjectChatPage:
             col1, col2, col3 = st.columns(3)
             
             suggested_input = None
+            # セッション固有のIDを確保
+            if "nav_session_id" not in st.session_state:
+                import random
+                st.session_state.nav_session_id = str(random.randint(100000, 999999))
+            
             with col1:
-                if st.button("📈 進捗を教えて", use_container_width=True, key=f"progress_btn_{project_id}"):
+                if st.button("📈 進捗を教えて", use_container_width=True, key=f"progress_btn_{project_id}_{st.session_state.nav_session_id}"):
                     suggested_input = "このプロジェクトの現在の進捗状況を教えてください。"
             
             with col2:
-                if st.button("⚠️ リスクを確認", use_container_width=True, key=f"risk_btn_{project_id}"):
+                if st.button("⚠️ リスクを確認", use_container_width=True, key=f"risk_btn_{project_id}_{st.session_state.nav_session_id}"):
                     suggested_input = "このプロジェクトの現在のリスクや課題を教えてください。"
             
             with col3:
-                if st.button("📅 次のステップ", use_container_width=True, key=f"next_step_btn_{project_id}"):
+                if st.button("📅 次のステップ", use_container_width=True, key=f"next_step_btn_{project_id}_{st.session_state.nav_session_id}"):
                     suggested_input = "次にやるべきことは何ですか？"
             
             # チャット入力

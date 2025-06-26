@@ -82,9 +82,14 @@ class HierarchicalNavigator:
             st.subheader("📂 メインメニュー")
             
             # ホームページ
+            # セッション固有のIDを生成（初回のみ）
+            if "nav_session_id" not in st.session_state:
+                import random
+                st.session_state.nav_session_id = str(random.randint(100000, 999999))
+            
             if st.button("🏠 ホーム", use_container_width=True, 
                         type="primary" if st.session_state.navigation_state.current_page == PageType.HOME else "secondary",
-                        key="nav_home_button"):
+                        key=f"nav_home_button_{st.session_state.nav_session_id}"):
                 st.session_state.navigation_state.current_page = PageType.HOME
                 st.session_state.navigation_state.selected_project_id = None
                 st.rerun()
@@ -109,7 +114,7 @@ class HierarchicalNavigator:
                     button_style = "primary" if is_selected else "secondary"
                     
                     if st.button(f"📋 {project_name}", use_container_width=True, type=button_style,
-                                key=f"nav_project_{project_id}"):
+                                key=f"nav_project_{project_id}_{st.session_state.nav_session_id}"):
                         st.session_state.navigation_state.selected_project_id = project_id
                         st.session_state.current_project_id = project_id  # Backward compatibility
                         
@@ -136,7 +141,7 @@ class HierarchicalNavigator:
                             with col2:
                                 button_type = "primary" if is_current_page else "secondary"
                                 if st.button(config["title"], use_container_width=True, 
-                                           type=button_type, key=f"sub_{page_type.value}_{project_id}"):
+                                           type=button_type, key=f"sub_{page_type.value}_{project_id}_{st.session_state.nav_session_id}"):
                                     st.session_state.navigation_state.current_page = page_type
                                     st.rerun()
         
