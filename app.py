@@ -550,7 +550,7 @@ def render_chat_interface():
     if user_input:
         # 会話処理を実行
         from core.chat_handler import process_chat_input
-        process_chat_input(user_input)
+        process_chat_input(user_input, current_project_id)
 
 # Chat processing functions have been moved to core.chat_handler to prevent circular imports
 
