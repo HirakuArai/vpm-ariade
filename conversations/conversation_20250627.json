@@ -210,6 +210,16 @@
       "role": "assistant",
       "content": "プロジェクトは DRAFT のままです。後でステータスを変更できます。",
       "ts": "2025-06-27T03:51:38+09:00"
+    },
+    {
+      "role": "user",
+      "content": "現在プライベートで利用しているステップワゴンをベースにしようと思っています。",
+      "ts": "2025-06-27T03:56:57+09:00"
+    },
+    {
+      "role": "assistant",
+      "content": "タスク追加中にエラーが発生しました: cannot access local variable 'json' where it is not associated with a value",
+      "ts": "2025-06-27T03:57:00+09:00"
     }
   ]
 }
