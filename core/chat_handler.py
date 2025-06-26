@@ -14,6 +14,11 @@ from typing import Optional
 import streamlit as st
 from zoneinfo import ZoneInfo
 
+try:
+    import openai
+except ImportError:
+    openai = None
+
 logger = logging.getLogger(__name__)
 
 # JST timezone
@@ -184,7 +189,8 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
 """
             
             try:
-                import openai
+                if not openai:
+                    raise ImportError("OpenAI not available")
                 response = openai.chat.completions.create(
                     model="gpt-4o-mini",
                     messages=[
@@ -195,7 +201,6 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
                     max_tokens=200
                 )
                 
-                import json
                 result = json.loads(response.choices[0].message.content.strip())
                 
                 if result.get("is_activation_intent", False) and result.get("confidence", 0) > 0.7:
@@ -270,8 +275,7 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
                     add_task(current_project_id, description, due_date)
                 else:
                     # 期限なしタスク（現在のadd_task関数を拡張する必要がある場合）
-                    import datetime
-                    default_due = (datetime.datetime.now() + datetime.timedelta(days=7)).strftime("%Y-%m-%d")
+                    default_due = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
                     add_task(current_project_id, description, default_due)
                 
                 # Get current tasks for display
@@ -412,9 +416,11 @@ def process_ai_conversation(user_input: str, current_project_id: Optional[str]) 
     """AI会話処理"""
     try:
         from .project_prompt import get_full_system_prompt
-        import openai
         
         # OpenAI クライアント設定
+        if not openai:
+            return "❌ OpenAI ライブラリが利用できません。"
+        
         api_key = get_openai_api_key()
         if not api_key:
             return "❌ OpenAI API キーが設定されていません。"
