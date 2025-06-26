@@ -539,7 +539,8 @@ def render_chat_interface():
     st.markdown("### 💬 AI との会話")
     
     # プロジェクト作成のヒント
-    current_project_id = nav_state.selected_project_id
+    current_nav_state = st.session_state.navigation_state
+    current_project_id = current_nav_state.selected_project_id
     if not current_project_id:
         st.info("💡 自然な言葉でプロジェクト作成やタスク追加を依頼してください。\n例：「ウェブサイト開発を始めたい」「データベース設計を来週までに完了したい」")
     
