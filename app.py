@@ -515,7 +515,7 @@ def render_home_page():
             st.warning("プロジェクト視覚化の表示でエラーが発生しました")
         
     else:
-        st.info("💡 左サイドバーからプロジェクトを選択するか、「プロジェクト作成」と入力して新しいプロジェクトを作成してください。")
+        st.info("💡 左サイドバーからプロジェクトを選択するか、「プロジェクト作成」「新規プロジェクト」「〜プロジェクトとして作成」などと入力して新しいプロジェクトを作成してください。")
         
         # 会話インターフェースの後にセッション履歴を表示
         # （render_chat_interface() が下で呼ばれる）
@@ -535,10 +535,10 @@ def render_chat_interface():
     # プロジェクト作成のヒント
     current_project_id = nav_state.selected_project_id
     if not current_project_id:
-        st.info("💡 プロジェクト作成は「プロジェクト作成」と入力してください。\n作成時は「タイトル: 詳細説明」の形式がおすすめです。")
+        st.info("💡 プロジェクト作成は「プロジェクト作成」「新規プロジェクト」「〜として作成」などと入力してください。\n作成時は「タイトル: 詳細説明」の形式がおすすめです。")
     
     # チャット入力
-    user_input = st.chat_input("メッセージを入力してください…（プロジェクト作成は「プロジェクト作成」と入力）")
+    user_input = st.chat_input("メッセージを入力してください…（プロジェクト作成は「〜プロジェクトとして作成」など）")
     
     if user_input:
         # 会話処理を実行
@@ -546,6 +546,10 @@ def render_chat_interface():
 
 def process_chat_input(user_input: str):
     """チャット入力の処理"""
+    # Ensure navigation state is properly initialized
+    if not hasattr(st.session_state, 'navigation_state') or st.session_state.navigation_state is None:
+        navigator.initialize_session_state()
+    
     # 1) ログへ保存
     _append_log("user", user_input)
     
@@ -557,9 +561,6 @@ def process_chat_input(user_input: str):
         st.session_state["current_project_id"] = current_project_id
     else:
         # ホームページでの会話を明示的に保持
-        # ナビゲーション状態が初期化されていることを確認
-        if not hasattr(st.session_state, 'navigation_state'):
-            navigator.initialize_session_state()
         st.session_state.navigation_state.current_page = PageType.HOME
         st.session_state.navigation_state.selected_project_id = None
         st.session_state["current_project_id"] = None
@@ -653,10 +654,46 @@ def process_chat_input(user_input: str):
         else:
             assistant_reply = "使用方法: タスク <説明> <YYYY-MM-DD>"
     
-    # Check for project creation trigger
-    elif "プロジェクト作成" in user_input:
-        st.session_state["awaiting_project_overview"] = True
-        assistant_reply = "プロジェクトの概要を教えてください。\n\n**入力形式:**\n- 短い名前: `会社研修`\n- タイトル付き: `会社研修: 新入社員向けの研修プログラムを企画・実施する`\n- 詳細のみ: `新入社員向けの研修プログラムを企画・実施する`"
+    # Check for project creation trigger (more flexible patterns)
+    elif any(pattern in user_input for pattern in [
+        "プロジェクト作成", "新規プロジェクト", "プロジェクトを作成", "プロジェクトとして作成", 
+        "新規に作成", "プロジェクトを新規", "新しいプロジェクト"
+    ]):
+        # If the message already contains substantial project description, create directly
+        if len(user_input.strip()) > 20 and any(word in user_input for word in ["プロジェクト", "計画", "企画", "開発", "事業"]):
+            try:
+                # Extract display name from input if provided in format with project keyword
+                import re
+                # Look for pattern like "XXプロジェクト" or "XXとして作成"
+                project_match = re.search(r'(\w+(?:プロジェクト|計画|企画|開発|事業))', user_input)
+                if project_match:
+                    potential_name = project_match.group(1)
+                    display_name = potential_name
+                    overview = user_input.strip()
+                else:
+                    # Extract meaningful name from beginning
+                    words = user_input.strip().split()
+                    if len(words) <= 5:
+                        display_name = user_input.strip()
+                    else:
+                        display_name = " ".join(words[:3])
+                    overview = user_input.strip()
+                
+                # Create project directly
+                project = create_project(None, overview, "human_user", display_name)
+                st.session_state["created_project_id"] = project.identifier
+                
+                # Update navigation state
+                st.session_state.navigation_state.selected_project_id = project.identifier
+                st.session_state["current_project_id"] = project.identifier
+                
+                st.session_state["awaiting_activate_confirm"] = True
+                assistant_reply = f"プロジェクト **{display_name}** を DRAFT で作成しました。次は ACTIVE にしますか？"
+            except Exception as e:
+                assistant_reply = f"プロジェクト作成中にエラーが発生しました: {str(e)}"
+        else:
+            st.session_state["awaiting_project_overview"] = True
+            assistant_reply = "プロジェクトの概要を教えてください。\n\n**入力形式:**\n- 短い名前: `会社研修`\n- タイトル付き: `会社研修: 新入社員向けの研修プログラムを企画・実施する`\n- 詳細のみ: `新入社員向けの研修プログラムを企画・実施する`"
     
     # Enhanced conversation flow with question generation
     if assistant_reply is None:
@@ -689,6 +726,15 @@ def process_chat_input(user_input: str):
                 logger.warning(f"Failed to push project {current_project_id} data to git")
     except Exception as e:
         logger.error(f"Error pushing to git: {e}")
+    
+    # Ensure navigation state is preserved before rerun
+    if not hasattr(st.session_state, 'navigation_state') or st.session_state.navigation_state is None:
+        navigator.initialize_session_state()
+    
+    # Explicitly maintain home page state for non-project conversations
+    if not current_project_id:
+        st.session_state.navigation_state.current_page = PageType.HOME
+        st.session_state.navigation_state.selected_project_id = None
     
     # Rerun to display the new messages
     st.rerun()
