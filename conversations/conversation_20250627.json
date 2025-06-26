@@ -140,6 +140,16 @@
       "role": "assistant",
       "content": "プロジェクト **proj-20250626-181419-516** を ACTIVE に設定しました！",
       "ts": "2025-06-27T03:14:37+09:00"
+    },
+    {
+      "role": "user",
+      "content": "ホンダのステップワゴンを車中泊仕様に改造しようと思っています。名前を提案してください。",
+      "ts": "2025-06-27T03:36:17+09:00"
+    },
+    {
+      "role": "assistant",
+      "content": "❌ AI応答の生成に失敗しました: cannot import name 'get_full_system_prompt' from 'core.project_prompt' (/mount/src/vpm-ariade/core/project_prompt.py)",
+      "ts": "2025-06-27T03:36:20+09:00"
     }
   ]
 }
