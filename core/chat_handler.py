@@ -156,19 +156,96 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
     
     # Check if we're waiting for activation confirmation
     elif st.session_state.get("awaiting_activate_confirm", False):
-        user_lower = user_input.lower().strip()
-        if any(word in user_lower for word in ["はい", "yes", "する", "active", "アクティブ"]):
+        # AI-based activation intent detection
+        if st.session_state.get("ai_intent_detector"):
+            detector = st.session_state["ai_intent_detector"]
+            
+            # Simple activation intent prompt
+            activation_prompt = f"""
+ユーザーの以下の発言は、プロジェクトをACTIVEにすることへの同意を示していますか？
+
+発言: "{user_input}"
+
+以下のJSONで回答してください：
+{{
+    "is_activation_intent": true/false,
+    "confidence": 0.0-1.0,
+    "reasoning": "判定理由"
+}}
+
+同意を示すパターン例：
+- はい、アクティブにしてください
+- yes, please activate
+- 進めてください
+- そうしましょう
+- 承認します
+
+質問や追加情報の場合は is_activation_intent: false にしてください。
+"""
+            
             try:
-                set_status(st.session_state["created_project_id"], "ACTIVE")
-                assistant_reply = f"プロジェクト **{st.session_state['created_project_id']}** を ACTIVE に設定しました！"
+                import openai
+                response = openai.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": "あなたは意図検出の専門家です。ユーザーの発言からアクティベーション意図を正確に判定してください。"},
+                        {"role": "user", "content": activation_prompt}
+                    ],
+                    temperature=0.1,
+                    max_tokens=200
+                )
+                
+                import json
+                result = json.loads(response.choices[0].message.content.strip())
+                
+                if result.get("is_activation_intent", False) and result.get("confidence", 0) > 0.7:
+                    try:
+                        set_status(st.session_state["created_project_id"], "ACTIVE")
+                        assistant_reply = f"プロジェクト **{st.session_state['created_project_id']}** を ACTIVE に設定しました！"
+                    except Exception as e:
+                        assistant_reply = f"ステータス更新中にエラーが発生しました: {str(e)}"
+                    
+                    # Reset flow state
+                    st.session_state["awaiting_activate_confirm"] = False
+                    st.session_state["created_project_id"] = None
+                else:
+                    # Continue conversation without activating, but provide context
+                    assistant_reply = f"承知しました。プロジェクトは現在DRAFT状態です。\n\n{user_input}\n\nプロジェクトをACTIVEにする準備ができましたら「はい、アクティブにしてください」とお知らせください。"
+                    
             except Exception as e:
-                assistant_reply = f"ステータス更新中にエラーが発生しました: {str(e)}"
+                logger.error(f"AI activation intent detection failed: {e}")
+                # Fallback to simple pattern matching
+                user_lower = user_input.lower().strip()
+                if any(word in user_lower for word in ["はい", "yes", "する", "active", "アクティブ"]):
+                    try:
+                        set_status(st.session_state["created_project_id"], "ACTIVE")
+                        assistant_reply = f"プロジェクト **{st.session_state['created_project_id']}** を ACTIVE に設定しました！"
+                    except Exception as e:
+                        assistant_reply = f"ステータス更新中にエラーが発生しました: {str(e)}"
+                    
+                    # Reset flow state
+                    st.session_state["awaiting_activate_confirm"] = False
+                    st.session_state["created_project_id"] = None
+                else:
+                    assistant_reply = "プロジェクトは DRAFT のままです。後でステータスを変更できます。"
+                    # Reset flow state
+                    st.session_state["awaiting_activate_confirm"] = False
+                    st.session_state["created_project_id"] = None
         else:
-            assistant_reply = "プロジェクトは DRAFT のままです。後でステータスを変更できます。"
-        
-        # Reset flow state
-        st.session_state["awaiting_activate_confirm"] = False
-        st.session_state["created_project_id"] = None
+            # Fallback when AI detector is not available
+            user_lower = user_input.lower().strip()
+            if any(word in user_lower for word in ["はい", "yes", "する", "active", "アクティブ"]):
+                try:
+                    set_status(st.session_state["created_project_id"], "ACTIVE")
+                    assistant_reply = f"プロジェクト **{st.session_state['created_project_id']}** を ACTIVE に設定しました！"
+                except Exception as e:
+                    assistant_reply = f"ステータス更新中にエラーが発生しました: {str(e)}"
+            else:
+                assistant_reply = "プロジェクトは DRAFT のままです。後でステータスを変更できます。"
+            
+            # Reset flow state
+            st.session_state["awaiting_activate_confirm"] = False
+            st.session_state["created_project_id"] = None
     
     # AI-based task addition intent detection
     elif current_project_id and st.session_state.get("ai_intent_detector"):
