@@ -159,7 +159,13 @@ class HierarchicalNavigator:
     
     def get_current_page_config(self) -> Dict:
         """現在のページ設定を取得"""
+        if not hasattr(st.session_state, 'navigation_state'):
+            self.initialize_session_state()
+        
         current_page = st.session_state.navigation_state.current_page
+        if current_page is None:
+            current_page = PageType.HOME
+        
         return self.page_config.get(current_page, {})
     
     def validate_navigation_state(self) -> bool:
@@ -183,8 +189,13 @@ class HierarchicalNavigator:
         if not hasattr(st.session_state, 'navigation_state'):
             self.initialize_session_state()
         
-        config = self.get_current_page_config()
+        # 現在のページを取得（Noneチェック付き）
         current_page = st.session_state.navigation_state.current_page
+        if current_page is None:
+            current_page = PageType.HOME
+            st.session_state.navigation_state.current_page = PageType.HOME
+        
+        config = self.get_current_page_config()
         
         # デバッグ: current_pageの型と値を確認
         if current_page == PageType.HOME or current_page == "home":
@@ -198,7 +209,13 @@ class HierarchicalNavigator:
                 st.info(f"📋 **選択中プロジェクト**: {project_name}")
         else:
             # 他のページのヘッダー
-            st.title(config.get("title", "ページ"))
+            # configが空の場合のフォールバック処理
+            if not config:
+                # ページタイプから直接設定を取得
+                config = self.page_config.get(current_page, {})
+            
+            title = config.get("title", "🏠 ホーム")  # デフォルトをホームに変更
+            st.title(title)
             
             selected_project = st.session_state.navigation_state.selected_project_id
             if selected_project and config.get("requires_project", False):

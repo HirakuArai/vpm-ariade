@@ -30,6 +30,11 @@ st.set_page_config(
     layout="wide"
 )
 
+# Streamlitのマルチページ機能を無効化
+# pagesディレクトリの存在による自動ページ検出を防ぐ
+if hasattr(st, '_is_running_with_streamlit'):
+    st._is_running_with_streamlit = True
+
 # ────────────────────────────────────────────────────────────────────────────
 # Kai modules
 # ────────────────────────────────────────────────────────────────────────────
@@ -352,6 +357,9 @@ def get_full_system_prompt() -> str:
 if "page" in st.query_params:
     st.query_params.clear()
 
+# ナビゲーション状態の初期化を確実に行う
+navigator.initialize_session_state()
+
 # サイドバーナビゲーションの描画
 nav_state = navigator.render_sidebar_navigation()
 
@@ -549,8 +557,12 @@ def process_chat_input(user_input: str):
         st.session_state["current_project_id"] = current_project_id
     else:
         # ホームページでの会話を明示的に保持
+        # ナビゲーション状態が初期化されていることを確認
+        if not hasattr(st.session_state, 'navigation_state'):
+            navigator.initialize_session_state()
         st.session_state.navigation_state.current_page = PageType.HOME
         st.session_state.navigation_state.selected_project_id = None
+        st.session_state["current_project_id"] = None
 
     # Handle project creation flow
     assistant_reply = None
