@@ -216,6 +216,7 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
                 else:
                     # Continue conversation without activating, but provide context
                     assistant_reply = f"承知しました。プロジェクトは現在DRAFT状態です。\n\n{user_input}\n\nプロジェクトをACTIVEにする準備ができましたら「はい、アクティブにしてください」とお知らせください。"
+                    # Don't reset the awaiting state - keep waiting for activation
                     
             except Exception as e:
                 logger.error(f"AI activation intent detection failed: {e}")
@@ -232,10 +233,8 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
                     st.session_state["awaiting_activate_confirm"] = False
                     st.session_state["created_project_id"] = None
                 else:
-                    assistant_reply = "プロジェクトは DRAFT のままです。後でステータスを変更できます。"
-                    # Reset flow state
-                    st.session_state["awaiting_activate_confirm"] = False
-                    st.session_state["created_project_id"] = None
+                    assistant_reply = f"承知しました。プロジェクトは現在DRAFT状態です。\n\n{user_input}\n\nプロジェクトをACTIVEにする準備ができましたら「はい、アクティブにしてください」とお知らせください。"
+                    # Don't reset the awaiting state - keep waiting for activation
         else:
             # Fallback when AI detector is not available
             user_lower = user_input.lower().strip()
@@ -246,11 +245,12 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
                 except Exception as e:
                     assistant_reply = f"ステータス更新中にエラーが発生しました: {str(e)}"
             else:
-                assistant_reply = "プロジェクトは DRAFT のままです。後でステータスを変更できます。"
+                assistant_reply = f"承知しました。プロジェクトは現在DRAFT状態です。\n\n{user_input}\n\nプロジェクトをACTIVEにする準備ができましたら「はい、アクティブにしてください」とお知らせください。"
             
-            # Reset flow state
-            st.session_state["awaiting_activate_confirm"] = False
-            st.session_state["created_project_id"] = None
+            # Only reset flow state if activation was confirmed
+            if any(word in user_input.lower().strip() for word in ["はい", "yes", "する", "active", "アクティブ"]):
+                st.session_state["awaiting_activate_confirm"] = False
+                st.session_state["created_project_id"] = None
     
     # AI-based task addition intent detection
     elif current_project_id and st.session_state.get("ai_intent_detector"):
