@@ -268,7 +268,10 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
         # Check for task removal intent first
         removal_intent = detector.detect_task_removal_intent(user_input, current_tasks)
         
-        if removal_intent["is_removal_intent"] and removal_intent["confidence"] > 0.7:
+        # ログで削除意図検出結果を確認
+        logger.info(f"Task removal intent detection: {removal_intent}")
+        
+        if removal_intent["is_removal_intent"] and removal_intent["confidence"] > 0.5:  # 閾値を下げて検証
             try:
                 if removal_intent["is_duplicate_removal"]:
                     # Remove duplicate tasks
@@ -304,6 +307,20 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
             except Exception as e:
                 assistant_reply = f"タスク削除中にエラーが発生しました: {str(e)}"
         
+        # タスク削除が処理された場合は、タスク追加処理をスキップ
+        if assistant_reply:
+            # 削除処理が完了したので、ここで処理を終了
+            pass
+        # タスクリスト確認の特別処理
+        elif any(keyword in user_input.lower() for keyword in [
+            "タスクリスト", "タスクを教えて", "現在のタスク", "タスク一覧", "タスクを見せて"
+        ]):
+            # タスクリスト表示の専用処理
+            if current_tasks:
+                task_list = "\n".join([f"[{t['id']}] {t['description']} (期日: {t['due_date']})" for t in current_tasks])
+                assistant_reply = f"現在の未完了タスクは以下の通りです：\n\n{task_list}"
+            else:
+                assistant_reply = "現在、未完了のタスクはありません。"
         # If not removal intent, check for task addition
         elif not removal_intent["is_removal_intent"]:
             from .project_prompt import get_cached_project_context
