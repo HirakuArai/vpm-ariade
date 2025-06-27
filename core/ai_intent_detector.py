@@ -7,7 +7,7 @@ AI Intent Detector - AI-based user intent detection system
 import json
 import logging
 import re
-from typing import Dict, Optional, Tuple, Any
+from typing import Dict, Optional, Tuple, Any, List
 from datetime import datetime, date
 
 logger = logging.getLogger(__name__)
