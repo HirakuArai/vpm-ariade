@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-27T20:40:35Z",
+  "generated_at": "2025-06-27T20:53:58Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -158,6 +158,10 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/ai_intent_detector.py"
     },
     {
+      "path": "core/ai_project_manager.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/ai_project_manager.py"
+    },
+    {
       "path": "core/ai_quality_manager.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/ai_quality_manager.py"
     },
@@ -188,6 +192,10 @@
     {
       "path": "core/chat_handler.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/chat_handler.py"
+    },
+    {
+      "path": "core/chat_handler_ai.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/chat_handler_ai.py"
     },
     {
       "path": "core/code_analysis.py",
@@ -984,6 +992,10 @@
     {
       "path": "test_ui_improvements.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/test_ui_improvements.py"
+    },
+    {
+      "path": "tests/test_ai_first_system.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/tests/test_ai_first_system.py"
     },
     {
       "path": "tests/test_automation_integration.py",
