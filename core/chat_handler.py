@@ -7,7 +7,6 @@ app.pyからチャット処理ロジックを分離して循環インポート�
 import json
 import logging
 import os
-import re
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
@@ -347,36 +346,6 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
                 except Exception as e:
                     assistant_reply = f"タスク追加中にエラーが発生しました: {str(e)}"
     
-    # Fallback: Check for traditional task command pattern
-    elif user_input.startswith("タスク "):
-        # Parse task command: タスク <description> <YYYY-MM-DD>
-        parts = user_input[3:].strip().split()  # Remove "タスク " prefix
-        if len(parts) >= 2:
-            # Last part should be date, everything else is description
-            due_date = parts[-1]
-            description = " ".join(parts[:-1])
-            
-            # Validate date format
-            if re.match(r'\d{4}-\d{2}-\d{2}', due_date):
-                if current_project_id:
-                    try:
-                        add_task(current_project_id, description, due_date)
-                        
-                        # Get current tasks for display
-                        path = Path(f"data/projects/{current_project_id}.json")
-                        data = json.loads(path.read_text())
-                        tasks = data.get("tasks", [])
-                        
-                        task_list = "\n".join([f"- {t['id']}: {t['description']} (期日: {t['due_date']})" for t in tasks])
-                        assistant_reply = f"タスクを追加しました。\n\n現在のタスク一覧:\n{task_list}"
-                    except Exception as e:
-                        assistant_reply = f"タスク追加中にエラーが発生しました: {str(e)}"
-                else:
-                    assistant_reply = "まずプロジェクトを作成または選択してください。"
-            else:
-                assistant_reply = "日付は YYYY-MM-DD 形式で入力してください。"
-        else:
-            assistant_reply = "使用方法: タスク <説明> <YYYY-MM-DD>"
     
     # AI-based project creation intent detection
     elif st.session_state.get("ai_intent_detector"):

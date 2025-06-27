@@ -10,6 +10,11 @@ import re
 from typing import Dict, Optional, Tuple, Any, List
 from datetime import datetime, date
 
+try:
+    import openai
+except ImportError:
+    openai = None
+
 logger = logging.getLogger(__name__)
 
 class AIIntentDetector:
@@ -53,7 +58,14 @@ class AIIntentDetector:
             }
         """
         if not self.available:
-            return self._fallback_project_creation(user_input)
+            return {
+                "error": "AI機能が利用できません。OpenAI APIキーを確認してください。",
+                "is_creation_intent": False,
+                "confidence": 0.0,
+                "project_name": "",
+                "project_description": "",
+                "extracted_data": {}
+            }
         
         try:
             prompt = f"""
@@ -124,7 +136,14 @@ class AIIntentDetector:
             
         except Exception as e:
             logger.error(f"AI project creation detection failed: {e}")
-            return self._fallback_project_creation(user_input)
+            return {
+                "error": f"AI判定でエラーが発生しました: {str(e)}",
+                "is_creation_intent": False,
+                "confidence": 0.0,
+                "project_name": "",
+                "project_description": "",
+                "extracted_data": {}
+            }
     
     def detect_task_addition_intent(self, user_input: str, project_context: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -145,7 +164,15 @@ class AIIntentDetector:
             }
         """
         if not self.available:
-            return self._fallback_task_addition(user_input)
+            return {
+                "error": "AI機能が利用できません。OpenAI APIキーを確認してください。",
+                "is_task_intent": False,
+                "confidence": 0.0,
+                "task_description": "",
+                "due_date": None,
+                "priority": None,
+                "extracted_data": {}
+            }
         
         try:
             context_info = f"プロジェクト文脈: {project_context}" if project_context else "プロジェクト文脈: なし"
@@ -216,60 +243,17 @@ class AIIntentDetector:
             
         except Exception as e:
             logger.error(f"AI task addition detection failed: {e}")
-            return self._fallback_task_addition(user_input)
+            return {
+                "error": f"AI判定でエラーが発生しました: {str(e)}",
+                "is_task_intent": False,
+                "confidence": 0.0,
+                "task_description": "",
+                "due_date": None,
+                "priority": None,
+                "extracted_data": {}
+            }
     
-    def _fallback_project_creation(self, user_input: str) -> Dict[str, Any]:
-        """
-        AI判定が失敗した場合のフォールバック処理（プロジェクト作成）
-        """
-        patterns = [
-            "プロジェクト作成", "新規プロジェクト", "プロジェクトを作成", 
-            "プロジェクトとして作成", "新規に作成", "プロジェクトを新規", 
-            "新しいプロジェクト", "プロジェクトを始める"
-        ]
-        
-        is_creation = any(pattern in user_input for pattern in patterns)
-        
-        return {
-            "is_creation_intent": is_creation,
-            "confidence": 0.8 if is_creation else 0.0,
-            "project_name": "新規プロジェクト",
-            "project_description": user_input.strip(),
-            "extracted_data": {}
-        }
     
-    def _fallback_task_addition(self, user_input: str) -> Dict[str, Any]:
-        """
-        AI判定が失敗した場合のフォールバック処理（タスク追加）
-        """
-        is_task = user_input.startswith("タスク ")
-        
-        if is_task:
-            # 既存のパースロジックを使用
-            parts = user_input[3:].strip().split()  # Remove "タスク " prefix
-            if len(parts) >= 2:
-                due_date = parts[-1]
-                description = " ".join(parts[:-1])
-                
-                # 日付フォーマットの検証
-                if re.match(r'\d{4}-\d{2}-\d{2}', due_date):
-                    return {
-                        "is_task_intent": True,
-                        "confidence": 0.9,
-                        "task_description": description,
-                        "due_date": due_date,
-                        "priority": None,
-                        "extracted_data": {}
-                    }
-        
-        return {
-            "is_task_intent": is_task,
-            "confidence": 0.8 if is_task else 0.0,
-            "task_description": user_input.strip(),
-            "due_date": None,
-            "priority": None,
-            "extracted_data": {}
-        }
 
     def detect_task_removal_intent(self, user_input: str, current_tasks: List[Dict] = None) -> Dict[str, Any]:
         """
@@ -283,7 +267,15 @@ class AIIntentDetector:
             Dict containing removal intent analysis
         """
         if not self.api_key:
-            return self._fallback_task_removal(user_input)
+            return {
+                "error": "AI機能が利用できません。OpenAI APIキーを確認してください。",
+                "is_removal_intent": False,
+                "confidence": 0.0,
+                "reasoning": "AI機能が利用できません",
+                "removal_type": "none",
+                "target_task_ids": [],
+                "is_duplicate_removal": False
+            }
         
         try:
             # タスクリストの情報を含める
@@ -351,29 +343,13 @@ class AIIntentDetector:
             
         except Exception as e:
             logger.error(f"AI task removal detection failed: {e}")
-            return self._fallback_task_removal(user_input)
+            return {
+                "error": f"AI判定でエラーが発生しました: {str(e)}",
+                "is_removal_intent": False,
+                "confidence": 0.0,
+                "reasoning": f"AI判定失敗: {str(e)}",
+                "removal_type": "none",
+                "target_task_ids": [],
+                "is_duplicate_removal": False
+            }
     
-    def _fallback_task_removal(self, user_input: str) -> Dict[str, Any]:
-        """
-        AI判定が失敗した場合のフォールバック処理（タスク削除）
-        """
-        removal_patterns = [
-            "削除", "消去", "除去", "取り除く", "消す", "ひとつ消して", 
-            "重複削除", "重複除去", "同じものを消す", "ダブりを消す"
-        ]
-        
-        is_removal = any(pattern in user_input for pattern in removal_patterns)
-        is_duplicate = any(word in user_input for word in ["重複", "同じ", "ダブり"])
-        
-        # 数字を抽出してタスクIDとして認識
-        import re
-        task_ids = [int(match) for match in re.findall(r'\b(\d+)\b', user_input)]
-        
-        return {
-            "is_removal_intent": is_removal,
-            "confidence": 0.8 if is_removal else 0.0,
-            "reasoning": "パターンマッチングによる判定",
-            "removal_type": "duplicate" if is_duplicate else ("specific" if task_ids else "general"),
-            "target_task_ids": task_ids,
-            "is_duplicate_removal": is_duplicate
-        }
