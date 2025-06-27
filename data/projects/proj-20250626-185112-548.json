@@ -6,7 +6,7 @@
   "created_by": "human_user",
   "status": "DRAFT",
   "schema_version": "1.0",
-  "updated_at": "2025-06-27T17:35:01.865357",
+  "updated_at": "2025-06-27T17:55:40.544828",
   "change_log": [],
   "uuid": "39a9a85e-a3b5-41e1-b6f9-4b64d5189847",
   "tasks": [
@@ -35,6 +35,13 @@
       "id": 4,
       "description": "\u30bf\u30b9\u30af\u306e\u524a\u9664",
       "due_date": "2025-07-04",
+      "owner": "__UNDEFINED__",
+      "status": "__UNDEFINED__"
+    },
+    {
+      "id": 5,
+      "description": "\u30e2\u30d0\u30a4\u30eb\u30ad\u30e3\u30d3\u30f3\u306e\u8a2d\u8a08\u30bf\u30b9\u30af\u3092\u8ffd\u52a0",
+      "due_date": "2025-07-03",
       "owner": "__UNDEFINED__",
       "status": "__UNDEFINED__"
     }
