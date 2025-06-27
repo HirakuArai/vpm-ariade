@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-27T17:32:15Z",
+  "generated_at": "2025-06-27T17:32:17Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -440,6 +440,10 @@
     {
       "path": "data/conversations/proj-20250626-185112-548/20250627.jsonl",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/conversations/proj-20250626-185112-548/20250627.jsonl"
+    },
+    {
+      "path": "data/conversations/proj-20250626-185112-548/20250628.jsonl",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/conversations/proj-20250626-185112-548/20250628.jsonl"
     },
     {
       "path": "data/dir_whitelist.json",
