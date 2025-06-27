@@ -2,11 +2,18 @@
 """
 AI Project Manager - 真のAI的バーチャルプロジェクトマネージャー
 統一されたAI判断による自然なプロジェクト管理
+
+🧠 AI-FIRST PHILOSOPHY IMPLEMENTATION
+❌ FORBIDDEN: Pattern matching, conditional chains, hardcoded rules
+✅ REQUIRED: Unified AI decisions, contextual understanding, learning
+
+📖 See docs/AI_FIRST_PHILOSOPHY.md for complete guidelines
+🔥 This philosophy MUST NEVER be violated
 """
 
 import json
 import logging
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 from datetime import datetime
 from dataclasses import dataclass
 

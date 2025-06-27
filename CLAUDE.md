@@ -1,5 +1,25 @@
 # CLAUDE.md
 
+## 🧠 AI-First Philosophy (ABSOLUTE RULE - NEVER VIOLATE)
+
+**🔥 CRITICAL: This is a TRUE AI-FIRST Virtual Project Manager**
+
+### ❌ FORBIDDEN (Non-AI Elements):
+* Pattern matching: `if "keyword" in user_input`  
+* Complex conditional chains: `if/elif/elif/else`
+* Hardcoded rules or predefined patterns
+* Fixed response mappings
+
+### ✅ REQUIRED (True AI Elements):
+* Unified AI decision making for ALL user interactions
+* Contextual understanding over surface-level keywords  
+* Learning from every conversation
+* Emergent responses to novel situations
+
+**📖 Complete guidelines: docs/AI_FIRST_PHILOSOPHY.md**
+
+---
+
 ## 🌟 North Star
 
 Kai VPM delivers an **idempotent, self‑evolving AI Project Manager** that can turn any vague human intention into a well‑defined project, guide it with consistent prioritisation and risk awareness, and learn from every outcome while keeping the system continuously usable.

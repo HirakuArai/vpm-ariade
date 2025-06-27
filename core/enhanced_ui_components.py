@@ -226,32 +226,41 @@ class NotificationComponents:
     
     @staticmethod
     def render_system_status():
-        """システム状態インジケータ"""
-        col1, col2, col3, col4 = st.columns(4)
+        """システム状態インジケータ（サイドバー最適化版）"""
+        # AI接続状態
+        ai_status = "🟢 正常" if st.session_state.get("ai_intent_detector") else "🔴 切断"
+        st.markdown(f"**🤖 AI状態**: {ai_status}")
         
-        with col1:
-            # AI接続状態
-            ai_status = "🟢 正常" if st.session_state.get("ai_intent_detector") else "🔴 切断"
-            st.metric("AI", ai_status)
+        # 会話履歴数
+        history_count = len(st.session_state.get("history", []))
+        st.markdown(f"**💬 履歴**: {history_count}件")
         
-        with col2:
-            # 会話履歴数
-            history_count = len(st.session_state.get("history", []))
-            st.metric("セッション履歴", f"{history_count}件")
+        # セッション時間
+        if "session_start" not in st.session_state:
+            st.session_state["session_start"] = datetime.now()
         
-        with col3:
-            # 現在時刻
-            current_time = datetime.now().strftime("%H:%M")
-            st.metric("現在時刻", current_time)
+        uptime = datetime.now() - st.session_state["session_start"]
+        hours, remainder = divmod(uptime.seconds, 3600)
+        minutes, _ = divmod(remainder, 60)
         
-        with col4:
-            # システム稼働時間（セッション開始からの時間）
-            if "session_start" not in st.session_state:
-                st.session_state["session_start"] = datetime.now()
-            
-            uptime = datetime.now() - st.session_state["session_start"]
-            uptime_str = f"{uptime.seconds // 60}分"
-            st.metric("セッション時間", uptime_str)
+        if hours > 0:
+            uptime_str = f"{hours}時間{minutes}分"
+        else:
+            uptime_str = f"{minutes}分"
+        
+        st.markdown(f"**⏱️ セッション**: {uptime_str}")
+        
+        # 現在時刻
+        current_time = datetime.now().strftime("%H:%M")
+        st.markdown(f"**🕐 現在時刻**: {current_time}")
+        
+        # プロジェクト情報（追加）
+        current_project = st.session_state.get("current_project_id")
+        if current_project:
+            project_display = current_project[:15] + "..." if len(current_project) > 15 else current_project
+            st.markdown(f"**📁 プロジェクト**: {project_display}")
+        else:
+            st.markdown("**📁 プロジェクト**: 未選択")
 
 class ResponsiveLayout:
     """レスポンシブレイアウトコンポーネント"""

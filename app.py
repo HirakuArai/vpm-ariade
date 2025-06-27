@@ -52,7 +52,7 @@ try:
     from core.notification_system import NotificationSystem
     from core.models import ProjectPhase
     from core.ui_components import ProjectVisualization, QuestionVisualization, InteractiveComponents, StatusIndicators
-    from core.enhanced_ui_components import FeedbackComponents, NotificationComponents, ResponsiveLayout
+    from core.enhanced_ui_components import NotificationComponents, ResponsiveLayout
     from core.ai_quality_manager import create_quality_manager
     from core.navigation import navigator, PageType
     from core.pages import ProjectDetailsPage, ProjectChatPage, ConversationHistoryPage
@@ -575,8 +575,5 @@ with st.sidebar:
                 st.markdown("**推奨事項:**")
                 for rec in recommendations:
                     st.caption(rec)
-    
-    # フィードバックフォーム
-    FeedbackComponents.render_feedback_form("システム全体")
 
 # 履歴表示（プロジェクト固有履歴＋セッション履歴）  
