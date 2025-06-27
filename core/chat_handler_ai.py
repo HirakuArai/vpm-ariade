@@ -103,7 +103,7 @@ def process_chat_input_ai(user_input: str, current_project_id: Optional[str] = N
         user_input: ユーザーの入力
         current_project_id: 現在のプロジェクトID
     """
-    from .navigation import navigator, PageType
+    from .navigation import navigator
     
     # Ensure navigation state is properly initialized
     if not hasattr(st.session_state, 'navigation_state') or st.session_state.navigation_state is None:
@@ -116,7 +116,10 @@ def process_chat_input_ai(user_input: str, current_project_id: Optional[str] = N
     if current_project_id:
         _append_project_log(current_project_id, "user", user_input)
         st.session_state["current_project_id"] = current_project_id
+        # プロジェクト会話の場合：現在のページ状態を保持
+        st.session_state.navigation_state.selected_project_id = current_project_id
     else:
+        # ホーム会話の場合のみナビゲーション状態をリセット
         st.session_state.navigation_state.current_page = PageType.HOME
         st.session_state.navigation_state.selected_project_id = None
         st.session_state["current_project_id"] = None
@@ -372,17 +375,19 @@ def _finalize_conversation(assistant_reply: str, current_project_id: Optional[st
         from .navigation import navigator
         navigator.initialize_session_state()
     
+    from .navigation import PageType
+    
     # プロジェクト会話の場合は現在のページ状態を保持し、ホーム会話の場合のみHOMEに設定
     if not current_project_id:
         st.session_state.navigation_state.current_page = PageType.HOME
         st.session_state.navigation_state.selected_project_id = None
         if "page" in st.query_params:
             st.query_params.clear()
+        # ホーム会話の場合のみ st.rerun() を実行
+        st.rerun()
     else:
         # プロジェクト会話の場合は現在のページ状態を維持
         # （PROJECT_CHATページから呼ばれた場合はそのページに留まる）
         st.session_state.navigation_state.selected_project_id = current_project_id
         st.session_state["current_project_id"] = current_project_id
-    
-    # ページ更新
-    st.rerun()
+        # プロジェクト会話の場合は呼び出し元（pages.py）でページ更新を処理

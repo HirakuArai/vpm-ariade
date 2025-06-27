@@ -392,7 +392,8 @@ class ProjectChatPage:
             from .chat_handler_ai import process_chat_input_ai
             process_chat_input_ai(user_input, project_id)
             
-            # Note: st.rerun() は process_chat_input_ai 内で呼ばれるため、ここでは呼ばない
+            # プロジェクト会話の場合は明示的にページ更新を実行
+            st.rerun()
             
         except Exception as e:
             st.error(f"会話処理エラー: {e}")
