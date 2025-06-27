@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-27T21:29:17Z",
+  "generated_at": "2025-06-27T21:37:16Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -1064,6 +1064,10 @@
     {
       "path": "utils/render_minutes.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/utils/render_minutes.py"
+    },
+    {
+      "path": "version.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/version.py"
     }
   ]
 }
