@@ -43,6 +43,31 @@ st.markdown("""
     background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
 }
 
+/* サイドバーボタンの選択状態強化 */
+.stButton > button[data-baseweb="button"][aria-pressed="false"] {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.stButton > button[data-baseweb="button"][kind="primary"] {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    border: 2px solid rgba(255, 255, 255, 0.6) !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3) !important;
+}
+
+.stButton > button[data-baseweb="button"][kind="primary"]:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: translateX(4px) !important;
+}
+
+.stButton > button[data-baseweb="button"]:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    transform: translateX(2px) !important;
+}
+
 /* メインコンテンツエリア */
 .main .block-container {
     background: rgba(255, 255, 255, 0.95);

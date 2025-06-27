@@ -87,8 +87,12 @@ class HierarchicalNavigator:
                 import random
                 st.session_state.nav_session_id = str(random.randint(100000, 999999))
             
-            if st.button("🏠 ホーム", use_container_width=True, 
-                        type="primary" if st.session_state.navigation_state.current_page == PageType.HOME else "secondary",
+            # ホームページボタンの選択状態表示
+            is_home_selected = st.session_state.navigation_state.current_page == PageType.HOME and not st.session_state.navigation_state.selected_project_id
+            home_text = "🏠 ホーム" + (" ◀ 現在のページ" if is_home_selected else "")
+            
+            if st.button(home_text, use_container_width=True, 
+                        type="primary" if is_home_selected else "secondary",
                         key=f"nav_home_button_{st.session_state.nav_session_id}"):
                 st.session_state.navigation_state.current_page = PageType.HOME
                 st.session_state.navigation_state.selected_project_id = None
@@ -113,7 +117,10 @@ class HierarchicalNavigator:
                     is_selected = st.session_state.navigation_state.selected_project_id == project_id
                     button_style = "primary" if is_selected else "secondary"
                     
-                    if st.button(f"📋 {project_name}", use_container_width=True, type=button_style,
+                    # プロジェクト名に選択インジケーター追加
+                    project_display = f"📋 {project_name}" + (" ◀ 選択中" if is_selected else "")
+                    
+                    if st.button(project_display, use_container_width=True, type=button_style,
                                 key=f"nav_project_{project_id}_{st.session_state.nav_session_id}"):
                         st.session_state.navigation_state.selected_project_id = project_id
                         st.session_state.current_project_id = project_id  # Backward compatibility
@@ -140,7 +147,10 @@ class HierarchicalNavigator:
                             col1, col2 = st.columns([0.1, 0.9])
                             with col2:
                                 button_type = "primary" if is_current_page else "secondary"
-                                if st.button(config["title"], use_container_width=True, 
+                                # サブページにも現在表示中インジケーター追加
+                                page_title = config["title"] + (" ◀ 表示中" if is_current_page else "")
+                                
+                                if st.button(page_title, use_container_width=True, 
                                            type=button_type, key=f"sub_{page_type.value}_{project_id}_{st.session_state.nav_session_id}"):
                                     st.session_state.navigation_state.current_page = page_type
                                     st.rerun()
@@ -204,9 +214,20 @@ class HierarchicalNavigator:
         
         config = self.get_current_page_config()
         
-        # デバッグ: current_pageの型と値を確認
+        # 現在のページ表示
+        selected_project = st.session_state.navigation_state.selected_project_id
+        
         if current_page == PageType.HOME or current_page == "home":
-            st.title("💬 Kai VPM - AI Project Manager")
+            if selected_project:
+                # プロジェクト選択時のホーム
+                project_data = self._get_project_summary(selected_project)
+                project_name = project_data.get("name", selected_project)
+                st.title(f"🧠 Kai VPM - {project_name}")
+                st.markdown(f"**📍 現在位置**: ホーム > {project_name}")
+            else:
+                # メインホーム
+                st.title("🧠 Kai VPM - AI-First Virtual Project Manager")
+                st.markdown("**📍 現在位置**: ホーム")
             
             # 選択されたプロジェクトがある場合、プロジェクト情報を表示
             selected_project = st.session_state.navigation_state.selected_project_id
@@ -228,7 +249,17 @@ class HierarchicalNavigator:
             if selected_project and config.get("requires_project", False):
                 project_data = self._get_project_summary(selected_project)
                 project_name = project_data.get("name", selected_project)
-                st.caption(f"📋 プロジェクト: {project_name}")
+                
+                # パンくずリスト表示
+                page_name = config.get("title", "ページ").replace("📄 ", "").replace("💬 ", "").replace("📋 ", "")
+                st.markdown(f"**📍 現在位置**: ホーム > {project_name} > {page_name}")
+                
+                # プロジェクト情報バー
+                st.markdown(f"""
+                <div class="project-highlight">
+                    📋 プロジェクト: {project_name}
+                </div>
+                """, unsafe_allow_html=True)
             
             # ページ説明
             description = config.get("description")
