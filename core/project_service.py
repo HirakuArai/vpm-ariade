@@ -55,7 +55,7 @@ def set_status(identifier: str, status: str, projects_dir: Path | None = None):
     data["updated_at"] = datetime.utcnow().isoformat()
     path.write_text(json.dumps(data, indent=2))
 
-def add_task(project_id: str, description: str, due_date: str, owner: str = DEFAULT_UNDEF, projects_dir: Path | None = None) -> dict:
+def add_task(project_id: str, description: str, due_date: str, owner: str = "human_user", projects_dir: Path | None = None) -> dict:
     """Add a task to a project with sequential ID"""
     if projects_dir is None:
         projects_dir = PROJECTS_DIR
@@ -73,21 +73,23 @@ def add_task(project_id: str, description: str, due_date: str, owner: str = DEFA
     # Generate sequential task ID
     task_id = len(data["tasks"]) + 1
     
-    # Create new task
+    # Create new task with proper defaults
     new_task = {
         "id": task_id,
         "description": description,
         "due_date": due_date,
-        "owner": owner,
-        "status": DEFAULT_UNDEF
+        "owner": owner if owner != DEFAULT_UNDEF else "human_user",
+        "status": "pending"
     }
     
     # Add task and update timestamp
     data["tasks"].append(new_task)
-    data["updated_at"] = datetime.utcnow().isoformat()
+    from zoneinfo import ZoneInfo
+    jst = ZoneInfo("Asia/Tokyo")
+    data["updated_at"] = datetime.now(jst).isoformat()
     
-    # Save updated project
-    path.write_text(json.dumps(data, indent=2))
+    # Save updated project with proper encoding
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
     
     return new_task
 
