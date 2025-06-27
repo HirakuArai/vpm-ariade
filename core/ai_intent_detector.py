@@ -6,9 +6,10 @@ AI Intent Detector - AI-based user intent detection system
 
 import json
 import logging
-import re
 from typing import Dict, Optional, Tuple, Any, List
 from datetime import datetime, date
+
+from .date_validator import is_valid_date
 
 try:
     import openai
@@ -232,8 +233,8 @@ class AIIntentDetector:
             if not result.get("task_description"):
                 result["task_description"] = user_input.strip()[:50]
             if result.get("due_date"):
-                # 日付フォーマットの検証
-                if not re.match(r'\d{4}-\d{2}-\d{2}', str(result["due_date"])):
+                # 日付フォーマットの検証（統一された検証モジュールを使用）
+                if not is_valid_date(str(result["due_date"])):
                     result["due_date"] = None
             if not result.get("extracted_data"):
                 result["extracted_data"] = {}
