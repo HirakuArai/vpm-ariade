@@ -6,7 +6,7 @@
   "created_by": "human_user",
   "status": "DRAFT",
   "schema_version": "1.0",
-  "updated_at": "2025-06-28T07:46:07.301830+09:00",
+  "updated_at": "2025-06-28T07:57:50.328955+09:00",
   "change_log": [
     {
       "timestamp": "2025-06-28T06:57:20.665206",
@@ -62,6 +62,41 @@
       "id": 6,
       "description": "テスト: データ保存機能の確認",
       "due_date": "2025-07-30",
+      "owner": "human_user",
+      "status": "pending"
+    },
+    {
+      "id": 7,
+      "description": "新しいタスク",
+      "due_date": "未設定",
+      "owner": "human_user",
+      "status": "pending"
+    },
+    {
+      "id": 8,
+      "description": "新しいタスク",
+      "due_date": "未設定",
+      "owner": "human_user",
+      "status": "pending"
+    },
+    {
+      "id": 9,
+      "description": "新しいタスク",
+      "due_date": "未設定",
+      "owner": "human_user",
+      "status": "pending"
+    },
+    {
+      "id": 10,
+      "description": "新しいタスク",
+      "due_date": "未設定",
+      "owner": "human_user",
+      "status": "pending"
+    },
+    {
+      "id": 11,
+      "description": "新しいタスク",
+      "due_date": "未設定",
       "owner": "human_user",
       "status": "pending"
     }
