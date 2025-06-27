@@ -383,9 +383,9 @@ class ProjectChatPage:
             # セッション状態を確認してプロジェクトを設定
             st.session_state["current_project_id"] = project_id
             
-            # process_chat_inputのインポートと実行（循環インポート回避）
-            from .chat_handler import process_chat_input
-            process_chat_input(user_input, project_id)
+            # AI-First chat_handlerのインポートと実行（循環インポート回避）
+            from .chat_handler_ai import process_chat_input_ai
+            process_chat_input_ai(user_input, project_id)
             
             # 会話完了後にリロード
             st.rerun()

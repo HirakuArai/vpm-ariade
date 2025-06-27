@@ -506,9 +506,9 @@ def render_chat_interface():
     user_input = st.chat_input("メッセージを入力してください…（自然な言葉でプロジェクト作成やタスク追加可能）")
     
     if user_input:
-        # 会話処理を実行
-        from core.chat_handler import process_chat_input
-        process_chat_input(user_input, current_project_id)
+        # AI-First 会話処理を実行
+        from core.chat_handler_ai import process_chat_input_ai
+        process_chat_input_ai(user_input, current_project_id)
 
 # Chat processing functions have been moved to core.chat_handler to prevent circular imports
 

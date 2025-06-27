@@ -22,6 +22,7 @@ except ImportError:
 from .ai_context_manager import create_context_manager
 from .ai_quality_manager import create_quality_manager
 from .enhanced_ui_components import InteractiveComponents, FeedbackComponents, NotificationComponents
+from .ai_project_manager import create_ai_project_manager
 
 logger = logging.getLogger(__name__)
 
