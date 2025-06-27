@@ -1,22 +1,22 @@
 {
   "identifier": "proj-20250626-185112-548",
-  "overview": "「モバイルキャビン」にしてください。",
-  "display_name": "モバイルキャビン",
+  "overview": "\u300c\u30e2\u30d0\u30a4\u30eb\u30ad\u30e3\u30d3\u30f3\u300d\u306b\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+  "display_name": "\u30e2\u30d0\u30a4\u30eb\u30ad\u30e3\u30d3\u30f3",
   "created_at": "2025-06-26T18:51:12.549015",
   "created_by": "human_user",
   "status": "DRAFT",
   "schema_version": "1.0",
-  "updated_at": "2025-06-28T06:57:20.665200",
+  "updated_at": "2025-06-27T22:27:33.511414",
   "change_log": [
     {
       "timestamp": "2025-06-28T06:57:20.665206",
       "type": "data_normalization",
-      "description": "プロジェクトデータ統一化: 4件の変更",
+      "description": "\u30d7\u30ed\u30b8\u30a7\u30af\u30c8\u30c7\u30fc\u30bf\u7d71\u4e00\u5316: 4\u4ef6\u306e\u5909\u66f4",
       "changes": [
-        "未定義値修正: completion_percentage",
-        "未定義値修正: phase_requirements",
-        "タスクフィールドを統一化",
-        "updated_at を更新"
+        "\u672a\u5b9a\u7fa9\u5024\u4fee\u6b63: completion_percentage",
+        "\u672a\u5b9a\u7fa9\u5024\u4fee\u6b63: phase_requirements",
+        "\u30bf\u30b9\u30af\u30d5\u30a3\u30fc\u30eb\u30c9\u3092\u7d71\u4e00\u5316",
+        "updated_at \u3092\u66f4\u65b0"
       ],
       "source": "project_normalizer"
     }
@@ -25,38 +25,66 @@
   "tasks": [
     {
       "id": 1,
-      "description": "ステップワゴンをベースにした「モバイルキャビン」の設計",
+      "description": "\u30b9\u30c6\u30c3\u30d7\u30ef\u30b4\u30f3\u3092\u30d9\u30fc\u30b9\u306b\u3057\u305f\u300c\u30e2\u30d0\u30a4\u30eb\u30ad\u30e3\u30d3\u30f3\u300d\u306e\u8a2d\u8a08",
       "due_date": "2025-07-03",
       "owner": "human_user",
       "status": "pending"
     },
     {
       "id": 2,
-      "description": "タスクの削除",
+      "description": "\u30bf\u30b9\u30af\u306e\u524a\u9664",
       "due_date": "2025-07-04",
       "owner": "human_user",
       "status": "pending"
     },
     {
       "id": 3,
-      "description": "モバイルキャビンの設計タスクを追加",
+      "description": "\u30e2\u30d0\u30a4\u30eb\u30ad\u30e3\u30d3\u30f3\u306e\u8a2d\u8a08\u30bf\u30b9\u30af\u3092\u8ffd\u52a0",
       "due_date": "2025-07-03",
       "owner": "human_user",
       "status": "pending"
     },
     {
       "id": 4,
-      "description": "群馬県で登録されている自動車を新潟の長岡に変更する手続きを課題化する",
+      "description": "\u7fa4\u99ac\u770c\u3067\u767b\u9332\u3055\u308c\u3066\u3044\u308b\u81ea\u52d5\u8eca\u3092\u65b0\u6f5f\u306e\u9577\u5ca1\u306b\u5909\u66f4\u3059\u308b\u624b\u7d9a\u304d\u3092\u8ab2\u984c\u5316\u3059\u308b",
       "due_date": "2025-07-04",
       "owner": "human_user",
       "status": "pending"
     },
     {
       "id": 5,
-      "description": "モバイルキャビンの具体的な作業内容を明確化する",
+      "description": "\u30e2\u30d0\u30a4\u30eb\u30ad\u30e3\u30d3\u30f3\u306e\u5177\u4f53\u7684\u306a\u4f5c\u696d\u5185\u5bb9\u3092\u660e\u78ba\u5316\u3059\u308b",
       "due_date": "2025-07-04",
       "owner": "human_user",
       "status": "pending"
+    },
+    {
+      "id": 6,
+      "description": "\u65b0\u3057\u3044\u30bf\u30b9\u30af",
+      "due_date": "2025-07-10",
+      "owner": "__UNDEFINED__",
+      "status": "__UNDEFINED__"
+    },
+    {
+      "id": 7,
+      "description": "\u65b0\u3057\u3044\u30bf\u30b9\u30af",
+      "due_date": "2025-07-15",
+      "owner": "__UNDEFINED__",
+      "status": "__UNDEFINED__"
+    },
+    {
+      "id": 8,
+      "description": "\u65b0\u3057\u3044\u30bf\u30b9\u30af",
+      "due_date": "2025-07-20",
+      "owner": "__UNDEFINED__",
+      "status": "__UNDEFINED__"
+    },
+    {
+      "id": 9,
+      "description": "\u65b0\u3057\u3044\u30bf\u30b9\u30af",
+      "due_date": "2025-07-25",
+      "owner": "__UNDEFINED__",
+      "status": "__UNDEFINED__"
     }
   ],
   "phase": "INCEPTION",
