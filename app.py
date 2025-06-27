@@ -461,6 +461,42 @@ if "page" in st.query_params:
 # サイドバーナビゲーションの描画
 nav_state = navigator.render_sidebar_navigation()
 
+# デバッグ・リセット機能（JavaScriptエラー対処用）
+with st.sidebar:
+    st.divider()
+    with st.expander("🔧 デバッグ・リセット", expanded=False):
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("🔄 セッション\nリセット", help="JavaScriptエラー時に使用", use_container_width=True):
+                # セッション状態をクリア
+                keys_to_clear = [k for k in st.session_state.keys() if k not in ['navigation_state']]
+                for key in keys_to_clear:
+                    del st.session_state[key]
+                st.success("セッション状態をリセットしました")
+                st.rerun()
+        
+        with col2:
+            if st.button("ℹ️ JS エラー\n対処法", help="JavaScript Failed to fetch対処法", use_container_width=True):
+                st.info("""
+                **JavaScriptエラー対処法:**
+                1. ハードリフレッシュ:
+                   - Ctrl+Shift+R (Win)
+                   - Cmd+Shift+R (Mac)
+                2. シークレット/プライベートモードで再試行
+                3. ブラウザキャッシュクリア
+                4. URL直接アクセス
+                """)
+        
+        # Streamlit バージョン情報
+        st.caption(f"Streamlit v{st.__version__}")
+        
+        # エラー診断
+        if st.button("🔍 エラー診断", use_container_width=True):
+            st.write("**ブラウザ情報:**")
+            st.code("User-Agent取得にはJavaScriptが必要です")
+            st.write("**推奨ブラウザ:** Chrome, Firefox, Safari最新版")
+
 # ナビゲーション状態の妥当性チェック
 navigator.validate_navigation_state()
 
