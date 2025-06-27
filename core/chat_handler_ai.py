@@ -240,8 +240,17 @@ def _execute_task_creation(action_plan, current_project_id: Optional[str]) -> st
         for item in action_plan.target_items:
             if item.get("type") == "task":
                 params = item.get("parameters", {})
-                description = params.get("description", "新しいタスク")
-                due_date = params.get("due_date", (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d"))
+                description = params.get("description", "")
+                due_date = params.get("due_date", "")
+                
+                # タスク説明が空の場合はスキップ（無意味なタスクを作成しない）
+                if not description or description.strip() == "":
+                    logger.warning(f"タスク作成スキップ: 説明が空です。Parameters: {params}")
+                    continue
+                
+                # 期日が空の場合は「未設定」ではなく適切なデフォルトを設定
+                if not due_date or due_date.strip() == "":
+                    due_date = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
                 
                 add_task(current_project_id, description, due_date)
                 success_count += 1

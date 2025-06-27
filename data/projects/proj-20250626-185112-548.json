@@ -6,7 +6,7 @@
   "created_by": "human_user",
   "status": "DRAFT",
   "schema_version": "1.0",
-  "updated_at": "2025-06-28T07:57:50.328955+09:00",
+  "updated_at": "2025-06-28T08:04:40.110155+09:00",
   "change_log": [
     {
       "timestamp": "2025-06-28T06:57:20.665206",
@@ -19,6 +19,12 @@
         "updated_at を更新"
       ],
       "source": "project_normalizer"
+    },
+    {
+      "timestamp": "2025-06-28T08:04:40.110274+09:00",
+      "type": "meaningless_task_cleanup",
+      "description": "無意味なタスク 3 件を自動削除",
+      "source": "project_service"
     }
   ],
   "uuid": "39a9a85e-a3b5-41e1-b6f9-4b64d5189847",
@@ -32,71 +38,15 @@
     },
     {
       "id": 2,
-      "description": "タスクの削除",
-      "due_date": "2025-07-04",
-      "owner": "human_user",
-      "status": "pending"
-    },
-    {
-      "id": 3,
-      "description": "モバイルキャビンの設計タスクを追加",
-      "due_date": "2025-07-03",
-      "owner": "human_user",
-      "status": "pending"
-    },
-    {
-      "id": 4,
       "description": "群馬県で登録されている自動車を新潟の長岡に変更する手続きを課題化する",
       "due_date": "2025-07-04",
       "owner": "human_user",
       "status": "pending"
     },
     {
-      "id": 5,
-      "description": "モバイルキャビンの具体的な作業内容を明確化する",
-      "due_date": "2025-07-04",
-      "owner": "human_user",
-      "status": "pending"
-    },
-    {
-      "id": 6,
+      "id": 3,
       "description": "テスト: データ保存機能の確認",
       "due_date": "2025-07-30",
-      "owner": "human_user",
-      "status": "pending"
-    },
-    {
-      "id": 7,
-      "description": "新しいタスク",
-      "due_date": "未設定",
-      "owner": "human_user",
-      "status": "pending"
-    },
-    {
-      "id": 8,
-      "description": "新しいタスク",
-      "due_date": "未設定",
-      "owner": "human_user",
-      "status": "pending"
-    },
-    {
-      "id": 9,
-      "description": "新しいタスク",
-      "due_date": "未設定",
-      "owner": "human_user",
-      "status": "pending"
-    },
-    {
-      "id": 10,
-      "description": "新しいタスク",
-      "due_date": "未設定",
-      "owner": "human_user",
-      "status": "pending"
-    },
-    {
-      "id": 11,
-      "description": "新しいタスク",
-      "due_date": "未設定",
       "owner": "human_user",
       "status": "pending"
     }

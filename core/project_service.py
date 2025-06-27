@@ -459,3 +459,78 @@ def update_task_status(project_id: str, task_id: int, status: str, projects_dir:
     except Exception as e:
         logger.error("Error updating task %s status for project %s: %s", task_id, project_id, str(e))
         return False
+
+def clean_meaningless_tasks(project_id: str, projects_dir: Path | None = None) -> int:
+    """
+    無意味なタスクを自動削除
+    
+    Args:
+        project_id: プロジェクトID
+        projects_dir: プロジェクトディレクトリ
+        
+    Returns:
+        削除されたタスク数
+    """
+    if projects_dir is None:
+        projects_dir = PROJECTS_DIR
+        
+    path = projects_dir / f"{project_id}.json"
+    if not path.exists():
+        return 0
+    
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        if "tasks" not in data or not isinstance(data["tasks"], list):
+            return 0
+        
+        # 無意味なタスクのパターン
+        meaningless_patterns = [
+            "新しいタスク",
+            "タスクの削除", 
+            "タスクを追加",
+            "設計タスクを追加",
+            "作業内容を明確化"
+        ]
+        
+        original_count = len(data["tasks"])
+        
+        # 無意味なタスクを除外
+        data["tasks"] = [
+            task for task in data["tasks"] 
+            if not any(pattern in task.get("description", "") for pattern in meaningless_patterns)
+        ]
+        
+        removed_count = original_count - len(data["tasks"])
+        
+        if removed_count > 0:
+            # タスクIDを再振り番
+            for i, task in enumerate(data["tasks"], 1):
+                task["id"] = i
+            
+            # JST タイムゾーンで更新時刻を設定
+            from zoneinfo import ZoneInfo
+            jst = ZoneInfo("Asia/Tokyo")
+            data["updated_at"] = datetime.now(jst).isoformat()
+            
+            # 変更ログを追加
+            if "change_log" not in data or isinstance(data["change_log"], str):
+                data["change_log"] = []
+            
+            data["change_log"].append({
+                "timestamp": datetime.now(jst).isoformat(),
+                "type": "meaningless_task_cleanup",
+                "description": f"無意味なタスク {removed_count} 件を自動削除",
+                "source": "project_service"
+            })
+            
+            # ファイルを保存
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+        
+        return removed_count
+        
+    except Exception as e:
+        logger.error("Error cleaning meaningless tasks for project %s: %s", project_id, str(e))
+        return 0
