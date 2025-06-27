@@ -107,18 +107,16 @@ class ConversationMigrator:
         if project_id in content:
             return True
         
-        # プロジェクト作成・選択のキーワード
-        project_keywords = [
+        # 基本的なプロジェクト関連キーワードのみ（汎用的なもの）
+        generic_project_keywords = [
             "プロジェクト作成",
-            "八ヶ岳登山",
-            "登山計画",
-            "参加者",
-            "スケジュール",
-            "行者小屋",
-            "赤岳"
+            "プロジェクト開始",
+            "プロジェクト選択"
         ]
         
-        return any(keyword in content for keyword in project_keywords)
+        # Note: 特定プロジェクト固有のキーワード検出は制限的
+        # より精密な会話移行が必要な場合は、AI判定機能の実装が推奨される
+        return any(keyword in content for keyword in generic_project_keywords)
     
     def _is_context_change(self, content: str) -> bool:
         """プロジェクトコンテキストから外れたかを判定"""
@@ -126,9 +124,13 @@ class ConversationMigrator:
             "別のプロジェクト",
             "新しいプロジェクト",
             "他の件",
-            "次の話題"
+            "次の話題",
+            "ホームページ",
+            "メインメニュー"
         ]
         
+        # Note: シンプルなキーワードマッチングのみ
+        # より高精度な文脈変化検出には、AI判定機能の実装が必要
         return any(keyword in content for keyword in context_change_keywords)
     
     def _save_project_conversation(self, project_id: str, date_str: str, messages: List[Dict]) -> bool:
