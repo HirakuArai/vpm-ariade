@@ -24,11 +24,127 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 st.set_page_config(
-    page_title="Kai VPM", 
-    page_icon="💬", 
+    page_title="Kai VPM - AI-First Virtual Project Manager", 
+    page_icon="🧠", 
     initial_sidebar_state="expanded",
     layout="wide"
 )
+
+# モダンなグローバルスタイルを適用
+st.markdown("""
+<style>
+/* グローバルフォントとカラーテーマ */
+.stApp {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* サイドバーのスタイリング */
+.css-1d391kg {
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+}
+
+/* メインコンテンツエリア */
+.main .block-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    margin-top: 1rem;
+}
+
+/* チャットメッセージのスタイリング */
+.stChatMessage {
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin: 8px 0;
+}
+
+/* ボタンのモダンスタイル */
+.stButton > button {
+    border-radius: 25px;
+    border: none;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* インプットフィールドのスタイリング */
+.stTextInput > div > div > input {
+    border-radius: 15px;
+    border: 2px solid #e1e5e9;
+    transition: all 0.3s ease;
+}
+
+.stTextInput > div > div > input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* カードスタイルコンポーネント */
+.stExpander {
+    border-radius: 15px;
+    border: 1px solid #e1e5e9;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+/* メトリクスのスタイリング */
+.metric-container {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+    border-radius: 15px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    color: white;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* アニメーション */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+    .main .block-container {
+        padding: 1rem;
+        margin: 0.5rem;
+        border-radius: 15px;
+    }
+}
+
+/* プロジェクト選択の強調 */
+.project-highlight {
+    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 1rem 0;
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(132, 250, 176, 0.3);
+}
+</style>
+""", unsafe_allow_html=True)
 
 # Streamlitのマルチページ機能を無効化
 # pagesディレクトリの存在による自動ページ検出を防ぐ

@@ -226,41 +226,118 @@ class NotificationComponents:
     
     @staticmethod
     def render_system_status():
-        """システム状態インジケータ（サイドバー最適化版）"""
+        """システム状態インジケータ（モダンデザイン版）"""
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        import sys
+        import os
+        
+        # バージョン情報の取得
+        try:
+            sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+            from version import get_version_info
+            version_info = get_version_info()
+        except:
+            version_info = {"display": "v2.1.0", "name": "AI-First Era"}
+        
+        # 日本時間の取得
+        jst = ZoneInfo("Asia/Tokyo")
+        jst_time = datetime.now(jst)
+        
+        # モダンなカードスタイルでシステム状態を表示
+        st.markdown("""
+        <style>
+        .status-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 8px 0;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 6px 0;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        .status-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        .status-value {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .version-tag {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
         # AI接続状態
-        ai_status = "🟢 正常" if st.session_state.get("ai_intent_detector") else "🔴 切断"
-        st.markdown(f"**🤖 AI状態**: {ai_status}")
+        ai_connected = st.session_state.get("ai_intent_detector") is not None
+        ai_status = "🟢 Connected" if ai_connected else "🔴 Disconnected"
         
         # 会話履歴数
         history_count = len(st.session_state.get("history", []))
-        st.markdown(f"**💬 履歴**: {history_count}件")
         
         # セッション時間
         if "session_start" not in st.session_state:
-            st.session_state["session_start"] = datetime.now()
+            st.session_state["session_start"] = datetime.now(jst)
         
-        uptime = datetime.now() - st.session_state["session_start"]
+        uptime = jst_time - st.session_state["session_start"]
         hours, remainder = divmod(uptime.seconds, 3600)
         minutes, _ = divmod(remainder, 60)
+        uptime_str = f"{hours:02d}:{minutes:02d}" if hours > 0 else f"{minutes}m"
         
-        if hours > 0:
-            uptime_str = f"{hours}時間{minutes}分"
-        else:
-            uptime_str = f"{minutes}分"
-        
-        st.markdown(f"**⏱️ セッション**: {uptime_str}")
-        
-        # 現在時刻
-        current_time = datetime.now().strftime("%H:%M")
-        st.markdown(f"**🕐 現在時刻**: {current_time}")
-        
-        # プロジェクト情報（追加）
+        # プロジェクト情報
         current_project = st.session_state.get("current_project_id")
         if current_project:
-            project_display = current_project[:15] + "..." if len(current_project) > 15 else current_project
-            st.markdown(f"**📁 プロジェクト**: {project_display}")
+            project_display = current_project[:12] + "..." if len(current_project) > 12 else current_project
         else:
-            st.markdown("**📁 プロジェクト**: 未選択")
+            project_display = "None"
+        
+        # モダンなカードUIで表示
+        status_html = f"""
+        <div class="status-card">
+            <div class="status-item">
+                <span class="status-label">🤖 AI Engine</span>
+                <span class="status-value">{ai_status}</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">💬 Session</span>
+                <span class="status-value">{history_count} msgs</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">⏱️ Uptime</span>
+                <span class="status-value">{uptime_str}</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">🕐 JST</span>
+                <span class="status-value">{jst_time.strftime('%H:%M')}</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">📁 Project</span>
+                <span class="status-value">{project_display}</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">🏷️ Version</span>
+                <span class="version-tag">{version_info['display']} {version_info.get('name', '')}</span>
+            </div>
+        </div>
+        """
+        
+        st.markdown(status_html, unsafe_allow_html=True)
 
 class ResponsiveLayout:
     """レスポンシブレイアウトコンポーネント"""
