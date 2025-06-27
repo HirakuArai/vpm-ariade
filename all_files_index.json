@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-27T18:23:20Z",
+  "generated_at": "2025-06-27T18:44:30Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -182,10 +182,6 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/chat_handler.py"
     },
     {
-      "path": "core/chat_processor.py",
-      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/chat_processor.py"
-    },
-    {
       "path": "core/code_analysis.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/code_analysis.py"
     },
@@ -208,6 +204,10 @@
     {
       "path": "core/conversation_reanalyzer.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/conversation_reanalyzer.py"
+    },
+    {
+      "path": "core/date_validator.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/date_validator.py"
     },
     {
       "path": "core/decorator_inserter.py",
@@ -988,6 +988,10 @@
     {
       "path": "tests/test_convo_mode.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/tests/test_convo_mode.py"
+    },
+    {
+      "path": "tests/test_date_validator.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/tests/test_date_validator.py"
     },
     {
       "path": "tests/test_diff_proposal.py",
