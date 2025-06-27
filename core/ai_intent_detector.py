@@ -267,3 +267,110 @@ class AIIntentDetector:
             "priority": None,
             "extracted_data": {}
         }
+
+    def detect_task_removal_intent(self, user_input: str, current_tasks: List[Dict] = None) -> Dict[str, Any]:
+        """
+        タスク削除意図の検出
+        
+        Args:
+            user_input: ユーザーの入力
+            current_tasks: 現在のタスクリスト
+            
+        Returns:
+            Dict containing removal intent analysis
+        """
+        if not self.api_key:
+            return self._fallback_task_removal(user_input)
+        
+        try:
+            # タスクリストの情報を含める
+            tasks_info = ""
+            if current_tasks:
+                tasks_info = "\n現在のタスクリスト:\n"
+                for task in current_tasks:
+                    tasks_info += f"- [{task.get('id')}] {task.get('description')} (期日: {task.get('due_date')})\n"
+            
+            prompt = f"""
+以下のユーザーメッセージがタスク削除・重複除去の意図を含んでいるかを判定してください。
+
+ユーザーメッセージ: "{user_input}"
+{tasks_info}
+
+判定基準:
+1. **削除意図**:
+   - 「削除」「消去」「除去」「取り除く」「消す」「ひとつ消して」
+   - 「重複を削除」「同じものを消す」「重複除去」
+   
+2. **対象の特定**:
+   - 特定のタスクID（数字）
+   - 「重複」「同じもの」「ダブり」
+   - 「全部」「すべて」
+
+3. **除外パターン**:
+   - 新しい「削除」タスクの追加依頼
+   - タスクの内容が「削除」に関する作業
+
+以下のJSON形式で回答してください:
+{{
+  "is_removal_intent": true/false,
+  "confidence": 0.0-1.0の信頼度,
+  "reasoning": "判定理由",
+  "removal_type": "specific/duplicate/all",
+  "target_task_ids": [削除対象のタスクID配列],
+  "is_duplicate_removal": true/false
+}}
+"""
+            
+            response = openai.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "あなたはタスク削除意図の検出専門家です。ユーザーの発言を正確に分析してください。"},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.1,
+                max_tokens=300
+            )
+            
+            result = json.loads(response.choices[0].message.content.strip())
+            
+            # 必須フィールドの検証と補完
+            if not isinstance(result.get("is_removal_intent"), bool):
+                result["is_removal_intent"] = False
+            if not isinstance(result.get("confidence"), (int, float)):
+                result["confidence"] = 0.0
+            if not result.get("target_task_ids"):
+                result["target_task_ids"] = []
+            if not isinstance(result.get("is_duplicate_removal"), bool):
+                result["is_duplicate_removal"] = False
+            
+            logger.info(f"Task removal intent detected: {result['is_removal_intent']} (confidence: {result['confidence']})")
+            return result
+            
+        except Exception as e:
+            logger.error(f"AI task removal detection failed: {e}")
+            return self._fallback_task_removal(user_input)
+    
+    def _fallback_task_removal(self, user_input: str) -> Dict[str, Any]:
+        """
+        AI判定が失敗した場合のフォールバック処理（タスク削除）
+        """
+        removal_patterns = [
+            "削除", "消去", "除去", "取り除く", "消す", "ひとつ消して", 
+            "重複削除", "重複除去", "同じものを消す", "ダブりを消す"
+        ]
+        
+        is_removal = any(pattern in user_input for pattern in removal_patterns)
+        is_duplicate = any(word in user_input for word in ["重複", "同じ", "ダブり"])
+        
+        # 数字を抽出してタスクIDとして認識
+        import re
+        task_ids = [int(match) for match in re.findall(r'\b(\d+)\b', user_input)]
+        
+        return {
+            "is_removal_intent": is_removal,
+            "confidence": 0.8 if is_removal else 0.0,
+            "reasoning": "パターンマッチングによる判定",
+            "removal_type": "duplicate" if is_duplicate else ("specific" if task_ids else "general"),
+            "target_task_ids": task_ids,
+            "is_duplicate_removal": is_duplicate
+        }

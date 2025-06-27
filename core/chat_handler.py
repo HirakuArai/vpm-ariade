@@ -252,51 +252,100 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
                 st.session_state["awaiting_activate_confirm"] = False
                 st.session_state["created_project_id"] = None
     
-    # AI-based task addition intent detection
+    # AI-based task removal intent detection (check before task addition)
     elif current_project_id and st.session_state.get("ai_intent_detector"):
-        from .project_prompt import get_cached_project_context
+        from .project_service import remove_task, remove_duplicate_tasks, get_project
         detector = st.session_state["ai_intent_detector"]
         
-        # Get project context for better task detection
-        try:
-            project_context = get_cached_project_context(current_project_id)
-        except:
-            project_context = None
-            
-        task_intent = detector.detect_task_addition_intent(user_input, project_context)
+        # Get current tasks for context
+        project_data = get_project(current_project_id)
+        current_tasks = project_data.get("tasks", []) if project_data else []
         
-        if task_intent["is_task_intent"] and task_intent["confidence"] > 0.7:
+        # Check for task removal intent first
+        removal_intent = detector.detect_task_removal_intent(user_input, current_tasks)
+        
+        if removal_intent["is_removal_intent"] and removal_intent["confidence"] > 0.7:
             try:
-                description = task_intent["task_description"]
-                due_date = task_intent["due_date"]
+                if removal_intent["is_duplicate_removal"]:
+                    # Remove duplicate tasks
+                    removed_count = remove_duplicate_tasks(current_project_id)
+                    if removed_count > 0:
+                        # Get updated task list
+                        updated_project = get_project(current_project_id)
+                        updated_tasks = updated_project.get("tasks", [])
+                        task_list = "\n".join([f"- [{t['id']}] {t['description']} (期日: {t['due_date']})" for t in updated_tasks])
+                        assistant_reply = f"重複タスクを{removed_count}個削除しました。\n\n現在のタスク一覧:\n{task_list}"
+                    else:
+                        assistant_reply = "重複するタスクは見つかりませんでした。"
                 
-                if due_date:
-                    # 期限付きタスク
-                    add_task(current_project_id, description, due_date)
+                elif removal_intent["target_task_ids"]:
+                    # Remove specific tasks
+                    removed_count = 0
+                    for task_id in removal_intent["target_task_ids"]:
+                        if remove_task(current_project_id, task_id):
+                            removed_count += 1
+                    
+                    if removed_count > 0:
+                        # Get updated task list
+                        updated_project = get_project(current_project_id)
+                        updated_tasks = updated_project.get("tasks", [])
+                        task_list = "\n".join([f"- [{t['id']}] {t['description']} (期日: {t['due_date']})" for t in updated_tasks])
+                        assistant_reply = f"タスクを{removed_count}個削除しました。\n\n現在のタスク一覧:\n{task_list}"
+                    else:
+                        assistant_reply = "指定されたタスクが見つかりませんでした。"
+                
                 else:
-                    # 期限なしタスク（現在のadd_task関数を拡張する必要がある場合）
-                    default_due = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
-                    add_task(current_project_id, description, default_due)
-                
-                # Get current tasks for display
-                path = Path(f"data/projects/{current_project_id}.json")
-                data = json.loads(path.read_text())
-                tasks = data.get("tasks", [])
-                
-                task_list = "\n".join([f"- {t['id']}: {t['description']} (期日: {t['due_date']})" for t in tasks])
-                
-                # 抽出されたデータがあれば追加情報として表示
-                extracted_info = ""
-                if task_intent["extracted_data"]:
-                    extracted_info = "\n\n**検出された情報:**\n"
-                    for key, value in task_intent["extracted_data"].items():
-                        if value:
-                            extracted_info += f"- {key}: {value}\n"
-                
-                assistant_reply = f"タスクを追加しました: **{description}**\n\n現在のタスク一覧:\n{task_list}{extracted_info}"
-                
+                    assistant_reply = "削除対象のタスクを明確に指定してください。例：「タスク1を削除」「重複を削除」"
+                    
             except Exception as e:
-                assistant_reply = f"タスク追加中にエラーが発生しました: {str(e)}"
+                assistant_reply = f"タスク削除中にエラーが発生しました: {str(e)}"
+        
+        # If not removal intent, check for task addition
+        elif not removal_intent["is_removal_intent"]:
+            from .project_prompt import get_cached_project_context
+            
+            # Get project context for better task detection
+            try:
+                project_context = get_cached_project_context(current_project_id)
+            except:
+                project_context = None
+                
+            task_intent = detector.detect_task_addition_intent(user_input, project_context)
+            
+            if task_intent["is_task_intent"] and task_intent["confidence"] > 0.7:
+                try:
+                    from .project_service import add_task
+                    
+                    description = task_intent["task_description"]
+                    due_date = task_intent["due_date"]
+                    
+                    if due_date:
+                        # 期限付きタスク
+                        add_task(current_project_id, description, due_date)
+                    else:
+                        # 期限なしタスク（現在のadd_task関数を拡張する必要がある場合）
+                        default_due = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
+                        add_task(current_project_id, description, default_due)
+                    
+                    # Get current tasks for display
+                    path = Path(f"data/projects/{current_project_id}.json")
+                    data = json.loads(path.read_text())
+                    tasks = data.get("tasks", [])
+                    
+                    task_list = "\n".join([f"- {t['id']}: {t['description']} (期日: {t['due_date']})" for t in tasks])
+                    
+                    # 抽出されたデータがあれば追加情報として表示
+                    extracted_info = ""
+                    if task_intent["extracted_data"]:
+                        extracted_info = "\n\n**検出された情報:**\n"
+                        for key, value in task_intent["extracted_data"].items():
+                            if value:
+                                extracted_info += f"- {key}: {value}\n"
+                    
+                    assistant_reply = f"タスクを追加しました: **{description}**\n\n現在のタスク一覧:\n{task_list}{extracted_info}"
+                    
+                except Exception as e:
+                    assistant_reply = f"タスク追加中にエラーが発生しました: {str(e)}"
     
     # Fallback: Check for traditional task command pattern
     elif user_input.startswith("タスク "):

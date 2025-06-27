@@ -91,6 +91,76 @@ def add_task(project_id: str, description: str, due_date: str, owner: str = DEFA
     
     return new_task
 
+def remove_task(project_id: str, task_id: int, projects_dir: Path | None = None) -> bool:
+    """Remove a task from a project by task ID"""
+    if projects_dir is None:
+        projects_dir = PROJECTS_DIR
+        
+    path = projects_dir / f"{project_id}.json"
+    if not path.exists():
+        raise FileNotFoundError(f"Project {project_id} not found")
+    
+    data = json.loads(path.read_text())
+    
+    # Ensure tasks field exists
+    if "tasks" not in data or not isinstance(data["tasks"], list):
+        return False
+    
+    # Find and remove task with matching ID
+    original_count = len(data["tasks"])
+    data["tasks"] = [task for task in data["tasks"] if task.get("id") != task_id]
+    
+    if len(data["tasks"]) == original_count:
+        return False  # Task not found
+    
+    # Update timestamp
+    data["updated_at"] = datetime.utcnow().isoformat()
+    
+    # Save updated project
+    path.write_text(json.dumps(data, indent=2))
+    
+    return True
+
+def remove_duplicate_tasks(project_id: str, projects_dir: Path | None = None) -> int:
+    """Remove duplicate tasks based on description and due_date"""
+    if projects_dir is None:
+        projects_dir = PROJECTS_DIR
+        
+    path = projects_dir / f"{project_id}.json"
+    if not path.exists():
+        raise FileNotFoundError(f"Project {project_id} not found")
+    
+    data = json.loads(path.read_text())
+    
+    # Ensure tasks field exists
+    if "tasks" not in data or not isinstance(data["tasks"], list):
+        return 0
+    
+    # Track unique tasks by (description, due_date)
+    seen = set()
+    unique_tasks = []
+    removed_count = 0
+    
+    for task in data["tasks"]:
+        key = (task.get("description", ""), task.get("due_date", ""))
+        if key not in seen:
+            seen.add(key)
+            unique_tasks.append(task)
+        else:
+            removed_count += 1
+    
+    # Update tasks list if duplicates were found
+    if removed_count > 0:
+        data["tasks"] = unique_tasks
+        # Reassign sequential IDs
+        for i, task in enumerate(data["tasks"], 1):
+            task["id"] = i
+        
+        data["updated_at"] = datetime.utcnow().isoformat()
+        path.write_text(json.dumps(data, indent=2))
+    
+    return removed_count
+
 def get_project(project_id: str, projects_dir: Path | None = None) -> Optional[Dict[str, Any]]:
     """
     Get project data by ID.
