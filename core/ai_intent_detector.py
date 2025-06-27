@@ -22,6 +22,7 @@ class AIIntentDetector:
         Args:
             openai_api_key: OpenAI API key
         """
+        self.api_key = openai_api_key
         try:
             from openai import OpenAI
             self.client = OpenAI(api_key=openai_api_key)
@@ -29,9 +30,11 @@ class AIIntentDetector:
         except ImportError:
             logger.error("OpenAI package not available")
             self.available = False
+            self.client = None
         except Exception as e:
             logger.error(f"Failed to initialize OpenAI client: {e}")
             self.available = False
+            self.client = None
     
     def detect_project_creation_intent(self, user_input: str) -> Dict[str, Any]:
         """
