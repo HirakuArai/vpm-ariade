@@ -311,16 +311,23 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
         if assistant_reply:
             # 削除処理が完了したので、ここで処理を終了
             pass
-        # タスクリスト確認の特別処理
-        elif any(keyword in user_input.lower() for keyword in [
-            "タスクリスト", "タスクを教えて", "現在のタスク", "タスク一覧", "タスクを見せて"
+        # 質問・情報確認の特別処理（タスク追加を防ぐ）
+        elif any(pattern in user_input.lower() for pattern in [
+            "タスクリスト", "タスクを教えて", "現在のタスク", "タスク一覧", "タスクを見せて",
+            "何をする必要がありますか", "具体的に何を", "どうすれば", "方法は", "やり方は",
+            "教えてください", "教えて下さい", "詳細を", "説明して", "どのような"
         ]):
-            # タスクリスト表示の専用処理
-            if current_tasks:
-                task_list = "\n".join([f"[{t['id']}] {t['description']} (期日: {t['due_date']})" for t in current_tasks])
-                assistant_reply = f"現在の未完了タスクは以下の通りです：\n\n{task_list}"
+            # 情報確認・質問への適切な対応
+            if "タスク" in user_input.lower() and any(q in user_input.lower() for q in ["リスト", "教えて", "一覧", "見せて"]):
+                # タスクリスト表示
+                if current_tasks:
+                    task_list = "\n".join([f"[{t['id']}] {t['description']} (期日: {t['due_date']})" for t in current_tasks])
+                    assistant_reply = f"現在の未完了タスクは以下の通りです：\n\n{task_list}"
+                else:
+                    assistant_reply = "現在、未完了のタスクはありません。"
             else:
-                assistant_reply = "現在、未完了のタスクはありません。"
+                # 一般的な質問への対応
+                assistant_reply = "ご質問ですね。プロジェクトについて詳しくお聞かせください。新しいタスクを追加したい場合は「〜を実装してください」「〜を作成してください」のような明確な指示をお願いします。"
         # If not removal intent, check for task addition
         elif not removal_intent["is_removal_intent"]:
             from .project_prompt import get_cached_project_context
