@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-27T21:00:39Z",
+  "generated_at": "2025-06-27T21:29:17Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -568,6 +568,10 @@
     {
       "path": "\"disabled_pages/3_\\360\\237\\247\\240_Analysis_and_WBS.py\"",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/\"disabled_pages/3_\\360\\237\\247\\240_Analysis_and_WBS.py\""
+    },
+    {
+      "path": "docs/AI_FIRST_PHILOSOPHY.md",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/docs/AI_FIRST_PHILOSOPHY.md"
     },
     {
       "path": "docs/architecture_overview.md",
