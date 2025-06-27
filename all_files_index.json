@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-27T18:44:30Z",
+  "generated_at": "2025-06-27T20:22:51Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -150,8 +150,16 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/__init__.py"
     },
     {
+      "path": "core/ai_context_manager.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/ai_context_manager.py"
+    },
+    {
       "path": "core/ai_intent_detector.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/ai_intent_detector.py"
+    },
+    {
+      "path": "core/ai_quality_manager.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/ai_quality_manager.py"
     },
     {
       "path": "core/append_to_log.py",
@@ -236,6 +244,10 @@
     {
       "path": "core/enforcement.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/enforcement.py"
+    },
+    {
+      "path": "core/enhanced_ui_components.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/enhanced_ui_components.py"
     },
     {
       "path": "core/git_ops.py",
@@ -996,6 +1008,10 @@
     {
       "path": "tests/test_diff_proposal.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/tests/test_diff_proposal.py"
+    },
+    {
+      "path": "tests/test_enhanced_features.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/tests/test_enhanced_features.py"
     },
     {
       "path": "tests/test_lifecycle_manager.py",
