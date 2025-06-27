@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-06-27T21:52:52Z",
+  "generated_at": "2025-06-27T21:58:32Z",
   "files": [
     {
       "path": ".dsl/applied_keys.json",
@@ -326,6 +326,10 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/project_diff.py"
     },
     {
+      "path": "core/project_normalizer.py",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/project_normalizer.py"
+    },
+    {
       "path": "core/project_prompt.py",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/core/project_prompt.py"
     },
@@ -514,8 +518,16 @@
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/projects/proj-20250626-185112-548.json"
     },
     {
+      "path": "data/projects/proj-20250626-185112-548.json.backup.20250628_065720",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/projects/proj-20250626-185112-548.json.backup.20250628_065720"
+    },
+    {
       "path": "data/projects/test-project-001.json",
       "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/projects/test-project-001.json"
+    },
+    {
+      "path": "data/projects/test-project-001.json.backup.20250628_065720",
+      "raw": "https://raw.githubusercontent.com/HirakuArai/vpm-ariade/main/data/projects/test-project-001.json.backup.20250628_065720"
     },
     {
       "path": "data/schedules/proj-20250618-075700-122_schedule.json",
