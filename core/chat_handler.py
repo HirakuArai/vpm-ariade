@@ -449,13 +449,18 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
     if not hasattr(st.session_state, 'navigation_state') or st.session_state.navigation_state is None:
         navigator.initialize_session_state()
     
-    # Explicitly maintain home page state for non-project conversations
+    # プロジェクト会話の場合は現在のページ状態を保持し、ホーム会話の場合のみHOMEに設定
     if not current_project_id:
         st.session_state.navigation_state.current_page = PageType.HOME
         st.session_state.navigation_state.selected_project_id = None
         # Also clear any potential URL parameters that might interfere
         if "page" in st.query_params:
             st.query_params.clear()
+    else:
+        # プロジェクト会話の場合は現在のページ状態を維持
+        # （PROJECT_CHATページから呼ばれた場合はそのページに留まる）
+        st.session_state.navigation_state.selected_project_id = current_project_id
+        st.session_state["current_project_id"] = current_project_id
     
     # Rerun to display the new messages
     st.rerun()

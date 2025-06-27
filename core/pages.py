@@ -373,7 +373,7 @@ class ProjectChatPage:
     
     @staticmethod
     def _process_chat_with_reload(project_id: str, user_input: str):
-        """会話処理と完了後のリロード"""
+        """会話処理（リロードは chat_handler_ai 内で処理される）"""
         try:
             # app.pyのprocess_chat_inputを呼び出す
             import sys
@@ -383,12 +383,16 @@ class ProjectChatPage:
             # セッション状態を確認してプロジェクトを設定
             st.session_state["current_project_id"] = project_id
             
+            # 現在のページ状態を保持（PROJECT_CHATページにいることを明示）
+            if hasattr(st.session_state, 'navigation_state'):
+                st.session_state.navigation_state.current_page = PageType.PROJECT_CHAT
+                st.session_state.navigation_state.selected_project_id = project_id
+            
             # AI-First chat_handlerのインポートと実行（循環インポート回避）
             from .chat_handler_ai import process_chat_input_ai
             process_chat_input_ai(user_input, project_id)
             
-            # 会話完了後にリロード
-            st.rerun()
+            # Note: st.rerun() は process_chat_input_ai 内で呼ばれるため、ここでは呼ばない
             
         except Exception as e:
             st.error(f"会話処理エラー: {e}")
