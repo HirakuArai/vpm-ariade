@@ -6,7 +6,7 @@
   "created_by": "human_user",
   "status": "DRAFT",
   "schema_version": "1.0",
-  "updated_at": "2025-06-28T06:57:20.665200",
+  "updated_at": "2025-06-27T20:28:46.943773",
   "change_log": [
     {
       "timestamp": "2025-06-28T06:57:20.665206",
@@ -27,42 +27,42 @@
       "id": 1,
       "description": "ステップワゴンをベースにした「モバイルキャビン」の設計",
       "due_date": "2025-07-03",
-      "owner": "human_user",
-      "status": "pending"
+      "owner": "__UNDEFINED__",
+      "status": "__UNDEFINED__"
     },
     {
       "id": 2,
       "description": "タスクの削除",
       "due_date": "2025-07-04",
-      "owner": "human_user",
-      "status": "pending"
+      "owner": "__UNDEFINED__",
+      "status": "__UNDEFINED__"
     },
     {
       "id": 3,
       "description": "モバイルキャビンの設計タスクを追加",
       "due_date": "2025-07-03",
-      "owner": "human_user",
-      "status": "pending"
+      "owner": "__UNDEFINED__",
+      "status": "__UNDEFINED__"
     },
     {
       "id": 4,
       "description": "群馬県で登録されている自動車を新潟の長岡に変更する手続きを課題化する",
       "due_date": "2025-07-04",
-      "owner": "human_user",
-      "status": "pending"
+      "owner": "__UNDEFINED__",
+      "status": "__UNDEFINED__"
     },
     {
       "id": 5,
       "description": "モバイルキャビンの具体的な作業内容を明確化する",
       "due_date": "2025-07-04",
-      "owner": "human_user",
-      "status": "pending"
+      "owner": "__UNDEFINED__",
+      "status": "__UNDEFINED__"
     }
   ],
   "phase": "INCEPTION",
-  "completion_percentage": 0.0,
+  "completion_percentage": "__UNDEFINED__",
   "next_actions": [],
   "blocking_issues": [],
-  "phase_requirements": {},
+  "phase_requirements": "__UNDEFINED__",
   "phase_history": []
 }

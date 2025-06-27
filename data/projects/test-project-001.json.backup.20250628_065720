@@ -5,7 +5,7 @@
   "created_by": "ai_analyzer",
   "status": "DRAFT",
   "schema_version": "1.0",
-  "updated_at": "2025-06-28T06:57:20.666352",
+  "updated_at": "2025-06-22T03:15:13.165517",
   "change_log": [
     {
       "timestamp": "2025-06-28T06:57:20.666354",
@@ -95,6 +95,5 @@
         "ask_after": "destination"
       }
     }
-  },
-  "display_name": "AI分析により生成されたプロジェクト"
+  }
 }
