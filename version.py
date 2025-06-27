@@ -4,7 +4,7 @@ Version Management for Kai VPM
 アプリケーションバージョン管理
 """
 
-__version__ = "2.1.0"
+__version__ = "2.1.1"
 __version_name__ = "AI-First Era"
 __build_date__ = "2025-06-28"
 

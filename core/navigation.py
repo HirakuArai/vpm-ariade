@@ -89,9 +89,8 @@ class HierarchicalNavigator:
             
             # ホームページボタンの選択状態表示
             is_home_selected = st.session_state.navigation_state.current_page == PageType.HOME and not st.session_state.navigation_state.selected_project_id
-            home_text = "🏠 ホーム" + (" ◀ 現在のページ" if is_home_selected else "")
             
-            if st.button(home_text, use_container_width=True, 
+            if st.button("🏠 ホーム", use_container_width=True, 
                         type="primary" if is_home_selected else "secondary",
                         key=f"nav_home_button_{st.session_state.nav_session_id}"):
                 st.session_state.navigation_state.current_page = PageType.HOME
@@ -117,10 +116,7 @@ class HierarchicalNavigator:
                     is_selected = st.session_state.navigation_state.selected_project_id == project_id
                     button_style = "primary" if is_selected else "secondary"
                     
-                    # プロジェクト名に選択インジケーター追加
-                    project_display = f"📋 {project_name}" + (" ◀ 選択中" if is_selected else "")
-                    
-                    if st.button(project_display, use_container_width=True, type=button_style,
+                    if st.button(f"📋 {project_name}", use_container_width=True, type=button_style,
                                 key=f"nav_project_{project_id}_{st.session_state.nav_session_id}"):
                         st.session_state.navigation_state.selected_project_id = project_id
                         st.session_state.current_project_id = project_id  # Backward compatibility
@@ -147,10 +143,8 @@ class HierarchicalNavigator:
                             col1, col2 = st.columns([0.1, 0.9])
                             with col2:
                                 button_type = "primary" if is_current_page else "secondary"
-                                # サブページにも現在表示中インジケーター追加
-                                page_title = config["title"] + (" ◀ 表示中" if is_current_page else "")
                                 
-                                if st.button(page_title, use_container_width=True, 
+                                if st.button(config["title"], use_container_width=True, 
                                            type=button_type, key=f"sub_{page_type.value}_{project_id}_{st.session_state.nav_session_id}"):
                                     st.session_state.navigation_state.current_page = page_type
                                     st.rerun()

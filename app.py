@@ -43,29 +43,33 @@ st.markdown("""
     background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
 }
 
-/* サイドバーボタンの選択状態強化 */
-.stButton > button[data-baseweb="button"][aria-pressed="false"] {
-    background: rgba(255, 255, 255, 0.1) !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+/* サイドバーボタンの色による選択状態表現 */
+.stButton > button[data-baseweb="button"][kind="secondary"] {
+    background: rgba(66, 133, 244, 0.5) !important;  /* 50% 透明度 */
+    color: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(66, 133, 244, 0.3) !important;
+    transition: all 0.3s ease !important;
 }
 
 .stButton > button[data-baseweb="button"][kind="primary"] {
-    background: rgba(255, 255, 255, 0.2) !important;
+    background: rgba(66, 133, 244, 1.0) !important;  /* 100% 濃度 */
     color: white !important;
-    border: 2px solid rgba(255, 255, 255, 0.6) !important;
-    font-weight: 700 !important;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3) !important;
+    border: 2px solid rgba(66, 133, 244, 1.0) !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 15px rgba(66, 133, 244, 0.4) !important;
+    transition: all 0.3s ease !important;
 }
 
 .stButton > button[data-baseweb="button"][kind="primary"]:hover {
-    background: rgba(255, 255, 255, 0.3) !important;
-    transform: translateX(4px) !important;
+    background: rgba(66, 133, 244, 1.0) !important;
+    box-shadow: 0 6px 20px rgba(66, 133, 244, 0.5) !important;
+    transform: translateY(-2px) !important;
 }
 
-.stButton > button[data-baseweb="button"]:hover {
-    background: rgba(255, 255, 255, 0.15) !important;
-    transform: translateX(2px) !important;
+.stButton > button[data-baseweb="button"][kind="secondary"]:hover {
+    background: rgba(66, 133, 244, 0.7) !important;  /* ホバー時は70% */
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 10px rgba(66, 133, 244, 0.3) !important;
 }
 
 /* メインコンテンツエリア */
