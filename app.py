@@ -52,6 +52,8 @@ try:
     from core.notification_system import NotificationSystem
     from core.models import ProjectPhase
     from core.ui_components import ProjectVisualization, QuestionVisualization, InteractiveComponents, StatusIndicators
+    from core.enhanced_ui_components import FeedbackComponents, NotificationComponents, ResponsiveLayout
+    from core.ai_quality_manager import create_quality_manager
     from core.navigation import navigator, PageType
     from core.pages import ProjectDetailsPage, ProjectChatPage, ConversationHistoryPage
     from core.ai_intent_detector import AIIntentDetector
@@ -471,7 +473,13 @@ def render_home_page():
             st.warning("プロジェクト視覚化の表示でエラーが発生しました")
         
     else:
-        st.info("💡 左サイドバーからプロジェクトを選択するか、自然な言葉でプロジェクト作成を依頼してください。\n例：「ウェブサイト開発プロジェクトを始めたい」「会社研修を企画したい」")
+        # レスポンシブレイアウトでウェルカムメッセージを表示
+        welcome_items = [
+            lambda: st.info("💡 左サイドバーからプロジェクトを選択するか、自然な言葉でプロジェクト作成を依頼してください。"),
+            lambda: st.markdown("**例:**\n- 「ウェブサイト開発プロジェクトを始めたい」\n- 「会社研修を企画したい」\n- 「新商品の開発プロジェクトを作成して」")
+        ]
+        
+        ResponsiveLayout.render_adaptive_columns(welcome_items, max_cols=2)
         
         # 会話インターフェースの後にセッション履歴を表示
         # （render_chat_interface() が下で呼ばれる）
@@ -534,5 +542,41 @@ render_page_content()
 current_nav_state = st.session_state.navigation_state
 if current_nav_state.current_page == PageType.HOME and not current_nav_state.selected_project_id:
     render_chat_interface()
+
+# サイドバーに拡張機能を追加
+with st.sidebar:
+    st.divider()
+    
+    # システム状態表示
+    with st.expander("⚙️ システム状態", expanded=False):
+        NotificationComponents.render_system_status()
+    
+    # AI品質管理ダッシュボード
+    if st.session_state.get("ai_quality_manager"):
+        with st.expander("📊 AI品質管理", expanded=False):
+            quality_manager = st.session_state["ai_quality_manager"]
+            
+            # 品質レポート表示
+            report = quality_manager.get_quality_report()
+            metrics = report["metrics"]
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("成功率", f"{(1-metrics['error_rate'])*100:.1f}%")
+                st.metric("平均応答時間", f"{metrics['average_response_time']:.2f}s")
+            
+            with col2:
+                st.metric("品質スコア", f"{metrics['average_quality_score']:.2f}")
+                st.metric("24h リクエスト", metrics['last_24h_requests'])
+            
+            # 推奨事項
+            recommendations = quality_manager.get_recommendations()
+            if recommendations:
+                st.markdown("**推奨事項:**")
+                for rec in recommendations:
+                    st.caption(rec)
+    
+    # フィードバックフォーム
+    FeedbackComponents.render_feedback_form("システム全体")
 
 # 履歴表示（プロジェクト固有履歴＋セッション履歴）  

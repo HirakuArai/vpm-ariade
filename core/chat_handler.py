@@ -18,6 +18,11 @@ try:
 except ImportError:
     openai = None
 
+# 新しいAI機能の統合
+from .ai_context_manager import create_context_manager
+from .ai_quality_manager import create_quality_manager
+from .enhanced_ui_components import InteractiveComponents, FeedbackComponents, NotificationComponents
+
 logger = logging.getLogger(__name__)
 
 # JST timezone
@@ -431,42 +436,108 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
     st.rerun()
 
 def process_ai_conversation(user_input: str, current_project_id: Optional[str]) -> str:
-    """AI会話処理"""
+    """高度AI機能統合版の会話処理"""
     try:
         from .project_prompt import get_full_system_prompt
         
-        # OpenAI クライアント設定
-        if not openai:
-            return "❌ OpenAI ライブラリが利用できません。"
-        
+        # API キー確認
         api_key = get_openai_api_key()
         if not api_key:
             return "❌ OpenAI API キーが設定されていません。"
         
-        # 1. 基本的なAI応答生成
+        # 品質管理システム初期化
+        if "ai_quality_manager" not in st.session_state:
+            st.session_state["ai_quality_manager"] = create_quality_manager(api_key)
+        
+        quality_manager = st.session_state["ai_quality_manager"]
+        
+        # コンテキスト管理システム初期化
+        if "ai_context_manager" not in st.session_state:
+            st.session_state["ai_context_manager"] = create_context_manager(api_key)
+        
+        context_manager = st.session_state["ai_context_manager"]
+        
+        # システムプロンプト取得
         system_prompt = get_full_system_prompt(current_project_id)
-        messages = [{"role": "system", "content": system_prompt}] + \
-                  st.session_state.get("history", []) + \
-                  [{"role": "user", "content": user_input}]
         
-        # Performance optimization: limit history to last 5 exchanges to reduce old data influence
-        if len(st.session_state.get("history", [])) > 10:  # 10 messages = 5 exchanges
-            recent_history = st.session_state["history"][-10:]
-            messages = [{"role": "system", "content": system_prompt}] + \
-                      recent_history + \
-                      [{"role": "user", "content": user_input}]
+        # 現在の会話メッセージ
+        current_messages = st.session_state.get("history", []) + [{"role": "user", "content": user_input}]
         
-        response = openai.chat.completions.create(
-            model="gpt-4o",
-            messages=messages,
-            max_tokens=800,
-            temperature=0.7
+        # 最適化されたコンテキストウィンドウ構築
+        context_window = context_manager.build_context_window(
+            current_messages=current_messages,
+            current_query=user_input,
+            project_id=current_project_id,
+            system_prompt=system_prompt
         )
         
-        assistant_reply = response.choices[0].message.content.strip()
+        # メッセージ構築（コンテキストウィンドウを使用）
+        messages = [{"role": "system", "content": context_window.system_prompt}]
+        messages.extend(context_window.relevant_history)
+        messages.extend(context_window.current_conversation)
         
-        return assistant_reply
+        # タイピングインジケータ表示
+        typing_indicator = InteractiveComponents.render_typing_indicator()
+        typing_placeholder = st.empty()
+        
+        with typing_placeholder:
+            st.info("🤖 AI が回答を生成中...")
+        
+        # 品質管理付きAIリクエスト実行
+        ai_response = quality_manager.make_request_with_quality_check(
+            messages=messages,
+            model="gpt-4o",
+            temperature=0.7,
+            max_tokens=800
+        )
+        
+        # タイピングインジケータを削除
+        typing_placeholder.empty()
+        
+        # エラーハンドリング
+        if ai_response.error_type:
+            error_msg = ai_response.error_message or "不明なエラーが発生しました"
+            
+            # エラー通知表示
+            NotificationComponents.render_toast_notification(
+                f"エラー: {error_msg}", 
+                "error", 
+                duration=5
+            )
+            
+            return f"❌ {error_msg}"
+        
+        # 品質チェック
+        if ai_response.quality_score and ai_response.quality_score < 0.6:
+            # 品質が低い場合の警告
+            st.warning(f"⚠️ AI応答の品質が低い可能性があります（スコア: {ai_response.quality_score:.2f}）")
+        
+        # 会話をコンテキストに追加
+        conversation_messages = [
+            {"role": "user", "content": user_input},
+            {"role": "assistant", "content": ai_response.response}
+        ]
+        context_manager.add_conversation(current_project_id, conversation_messages)
+        
+        # 成功通知（高品質な応答の場合）
+        if ai_response.quality_score and ai_response.quality_score > 0.9:
+            NotificationComponents.render_toast_notification(
+                "✨ 高品質な応答が生成されました", 
+                "success", 
+                duration=2
+            )
+        
+        logger.info(f"AI conversation processed successfully. Quality: {ai_response.quality_score:.2f}")
+        return ai_response.response
         
     except Exception as e:
-        logger.error(f"OpenAI API call failed: {str(e)}")
-        return f"❌ AI応答の生成に失敗しました: {e}"
+        logger.error(f"Enhanced AI conversation failed: {str(e)}")
+        
+        # エラー通知
+        NotificationComponents.render_toast_notification(
+            f"AI処理中にエラーが発生しました: {str(e)}", 
+            "error", 
+            duration=5
+        )
+        
+        return f"❌ AI会話処理に失敗しました: {e}"
