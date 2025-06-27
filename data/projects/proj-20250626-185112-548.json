@@ -6,7 +6,7 @@
   "created_by": "human_user",
   "status": "DRAFT",
   "schema_version": "1.0",
-  "updated_at": "2025-06-27T17:55:40.544828",
+  "updated_at": "2025-06-27T20:26:44.624952",
   "change_log": [],
   "uuid": "39a9a85e-a3b5-41e1-b6f9-4b64d5189847",
   "tasks": [
@@ -19,27 +19,13 @@
     },
     {
       "id": 2,
-      "description": "\u30b9\u30c6\u30c3\u30d7\u30ef\u30b4\u30f3\u3092\u30d9\u30fc\u30b9\u306b\u3057\u305f\u300c\u30e2\u30d0\u30a4\u30eb\u30ad\u30e3\u30d3\u30f3\u300d\u306e\u8a2d\u8a08",
-      "due_date": "2025-07-03",
+      "description": "\u30bf\u30b9\u30af\u306e\u524a\u9664",
+      "due_date": "2025-07-04",
       "owner": "__UNDEFINED__",
       "status": "__UNDEFINED__"
     },
     {
       "id": 3,
-      "description": "\u30bf\u30b9\u30af\u306e\u524a\u9664",
-      "due_date": "2025-07-04",
-      "owner": "__UNDEFINED__",
-      "status": "__UNDEFINED__"
-    },
-    {
-      "id": 4,
-      "description": "\u30bf\u30b9\u30af\u306e\u524a\u9664",
-      "due_date": "2025-07-04",
-      "owner": "__UNDEFINED__",
-      "status": "__UNDEFINED__"
-    },
-    {
-      "id": 5,
       "description": "\u30e2\u30d0\u30a4\u30eb\u30ad\u30e3\u30d3\u30f3\u306e\u8a2d\u8a08\u30bf\u30b9\u30af\u3092\u8ffd\u52a0",
       "due_date": "2025-07-03",
       "owner": "__UNDEFINED__",
