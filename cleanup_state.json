@@ -12,7 +12,8 @@
       6,
       7,
       8,
-      9
+      9,
+      10
     ],
     "failed_stages": [
       3,
@@ -173,7 +174,7 @@
       "id": 10,
       "name": "final_verification",
       "description": "Final system verification and cleanup",
-      "status": "failed",
+      "status": "completed",
       "files_affected": [],
       "rollback_commands": [],
       "verification_commands": [
