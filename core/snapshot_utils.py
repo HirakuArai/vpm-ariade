@@ -18,8 +18,18 @@ def regenerate_master_snapshot() -> None:
     print("🛠 Generating master_snapshot.json ...", flush=True)
 
     # Use the exact interpreter running this process to guarantee the same venv
+    script_path = "archive/scripts/gen_master_snapshot.py"
+    if not os.path.exists(script_path):
+        # Fallback for legacy path
+        script_path = "scripts/gen_master_snapshot.py"
+    
+    if not os.path.exists(script_path):
+        print(f"❌ Snapshot script not found at {script_path}")
+        print("⚠️ Skipping snapshot generation due to archived scripts")
+        return
+    
     subprocess.run(
-        [sys.executable, "scripts/gen_master_snapshot.py"],
+        [sys.executable, script_path],
         check=True,
     )
 

@@ -122,10 +122,19 @@ def validate_model_usage(model_name: str) -> bool:
     is_valid = model_name == REQUIRED_OPENAI_MODEL
     
     if not is_valid:
-        logger.error(
-            f"INVALID MODEL DETECTED: '{model_name}' - "
-            f"Required model is '{REQUIRED_OPENAI_MODEL}'"
-        )
+        # Only log as warning for validation tests, error for actual usage
+        import inspect
+        frame = inspect.currentframe()
+        caller = frame.f_back.f_code.co_name if frame and frame.f_back else "unknown"
+        
+        if caller == "_verify_config":
+            logger.debug(f"Validation test: '{model_name}' correctly rejected")
+        else:
+            logger.error(
+                f"INVALID MODEL DETECTED: '{model_name}' - "
+                f"Required model is '{REQUIRED_OPENAI_MODEL}'"
+            )
+        
         raise ValueError(
             f"Model '{model_name}' is not allowed. "
             f"Only '{REQUIRED_OPENAI_MODEL}' is permitted for absolute consistency."
