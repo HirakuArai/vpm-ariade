@@ -6,7 +6,7 @@
   "created_by": "human_user",
   "status": "DRAFT",
   "schema_version": "1.0",
-  "updated_at": "2025-06-28T08:12:30.659835+09:00",
+  "updated_at": "2025-06-27T23:55:23.274143",
   "change_log": [
     {
       "timestamp": "2025-06-28T06:57:20.665206",
@@ -45,41 +45,34 @@
     },
     {
       "id": 3,
-      "description": "テスト: データ保存機能の確認",
-      "due_date": "2025-07-30",
-      "owner": "human_user",
-      "status": "pending"
-    },
-    {
-      "id": 4,
       "description": "後部座席を外す",
       "due_date": "2025-07-04",
       "owner": "human_user",
       "status": "pending"
     },
     {
-      "id": 5,
+      "id": 4,
       "description": "構造変更登録を行う",
       "due_date": "2025-07-04",
       "owner": "human_user",
       "status": "pending"
     },
     {
-      "id": 6,
+      "id": 5,
       "description": "後部スペースのベットキットでのフラット化",
       "due_date": "2025-07-04",
       "owner": "human_user",
       "status": "pending"
     },
     {
-      "id": 7,
+      "id": 6,
       "description": "キャリアの装着",
       "due_date": "2025-07-04",
       "owner": "human_user",
       "status": "pending"
     },
     {
-      "id": 8,
+      "id": 7,
       "description": "太陽光パネルの設置",
       "due_date": "2025-07-04",
       "owner": "human_user",

@@ -279,7 +279,7 @@ def _execute_task_removal(action_plan, current_project_id: Optional[str]) -> str
         return "タスクを削除するには、プロジェクトを選択してください。"
     
     try:
-        from .project_service import remove_task, remove_duplicate_tasks, get_project
+        from .project_service import remove_task, remove_duplicate_tasks, remove_task_by_description, get_project
         
         removed_count = 0
         for item in action_plan.target_items:
@@ -290,7 +290,13 @@ def _execute_task_removal(action_plan, current_project_id: Optional[str]) -> str
                 else:
                     params = item.get("parameters", {})
                     task_id = params.get("task_id")
+                    task_description = params.get("description", "")
+                    
+                    # IDベースの削除を優先的に試行
                     if task_id and remove_task(current_project_id, int(task_id)):
+                        removed_count += 1
+                    # IDが無い場合は説明文ベースで削除を試行
+                    elif task_description and remove_task_by_description(current_project_id, task_description):
                         removed_count += 1
         
         if removed_count > 0:
