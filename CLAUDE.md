@@ -99,6 +99,16 @@ All new modules **must** live under `core/v2/` or `persona/`, and be registered 
 * Never modify `charter_schema.yaml` without a PR titled `schema-change:` and an accompanying migration script.
 * Keep public APIs (`run_kai_self_check`, `append_log`, …) stable during migration.
 
+## 🤖 AI Model Requirements (ABSOLUTE)
+
+**🚨 CRITICAL: GPT-4.1 ONLY - NO EXCEPTIONS**
+
+* ALL OpenAI API calls MUST use GPT-4.1 exclusively
+* Import `get_openai_model()` from `core.v2.openai_config` - never hardcode models
+* Use `create_chat_completion()` for consistent API calls
+* Any deviation from GPT-4.1 will cause system failure
+* This requirement is absolute and must be maintained for ALL future additions
+
 ---
 
 ## 📜 Git & Docs Rules (inherited)

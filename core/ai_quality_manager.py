@@ -103,7 +103,7 @@ class AIQualityManager:
     
     def make_request_with_quality_check(self, 
                                       messages: List[Dict[str, str]], 
-                                      model: str = "gpt-4o-mini",
+                                      model: str = "gpt-4.1",
                                       temperature: float = 0.7,
                                       max_tokens: int = 800) -> AIResponse:
         """

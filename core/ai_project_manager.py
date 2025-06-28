@@ -19,8 +19,10 @@ from dataclasses import dataclass
 
 try:
     import openai
+    from core.v2.openai_config import get_openai_model
 except ImportError:
     openai = None
+    get_openai_model = None
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +99,7 @@ class AIProjectManager:
             )
             
             response = self.client.chat.completions.create(
-                model="gpt-4o",
+                model=get_openai_model() if get_openai_model else "gpt-4.1",
                 messages=[
                     {
                         "role": "system", 

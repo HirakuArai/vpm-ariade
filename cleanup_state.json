@@ -1,0 +1,187 @@
+{
+  "cleanup_session": {
+    "session_id": "89b383b7",
+    "started_at": "2025-06-29T00:37:18.362866",
+    "current_stage": 10,
+    "completed_stages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "failed_stages": [
+      3,
+      4,
+      5,
+      7,
+      8,
+      8,
+      10
+    ],
+    "backup_created": false,
+    "archive_branch_created": false
+  },
+  "stages": [
+    {
+      "id": 1,
+      "name": "pre_cleanup_backup",
+      "description": "Create complete backup before any changes",
+      "status": "completed",
+      "files_affected": [],
+      "rollback_commands": [],
+      "verification_commands": [
+        "git status",
+        "git log --oneline -5"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "create_archive_branch",
+      "description": "Create archive branch for tracking",
+      "status": "completed",
+      "files_affected": [],
+      "rollback_commands": [
+        "git branch -D archive/cleanup-$(date +%Y%m%d)"
+      ],
+      "verification_commands": [
+        "git branch --list 'archive/*'"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "archive_external_tools",
+      "description": "Archive tools/pycg external dependency",
+      "status": "completed",
+      "files_affected": [
+        "tools/pycg/"
+      ],
+      "rollback_commands": [
+        "git checkout HEAD -- tools/pycg/"
+      ],
+      "verification_commands": [
+        "ls -la tools/",
+        "git status tools/"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "archive_root_tests",
+      "description": "Archive root-level test files",
+      "status": "completed",
+      "files_affected": [
+        "test_*.py"
+      ],
+      "rollback_commands": [
+        "git checkout HEAD -- test_*.py"
+      ],
+      "verification_commands": [
+        "ls test_*.py 2>/dev/null || echo 'No root tests'",
+        "python -c 'import app' 2>/dev/null && echo 'App import OK'"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "archive_conversations",
+      "description": "Archive conversation logs",
+      "status": "completed",
+      "files_affected": [
+        "conversations/"
+      ],
+      "rollback_commands": [
+        "git checkout HEAD -- conversations/"
+      ],
+      "verification_commands": [
+        "ls conversations/ 2>/dev/null || echo 'Conversations archived'",
+        "python -c 'import app' 2>/dev/null && echo 'App import OK'"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "archive_generated_data",
+      "description": "Archive generated JSON backups",
+      "status": "completed",
+      "files_affected": [
+        "data/kai_capabilities_*.json",
+        "output/",
+        "snapshots/"
+      ],
+      "rollback_commands": [
+        "git checkout HEAD -- data/kai_capabilities_*.json output/ snapshots/"
+      ],
+      "verification_commands": [
+        "ls data/",
+        "python -c 'import app' 2>/dev/null && echo 'App import OK'"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "archive_utility_scripts",
+      "description": "Archive utility scripts",
+      "status": "completed",
+      "files_affected": [
+        "scripts/"
+      ],
+      "rollback_commands": [
+        "git checkout HEAD -- scripts/"
+      ],
+      "verification_commands": [
+        "ls scripts/ 2>/dev/null || echo 'Scripts archived'",
+        "python -c 'import app' 2>/dev/null && echo 'App import OK'"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "archive_disabled_pages",
+      "description": "Archive disabled Streamlit pages",
+      "status": "completed",
+      "files_affected": [
+        "disabled_pages/",
+        "app_*.py"
+      ],
+      "rollback_commands": [
+        "git checkout HEAD -- disabled_pages/ app_*.py"
+      ],
+      "verification_commands": [
+        "python -c 'import app' 2>/dev/null && echo 'App import OK'",
+        "streamlit run app.py --check-toml"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "consolidate_documentation",
+      "description": "Consolidate and archive redundant docs",
+      "status": "completed",
+      "files_affected": [
+        "docs/base_os_rules*.md",
+        "docs/project_definition*.md",
+        "docs/conversation_*.md"
+      ],
+      "rollback_commands": [
+        "git checkout HEAD -- docs/"
+      ],
+      "verification_commands": [
+        "ls docs/",
+        "python -c 'import app' 2>/dev/null && echo 'App import OK'"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "final_verification",
+      "description": "Final system verification and cleanup",
+      "status": "failed",
+      "files_affected": [],
+      "rollback_commands": [],
+      "verification_commands": [
+        "python -c 'import app'",
+        "streamlit run app.py --check-toml",
+        "pytest tests/ -v",
+        "git status"
+      ]
+    }
+  ]
+}

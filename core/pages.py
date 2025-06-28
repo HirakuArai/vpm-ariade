@@ -181,6 +181,7 @@ class ProjectDetailsPage:
         """プロジェクト詳細のAI生成"""
         try:
             import openai
+            from core.v2.openai_config import get_openai_model
             
             # プロンプトの作成
             prompt = f"""
@@ -204,7 +205,7 @@ class ProjectDetailsPage:
             
             # OpenAI APIを使用して説明を生成
             response = openai.chat.completions.create(
-                model="gpt-4o-mini",
+                model=get_openai_model(),
                 messages=[
                     {"role": "system", "content": "あなたはプロジェクトマネジメントの専門家で、複雑なプロジェクト情報をわかりやすく整理して説明することが得意です。"},
                     {"role": "user", "content": prompt}

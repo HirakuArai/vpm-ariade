@@ -15,8 +15,10 @@ from zoneinfo import ZoneInfo
 
 try:
     import openai
+    from core.v2.openai_config import get_openai_model
 except ImportError:
     openai = None
+    get_openai_model = None
 
 # 新しいAI機能の統合
 from .ai_context_manager import create_context_manager
@@ -197,7 +199,7 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
                 if not openai:
                     raise ImportError("OpenAI not available")
                 response = openai.chat.completions.create(
-                    model="gpt-4o-mini",
+                    model=get_openai_model() if get_openai_model else "gpt-4.1",
                     messages=[
                         {"role": "system", "content": "あなたは意図検出の専門家です。ユーザーの発言からアクティベーション意図を正確に判定してください。"},
                         {"role": "user", "content": activation_prompt}
@@ -516,7 +518,7 @@ def process_ai_conversation(user_input: str, current_project_id: Optional[str]) 
         # 品質管理付きAIリクエスト実行
         ai_response = quality_manager.make_request_with_quality_check(
             messages=messages,
-            model="gpt-4o",
+            model=get_openai_model() if get_openai_model else "gpt-4.1",
             temperature=0.7,
             max_tokens=800
         )

@@ -13,8 +13,10 @@ from .date_validator import is_valid_date
 
 try:
     import openai
+    from core.v2.openai_config import get_openai_model
 except ImportError:
     openai = None
+    get_openai_model = None
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +114,7 @@ class AIIntentDetector:
 """
             
             response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4.1",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.1,
                 max_tokens=500
@@ -219,7 +221,7 @@ class AIIntentDetector:
 """
             
             response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4.1",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.1,
                 max_tokens=400
@@ -322,7 +324,7 @@ class AIIntentDetector:
 """
             
             response = openai.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-4.1",
                 messages=[
                     {"role": "system", "content": "あなたはタスク削除意図の検出専門家です。ユーザーの発言を正確に分析してください。"},
                     {"role": "user", "content": prompt}
