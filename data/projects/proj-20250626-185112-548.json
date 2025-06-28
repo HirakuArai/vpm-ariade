@@ -6,7 +6,7 @@
   "created_by": "human_user",
   "status": "DRAFT",
   "schema_version": "1.0",
-  "updated_at": "2025-06-27T23:55:23.274143",
+  "updated_at": "2025-06-29T05:26:52.723172+09:00",
   "change_log": [
     {
       "timestamp": "2025-06-28T06:57:20.665206",
@@ -75,6 +75,13 @@
       "id": 7,
       "description": "太陽光パネルの設置",
       "due_date": "2025-07-04",
+      "owner": "human_user",
+      "status": "pending"
+    },
+    {
+      "id": 8,
+      "description": "群馬→新潟（長岡）への自動車登録変更手続きに必要な書類（登録用委任状、車庫証明用委任状、自動車保管場所使用承諾証明書、保管場所配置図、公共料金の領収書コピー、車検証のコピー、住民票）を揃える。",
+      "due_date": "2025-07-05",
       "owner": "human_user",
       "status": "pending"
     }
