@@ -19,6 +19,9 @@ class RequestKind(str, Enum):
     TICKET_GEN = "ticket_gen"
     REVIEW_GEN = "review_gen"
     UI_CHAT = "ui_chat"
+    PROJECT_DETAIL = "project_detail"  # AI-generated project summaries and descriptions
+    INTENT_DETECT = "intent_detect"    # User intent detection
+    CONVERSATION_ANALYSIS = "conversation_analysis"  # Conversation summary and analysis
 
 
 class LogEntry(BaseModel):

@@ -73,15 +73,42 @@ class SimpleConversationAnalyzer:
 上記の会話内容を分析し、プロジェクト情報の更新が必要な部分を特定してください。
 会話から明確に読み取れる情報のみを抽出し、推測は含めないでください。"""
 
-            response = openai.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
+            # LLMロギングを使用してAPIを呼び出し
+            from core.prompt_logger import log_call
+            from core.log_schema import RequestKind
+            
+            with log_call("kai", RequestKind.CONVERSATION_ANALYSIS) as log:
+                request_data = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                temperature=0.1,
-                max_tokens=2000
-            )
+                    "temperature": 0.1,
+                    "max_tokens": 2000
+                }
+                
+                log['log_request'](request_data)
+                
+                response = openai.chat.completions.create(**request_data)
+                
+                # レスポンスをログに記録
+                response_data = {
+                    "choices": [
+                        {
+                            "message": {
+                                "role": response.choices[0].message.role,
+                                "content": response.choices[0].message.content
+                            }
+                        }
+                    ],
+                    "usage": {
+                        "prompt_tokens": response.usage.prompt_tokens,
+                        "completion_tokens": response.usage.completion_tokens,
+                        "total_tokens": response.usage.total_tokens
+                    }
+                }
+                log['log_response'](response_data)
             
             # レスポンスを解析
             response_text = response.choices[0].message.content.strip()

@@ -182,6 +182,8 @@ class ProjectDetailsPage:
         try:
             import openai
             from core.v2.openai_config import get_openai_model
+            from core.prompt_logger import log_call
+            from core.log_schema import RequestKind
             
             # プロンプトの作成
             prompt = f"""
@@ -203,18 +205,42 @@ class ProjectDetailsPage:
 {json.dumps(project_data, ensure_ascii=False, indent=2)}
 """
             
-            # OpenAI APIを使用して説明を生成
-            response = openai.chat.completions.create(
-                model=get_openai_model(),
-                messages=[
-                    {"role": "system", "content": "あなたはプロジェクトマネジメントの専門家で、複雑なプロジェクト情報をわかりやすく整理して説明することが得意です。"},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.7,
-                max_tokens=2000
-            )
-            
-            return response.choices[0].message.content
+            # LLMロギングを使用してAPIを呼び出し
+            with log_call("kai", RequestKind.PROJECT_DETAIL) as log:
+                request_data = {
+                    "model": get_openai_model(),
+                    "messages": [
+                        {"role": "system", "content": "あなたはプロジェクトマネジメントの専門家で、複雑なプロジェクト情報をわかりやすく整理して説明することが得意です。"},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": 0.7,
+                    "max_tokens": 2000
+                }
+                
+                log['log_request'](request_data)
+                
+                # OpenAI APIを使用して説明を生成
+                response = openai.chat.completions.create(**request_data)
+                
+                # レスポンスをログに記録
+                response_data = {
+                    "choices": [
+                        {
+                            "message": {
+                                "role": response.choices[0].message.role,
+                                "content": response.choices[0].message.content
+                            }
+                        }
+                    ],
+                    "usage": {
+                        "prompt_tokens": response.usage.prompt_tokens,
+                        "completion_tokens": response.usage.completion_tokens,
+                        "total_tokens": response.usage.total_tokens
+                    }
+                }
+                log['log_response'](response_data)
+                
+                return response.choices[0].message.content
             
         except Exception as e:
             st.error(f"AI説明の生成エラー: {e}")

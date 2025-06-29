@@ -323,15 +323,42 @@ class AIIntentDetector:
 }}
 """
             
-            response = openai.chat.completions.create(
-                model="gpt-4.1",
-                messages=[
-                    {"role": "system", "content": "あなたはタスク削除意図の検出専門家です。ユーザーの発言を正確に分析してください。"},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.1,
-                max_tokens=300
-            )
+            # LLMロギングを使用してAPIを呼び出し
+            from core.prompt_logger import log_call
+            from core.log_schema import RequestKind
+            
+            with log_call("kai", RequestKind.INTENT_DETECT) as log:
+                request_data = {
+                    "model": "gpt-4.1",
+                    "messages": [
+                        {"role": "system", "content": "あなたはタスク削除意図の検出専門家です。ユーザーの発言を正確に分析してください。"},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": 0.1,
+                    "max_tokens": 300
+                }
+                
+                log['log_request'](request_data)
+                
+                response = openai.chat.completions.create(**request_data)
+                
+                # レスポンスをログに記録
+                response_data = {
+                    "choices": [
+                        {
+                            "message": {
+                                "role": response.choices[0].message.role,
+                                "content": response.choices[0].message.content
+                            }
+                        }
+                    ],
+                    "usage": {
+                        "prompt_tokens": response.usage.prompt_tokens,
+                        "completion_tokens": response.usage.completion_tokens,
+                        "total_tokens": response.usage.total_tokens
+                    }
+                }
+                log['log_response'](response_data)
             
             result = json.loads(response.choices[0].message.content.strip())
             
