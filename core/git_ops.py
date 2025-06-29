@@ -101,6 +101,35 @@ def commit_and_push_log(log_path: str = None) -> bool:
         print(f"❌ 会話ログのコミット失敗: {e}", flush=True)
         return False
 
+def commit_and_push_llm_logs() -> bool:
+    """LLMログファイルをコミット・プッシュ"""
+    try:
+        subprocess.run(["git", "config", "--global", "user.name", "Kai Bot"], check=True)
+        subprocess.run(["git", "config", "--global", "user.email", "kai@example.com"], check=True)
+        
+        # LLMログディレクトリ全体を追加
+        subprocess.run(["git", "add", "logs/llm_calls/"], check=True)
+        
+        # 変更があるかチェック
+        result = subprocess.run(["git", "diff", "--cached", "--quiet"], capture_output=True)
+        if result.returncode == 0:
+            # 変更がない場合
+            return True
+        
+        # コミット
+        commit_msg = "Update LLM call logs"
+        subprocess.run(["git", "commit", "-m", commit_msg], capture_output=True)
+        
+        # プッシュ
+        subprocess.run(["git", "push", f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"], check=True)
+        
+        print("✅ LLMログをプッシュしました", flush=True)
+        return True
+        
+    except subprocess.CalledProcessError as e:
+        print(f"❌ LLMログのプッシュ失敗: {e}", flush=True)
+        return False
+
 # ---------------------------------------------------------------------------
 # 未処理ログチェック (JSON 版)
 # ---------------------------------------------------------------------------
@@ -188,6 +217,7 @@ def push_all_important_files() -> None:
             "output/*.json",
             "conversations/*.json",  # ← md → json
             "logs/*.log",
+            "logs/llm_calls/*.jsonl",  # LLM呼び出しログも含める
             "docs/*.md",
             "core/**/*.py",
             "scripts/*.py",
