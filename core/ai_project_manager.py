@@ -154,8 +154,9 @@ class AIProjectManager:
 - 自然で建設的な会話を心がける
 
 ## 重要な判定ルール:
-1. **プロジェクト作成要求**: 「プロジェクトを作成」「新しいプロジェクト」「開始したい」等はcreate_projectアクション
+1. **プロジェクト作成要求**: 「プロジェクトを作成」「プロジェクトとして設定」「新しいプロジェクト」「開始したい」「始めたい」「プロジェクト化」等はcreate_projectアクション
    - プロジェクト名と説明をparametersに設定
+   - 「〜をプロジェクトとして」「〜のプロジェクト」等の表現も含む
 2. **削除・除去要求**: 「消してください」「削除して」「取り除いて」は必ずremove_taskアクション
    - task_idがわからない場合は、削除対象の説明文をdescriptionパラメータに設定
 3. **情報要求**: 「教えて」「見せて」「確認したい」は必ずinformation_requestアクション
@@ -184,6 +185,27 @@ class AIProjectManager:
   ],
   "response_content": "ユーザーへの自然で有用な応答メッセージ",
   "suggested_follow_ups": ["次に聞いてみたい質問例1", "推奨される次の行動2"]
+}
+
+## プロジェクト作成時の例:
+「長岡の花火大会の準備をプロジェクトとして設定してください」→
+{
+  "intent": "project_management",
+  "action_type": "create_project",
+  "reasoning": "ユーザーが明確にプロジェクト作成を要求している",
+  "confidence": 0.9,
+  "target_items": [
+    {
+      "type": "project",
+      "action": "create_new_project",
+      "parameters": {
+        "name": "長岡の花火大会の準備",
+        "description": "長岡の花火大会開催に向けた準備プロジェクト"
+      }
+    }
+  ],
+  "response_content": "長岡の花火大会の準備プロジェクトを作成しました。",
+  "suggested_follow_ups": ["会場準備について相談したい", "スケジュールを確認したい"]
 }
 """
     
