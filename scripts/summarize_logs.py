@@ -115,12 +115,16 @@ def summarize_by_kind(entries: List[LogEntry]) -> Dict[str, Dict]:
                             sample_text += "..."
                         break
             
+            # トークン警告フラグを追加
+            high_token_warning = "⚠️ " if entry.prompt_tokens > 1000 else ""
+            
             kind_summary['samples'].append({
                 'ts': entry.ts,
                 'task_id': entry.task_id,
                 'agent': entry.agent,
                 'text': sample_text,
-                'tokens': f"{entry.prompt_tokens}/{entry.completion_tokens}"
+                'tokens': f"{entry.prompt_tokens}/{entry.completion_tokens}",
+                'warning': high_token_warning
             })
     
     return dict(summary)
@@ -198,6 +202,7 @@ def generate_html_report(
         }
         .success { color: #28a745; }
         .error { color: #dc3545; }
+        .warning { color: #ff6b35; }
         .sample {
             background-color: white;
             border: 1px solid #e0e0e0;
@@ -308,7 +313,7 @@ def generate_html_report(
                 html_parts.append(f"""
                 <div class="sample">
                     <div class="sample-header">
-                        <span>{sample['agent']} • {sample['ts']}</span>
+                        <span>{sample.get('warning', '')}{sample['agent']} • {sample['ts']}</span>
                         <span>Tokens: {sample['tokens']}</span>
                     </div>
                     <div class="sample-text">{sample['text']}</div>

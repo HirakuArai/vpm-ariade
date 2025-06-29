@@ -20,9 +20,11 @@ from dataclasses import dataclass
 try:
     import openai
     from core.v2.openai_config import get_openai_model
+    from .prompt_builder import create_prompt_builder
 except ImportError:
     openai = None
     get_openai_model = None
+    create_prompt_builder = None
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +68,9 @@ class AIProjectManager:
         self.interaction_history = []
         self.user_preferences = {}
         
+        # PromptBuilderの初期化
+        self.prompt_builder = create_prompt_builder() if create_prompt_builder else None
+        
     def process_user_input(self, 
                           user_input: str, 
                           project_context: Dict[str, Any],
@@ -93,10 +98,18 @@ class AIProjectManager:
             )
         
         try:
-            # 統一されたAI判断プロンプト
-            unified_prompt = self._build_unified_prompt(
-                user_input, project_context, conversation_history
-            )
+            # 統一されたAI判断プロンプト（PromptBuilderを使用）
+            if self.prompt_builder:
+                unified_prompt = self.prompt_builder.build_unified_prompt(
+                    user_input, project_context, conversation_history
+                )
+                system_prompt = self.prompt_builder.build_system_prompt()
+            else:
+                # フォールバック: 従来の方法
+                unified_prompt = self._build_unified_prompt(
+                    user_input, project_context, conversation_history
+                )
+                system_prompt = self._get_ai_pm_system_prompt()
             
             # LLM call loggingを統合
             from .prompt_logger import log_call
@@ -108,7 +121,7 @@ class AIProjectManager:
                     "messages": [
                         {
                             "role": "system", 
-                            "content": self._get_ai_pm_system_prompt()
+                            "content": system_prompt
                         },
                         {
                             "role": "user", 
