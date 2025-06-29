@@ -98,21 +98,39 @@ class AIProjectManager:
                 user_input, project_context, conversation_history
             )
             
-            response = self.client.chat.completions.create(
-                model=get_openai_model() if get_openai_model else "gpt-4.1",
-                messages=[
-                    {
-                        "role": "system", 
-                        "content": self._get_ai_pm_system_prompt()
-                    },
-                    {
-                        "role": "user", 
-                        "content": unified_prompt
-                    }
-                ],
-                temperature=0.3,
-                max_tokens=1000
-            )
+            # LLM call loggingを統合
+            from .prompt_logger import log_call
+            from .log_schema import RequestKind
+            
+            with log_call("kai", RequestKind.UI_CHAT) as log:
+                request_data = {
+                    "model": get_openai_model() if get_openai_model else "gpt-4.1",
+                    "messages": [
+                        {
+                            "role": "system", 
+                            "content": self._get_ai_pm_system_prompt()
+                        },
+                        {
+                            "role": "user", 
+                            "content": unified_prompt
+                        }
+                    ],
+                    "temperature": 0.3,
+                    "max_tokens": 1000
+                }
+                
+                # リクエストをログ
+                log['log_request'](request_data)
+                
+                # API呼び出し
+                response = self.client.chat.completions.create(**request_data)
+                
+                # レスポンスをログ
+                log['log_response'](
+                    response.model_dump() if hasattr(response, 'model_dump') else response.dict(),
+                    response.usage.prompt_tokens,
+                    response.usage.completion_tokens
+                )
             
             # AI応答を解析してActionPlanに変換
             ai_response = response.choices[0].message.content.strip()
@@ -125,6 +143,16 @@ class AIProjectManager:
             
         except Exception as e:
             logger.error(f"AI project manager processing failed: {e}")
+            
+            # エラーもログに記録
+            try:
+                from .prompt_logger import log_call
+                from .log_schema import RequestKind
+                with log_call("kai", RequestKind.UI_CHAT) as log:
+                    log['log_error'](f"processing_error: {type(e).__name__}")
+            except:
+                pass  # ログ記録の失敗は無視
+            
             return ActionPlan(
                 intent="error",
                 action_type="processing_error",
