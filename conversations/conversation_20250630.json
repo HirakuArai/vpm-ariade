@@ -30,6 +30,16 @@
       "role": "assistant",
       "content": "プロジェクト作成中にエラーが発生しました: create_project() missing 1 required positional argument: 'created_by'",
       "ts": "2025-06-30T00:44:43+09:00"
+    },
+    {
+      "role": "user",
+      "content": " 長岡の花火大会の準備をプロジェクトとして設定してください。",
+      "ts": "2025-06-30T00:49:24+09:00"
+    },
+    {
+      "role": "assistant",
+      "content": "プロジェクト作成中にエラーが発生しました: create_project() missing 1 required positional argument: 'created_by'",
+      "ts": "2025-06-30T00:49:29+09:00"
     }
   ]
 }
