@@ -358,7 +358,7 @@ class AIIntentDetector:
                         "total_tokens": response.usage.total_tokens
                     }
                 }
-                log['log_response'](response_data)
+                log['log_response'](response_data, response.usage.prompt_tokens, response.usage.completion_tokens)
             
             result = json.loads(response.choices[0].message.content.strip())
             
