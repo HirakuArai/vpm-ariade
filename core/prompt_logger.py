@@ -69,7 +69,8 @@ class PromptLogger:
         if task_id is None:
             task_id = str(uuid.uuid4())
         
-        timestamp = datetime.now().isoformat()
+        # AI Log Output Guidelines v1.0 compliance: ISO-8601 with UTC timezone
+        timestamp = datetime.utcnow().isoformat(timespec="milliseconds") + "Z"
         request_data = None
         response_data = None
         prompt_tokens = 0

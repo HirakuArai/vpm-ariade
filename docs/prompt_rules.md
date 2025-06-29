@@ -1,5 +1,14 @@
 # AI Project Manager Prompt Rules
 
+*** LOGGING DIRECTIVE (AI Log Output Guidelines v1.0) ***
+When you generate responses, ensure all JSON outputs follow these standards:
+- Use `json.dumps(obj, ensure_ascii=False)` equivalent formatting
+- Do not wrap JSON in Markdown code fences in logs
+- Python `None` → JSON `null`, `True/False` → `true/false`
+- Include exact token counts from API responses
+- Use ISO-8601 UTC timestamps: YYYY-MM-DDTHH:MM:SS.sssZ
+*** END DIRECTIVE ***
+
 ## 基本方針
 
 1. **自然な理解**: パターンマッチングではなく、文脈と意図を理解

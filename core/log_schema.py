@@ -54,8 +54,12 @@ def log_to_jsonl(entry: LogEntry, filepath: Union[str, Path]) -> None:
     filepath.parent.mkdir(parents=True, exist_ok=True)
     
     with open(filepath, 'a+', encoding='utf-8') as f:
-        # Write without buffering for immediate persistence
-        f.write(entry.model_dump_json() + '\n')
+        # Write with AI Log Output Guidelines v1.0 compliance
+        # - Use ensure_ascii=False for UTF-8 support
+        # - Use separators for compact output
+        # - Handle None/True/False -> null/true/false conversion automatically via Pydantic
+        json_str = entry.model_dump_json(by_alias=True, exclude_none=False)
+        f.write(json_str + '\n')
         f.flush()
 
 
