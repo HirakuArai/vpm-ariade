@@ -170,7 +170,17 @@ def process_chat_input_ai(user_input: str, current_project_id: Optional[str] = N
         typing_placeholder.empty()
         
         # アクションプランの実行
-        assistant_reply = execute_action_plan(action_plan, current_project_id)
+        result = execute_action_plan(action_plan, current_project_id)
+        
+        # プロジェクト作成の場合、新しいプロジェクトIDを取得
+        if action_plan.action_type == "create_project":
+            # セッションから新しく作成されたプロジェクトIDを取得
+            new_project_id = st.session_state.get("current_project_id")
+            if new_project_id and new_project_id != current_project_id:
+                current_project_id = new_project_id
+                logger.info(f"Updated current_project_id to newly created project: {current_project_id}")
+        
+        assistant_reply = result
         
         # 学習データの表示（デバッグ用）
         if action_plan.confidence < 0.7:
@@ -400,8 +410,26 @@ def _execute_project_creation(action_plan, current_project_id: Optional[str]) ->
                         st.session_state["current_project_id"] = project_id
                     
                     logger.info(f"Created and selected project: {project_id}")
+                    
+                    # 新しく作成されたプロジェクトをGitにコミット
+                    try:
+                        from .git_ops import commit_and_push_project_data
+                        commit_and_push_project_data(project_id)
+                        logger.info(f"Successfully committed new project {project_id} to Git")
+                    except Exception as e:
+                        logger.error(f"Failed to commit new project {project_id} to Git: {e}")
         
         if created_projects:
+            # 複数プロジェクト作成時もGitコミット
+            if len(created_projects) > 1:
+                for project in created_projects:
+                    try:
+                        from .git_ops import commit_and_push_project_data
+                        commit_and_push_project_data(project['id'])
+                        logger.info(f"Successfully committed project {project['id']} to Git")
+                    except Exception as e:
+                        logger.error(f"Failed to commit project {project['id']} to Git: {e}")
+            
             if len(created_projects) == 1:
                 project = created_projects[0]
                 return f"{action_plan.response_content}\n\n✅ プロジェクト「{project['name']}」（ID: {project['id']}）を作成し、選択しました。"
