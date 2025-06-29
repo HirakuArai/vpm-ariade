@@ -220,6 +220,9 @@ def execute_action_plan(action_plan, current_project_id: Optional[str]) -> str:
         elif action_plan.action_type == "information_request":
             return _execute_information_request(action_plan, current_project_id)
         
+        elif action_plan.action_type == "create_project":
+            return _execute_project_creation(action_plan, current_project_id)
+        
         elif action_plan.action_type == "general_discussion":
             return action_plan.response_content
         
@@ -351,6 +354,55 @@ def _execute_information_request(action_plan, current_project_id: Optional[str])
     except Exception as e:
         logger.error(f"Information request failed: {e}")
         return action_plan.response_content
+
+def _execute_project_creation(action_plan, current_project_id: Optional[str]) -> str:
+    """プロジェクト作成の実行"""
+    try:
+        from .project_service import create_project
+        from .navigation import navigator
+        
+        created_projects = []
+        for item in action_plan.target_items:
+            if item.get("type") == "project":
+                params = item.get("parameters", {})
+                project_name = params.get("name", "")
+                project_description = params.get("description", "")
+                
+                # プロジェクト名が空の場合はスキップ
+                if not project_name or project_name.strip() == "":
+                    logger.warning(f"プロジェクト作成スキップ: 名前が空です。Parameters: {params}")
+                    continue
+                
+                # プロジェクト作成
+                project_id = create_project(project_name, project_description)
+                created_projects.append({
+                    "id": project_id,
+                    "name": project_name,
+                    "description": project_description
+                })
+                
+                # 最初に作成されたプロジェクトを自動選択
+                if len(created_projects) == 1:
+                    # ナビゲーション状態を更新
+                    if hasattr(st.session_state, 'navigation_state'):
+                        st.session_state.navigation_state.selected_project_id = project_id
+                        st.session_state["current_project_id"] = project_id
+                    
+                    logger.info(f"Created and selected project: {project_id}")
+        
+        if created_projects:
+            if len(created_projects) == 1:
+                project = created_projects[0]
+                return f"{action_plan.response_content}\n\n✅ プロジェクト「{project['name']}」（ID: {project['id']}）を作成し、選択しました。"
+            else:
+                project_list = "\n".join([f"• {p['name']} (ID: {p['id']})" for p in created_projects])
+                return f"{action_plan.response_content}\n\n✅ 以下のプロジェクトを作成しました:\n{project_list}"
+        else:
+            return action_plan.response_content
+            
+    except Exception as e:
+        logger.error(f"Project creation failed: {e}")
+        return f"プロジェクト作成中にエラーが発生しました: {str(e)}"
 
 def _finalize_conversation(assistant_reply: str, current_project_id: Optional[str]):
     """会話の最終処理"""

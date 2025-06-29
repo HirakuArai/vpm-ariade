@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 class ActionPlan:
     """AIが生成するアクションプラン"""
     intent: str  # "project_management", "conversation", "clarification"
-    action_type: str  # "create_task", "remove_task", "status_update", "information_request"
+    action_type: str  # "create_project", "create_task", "remove_task", "status_update", "information_request"
     reasoning: str
     confidence: float
     
@@ -154,11 +154,13 @@ class AIProjectManager:
 - 自然で建設的な会話を心がける
 
 ## 重要な判定ルール:
-1. **削除・除去要求**: 「消してください」「削除して」「取り除いて」は必ずremove_taskアクション
+1. **プロジェクト作成要求**: 「プロジェクトを作成」「新しいプロジェクト」「開始したい」等はcreate_projectアクション
+   - プロジェクト名と説明をparametersに設定
+2. **削除・除去要求**: 「消してください」「削除して」「取り除いて」は必ずremove_taskアクション
    - task_idがわからない場合は、削除対象の説明文をdescriptionパラメータに設定
-2. **情報要求**: 「教えて」「見せて」「確認したい」は必ずinformation_requestアクション
-3. **タスク作成条件**: 明確な「作業」「やる」「実装」「対応」等の実行意図がある場合のみcreate_task
-4. **質問・相談**: 「どうすれば」「方法は」「アドバイス」はgeneral_discussionアクション
+3. **情報要求**: 「教えて」「見せて」「確認したい」は必ずinformation_requestアクション
+4. **タスク作成条件**: 明確な「作業」「やる」「実装」「対応」等の実行意図がある場合のみcreate_task
+5. **質問・相談**: 「どうすれば」「方法は」「アドバイス」はgeneral_discussionアクション
 
 ## タスク削除時のパラメータ設定:
 - task_id: 分かる場合は数値で設定
@@ -170,7 +172,7 @@ class AIProjectManager:
 
 {
   "intent": "project_management|conversation|clarification",
-  "action_type": "create_task|remove_task|update_status|information_request|general_discussion",
+  "action_type": "create_project|create_task|remove_task|update_status|information_request|general_discussion",
   "reasoning": "この判断に至った理由と分析",
   "confidence": 0.0-1.0の信頼度,
   "target_items": [
