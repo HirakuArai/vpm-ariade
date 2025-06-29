@@ -669,10 +669,21 @@ def render_home_page():
 def render_chat_interface():
     """チャットインターフェースの描画"""
     # セッション履歴表示（プロジェクト未選択時のホーム画面）
-    if st.session_state.get("history"):
+    history = st.session_state.get("history", [])
+    if history:
         st.markdown("### 💬 現在のセッション")
-        for msg in st.session_state["history"]:
-            st.chat_message("user" if msg["role"] == "user" else "assistant").markdown(msg["content"])
+        for msg in history:
+            role = msg.get("role", "")
+            content = msg.get("content", "")
+            if role and content:
+                st.chat_message(role).markdown(content)
+    else:
+        # デバッグ情報（開発中のみ）
+        with st.expander("🔍 デバッグ情報", expanded=False):
+            st.write(f"履歴の長さ: {len(history)}")
+            st.write(f"セッション状態のキー: {list(st.session_state.keys())}")
+            if history:
+                st.json(history[-1] if history else "履歴なし")
     
     st.divider()
     st.markdown("### 💬 AI との会話")

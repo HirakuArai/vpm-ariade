@@ -109,6 +109,11 @@ def process_chat_input_ai(user_input: str, current_project_id: Optional[str] = N
     if not hasattr(st.session_state, 'navigation_state') or st.session_state.navigation_state is None:
         navigator.initialize_session_state()
     
+    # セッション履歴にユーザー入力を追加
+    if "history" not in st.session_state:
+        st.session_state["history"] = []
+    st.session_state["history"].append({"role": "user", "content": user_input})
+    
     # ログへ保存
     _append_log("user", user_input)
     
@@ -410,9 +415,8 @@ def _finalize_conversation(assistant_reply: str, current_project_id: Optional[st
     if "history" not in st.session_state:
         st.session_state["history"] = []
     
-    # ユーザー入力は既に追加されている想定
-    if st.session_state["history"] and st.session_state["history"][-1]["role"] != "assistant":
-        st.session_state["history"].append({"role": "assistant", "content": assistant_reply})
+    # アシスタントの応答を追加
+    st.session_state["history"].append({"role": "assistant", "content": assistant_reply})
     
     # ログに保存
     _append_log("assistant", assistant_reply)
