@@ -22,6 +22,7 @@ class RequestKind(str, Enum):
     PROJECT_DETAIL = "project_detail"  # AI-generated project summaries and descriptions
     INTENT_DETECT = "intent_detect"    # User intent detection
     CONVERSATION_ANALYSIS = "conversation_analysis"  # Conversation summary and analysis
+    UNKNOWN = "unknown"  # Fallback for unregistered kinds
 
 
 class LogEntry(BaseModel):

@@ -30,7 +30,16 @@
     },
     "kind": {
       "type": "string",
-      "enum": ["ui_chat", "spec_scan", "ticket_gen", "review_gen"],
+      "enum": [
+        "ui_chat", 
+        "spec_scan", 
+        "ticket_gen", 
+        "review_gen",
+        "project_detail",
+        "intent_detect", 
+        "conversation_analysis",
+        "unknown"
+      ],
       "description": "Type of request/operation"
     },
     "task_id": {
