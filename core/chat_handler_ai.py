@@ -379,7 +379,13 @@ def _execute_project_creation(action_plan, current_project_id: Optional[str]) ->
                     continue
                 
                 # プロジェクト作成
-                project_id = create_project(project_name, project_description)
+                project = create_project(
+                    identifier=None,  # 自動生成
+                    overview=project_description or project_name,  # 説明がなければ名前を使用
+                    created_by="AI Assistant",
+                    display_name=project_name
+                )
+                project_id = project.identifier
                 created_projects.append({
                     "id": project_id,
                     "name": project_name,
