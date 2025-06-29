@@ -43,7 +43,9 @@ def parse_args():
 def load_recent_logs(log_dir: Path, since_hours: int) -> List[LogEntry]:
     """Load log entries from recent log files"""
     entries = []
-    cutoff_time = datetime.now() - timedelta(hours=since_hours)
+    # Use timezone-aware cutoff time to match log entries (UTC)
+    from datetime import timezone
+    cutoff_time = datetime.now(timezone.utc) - timedelta(hours=since_hours)
     
     if not log_dir.exists():
         return entries
@@ -56,7 +58,9 @@ def load_recent_logs(log_dir: Path, since_hours: int) -> List[LogEntry]:
             file_date = datetime.strptime(file_date_str, "%Y%m%d")
             
             # Add one day to account for entries throughout the day
-            if file_date + timedelta(days=1) < cutoff_time.replace(hour=0, minute=0, second=0):
+            # Make file_date timezone-aware for comparison
+            file_date_tz = file_date.replace(tzinfo=timezone.utc)
+            if file_date_tz + timedelta(days=1) < cutoff_time.replace(hour=0, minute=0, second=0, microsecond=0):
                 continue
         except (ValueError, IndexError):
             # If we can't parse the date, include the file

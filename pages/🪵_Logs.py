@@ -22,7 +22,9 @@ from core.log_schema import LogEntry, RequestKind, from_jsonl
 def load_all_logs(log_dir: Path, since_hours: int) -> list[LogEntry]:
     """Load log entries from log directory"""
     entries = []
-    cutoff_time = datetime.now() - timedelta(hours=since_hours)
+    # Use timezone-aware cutoff time to match log entries (UTC)
+    from datetime import timezone
+    cutoff_time = datetime.now(timezone.utc) - timedelta(hours=since_hours)
     
     if not log_dir.exists():
         return entries
