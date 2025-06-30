@@ -151,6 +151,14 @@ class ProjectDetailsPage:
         """プロジェクト詳細ページの描画"""
         st.subheader("📄 プロジェクト詳細ドキュメント")
         
+        # ナビゲーション状態を明示的に保持
+        if hasattr(st.session_state, 'navigation_state'):
+            st.session_state.navigation_state.current_page = PageType.PROJECT_DETAILS
+            st.session_state.navigation_state.selected_project_id = project_id
+        
+        # プロジェクト詳細ページ専用の保護フラグ
+        st.session_state._in_project_details = True
+        
         try:
             # プロジェクトデータの読み込み
             project_data = ProjectDetailsPage._load_project_data(project_id)
@@ -159,9 +167,28 @@ class ProjectDetailsPage:
                 st.error("プロジェクトデータが見つかりません")
                 return
             
-            # AIによるプロジェクト説明生成
-            with st.spinner("🤖 AIがプロジェクト詳細を整理中..."):
-                detailed_description = ProjectDetailsPage._generate_ai_description(project_id, project_data)
+            # AI説明をキャッシュから取得または生成
+            cache_key = f"project_detail_ai_{project_id}"
+            if cache_key not in st.session_state:
+                # AIによるプロジェクト説明生成
+                with st.spinner("🤖 AIがプロジェクト詳細を整理中..."):
+                    # ナビゲーション状態を一時的に固定
+                    original_page = st.session_state.navigation_state.current_page
+                    original_project = st.session_state.navigation_state.selected_project_id
+                    
+                    detailed_description = ProjectDetailsPage._generate_ai_description(project_id, project_data)
+                    st.session_state[cache_key] = detailed_description
+                    
+                    # ナビゲーション状態を強制的に復元
+                    st.session_state.navigation_state.current_page = PageType.PROJECT_DETAILS
+                    st.session_state.navigation_state.selected_project_id = project_id
+            else:
+                detailed_description = st.session_state[cache_key]
+            
+            # ページ表示前に最終ナビゲーション状態チェック
+            if hasattr(st.session_state, 'navigation_state'):
+                st.session_state.navigation_state.current_page = PageType.PROJECT_DETAILS
+                st.session_state.navigation_state.selected_project_id = project_id
             
             # AI生成の説明を表示
             if detailed_description:
@@ -172,6 +199,19 @@ class ProjectDetailsPage:
             # 生データ表示オプション
             with st.expander("🔍 生データを確認", expanded=False):
                 st.json(project_data)
+            
+            # AI説明の再生成ボタン
+            col1, col2, col3 = st.columns([1, 1, 3])
+            with col1:
+                if st.button("🔄 AI説明を再生成", key=f"regenerate_ai_{project_id}"):
+                    # キャッシュをクリア
+                    cache_key = f"project_detail_ai_{project_id}"
+                    if cache_key in st.session_state:
+                        del st.session_state[cache_key]
+                    # ナビゲーション状態を保持しながらリロード
+                    st.session_state.navigation_state.current_page = PageType.PROJECT_DETAILS
+                    st.session_state.navigation_state.selected_project_id = project_id
+                    st.rerun()
             
         except Exception as e:
             st.error(f"プロジェクト詳細の読み込みに失敗しました: {e}")
@@ -184,6 +224,11 @@ class ProjectDetailsPage:
             from core.v2.openai_config import get_openai_model
             from core.prompt_logger import log_call
             from core.log_schema import RequestKind
+            
+            # ナビゲーション状態を保持（AI処理中の状態変更を防ぐ）
+            if hasattr(st.session_state, 'navigation_state'):
+                st.session_state.navigation_state.current_page = PageType.PROJECT_DETAILS
+                st.session_state.navigation_state.selected_project_id = project_id
             
             # プロンプトの作成
             prompt = f"""
@@ -205,8 +250,14 @@ class ProjectDetailsPage:
 {json.dumps(project_data, ensure_ascii=False, indent=2)}
 """
             
-            # LLMロギングを使用してAPIを呼び出し
-            with log_call("kai", RequestKind.PROJECT_DETAIL) as log:
+            # Streamlit特有の状態変更を防ぐため、Gitコミットを一時的に無効化
+            import os
+            old_git_disabled = os.environ.get("DISABLE_GIT_COMMITS", "")
+            os.environ["DISABLE_GIT_COMMITS"] = "1"
+            
+            try:
+                # LLMロギングを使用してAPIを呼び出し
+                with log_call("kai", RequestKind.PROJECT_DETAIL) as log:
                 request_data = {
                     "model": get_openai_model(),
                     "messages": [
@@ -240,7 +291,19 @@ class ProjectDetailsPage:
                 }
                 log['log_response'](response_data, response.usage.prompt_tokens, response.usage.completion_tokens)
                 
-                return response.choices[0].message.content
+                # ナビゲーション状態を再度確認（AI処理後も維持）
+                if hasattr(st.session_state, 'navigation_state'):
+                    st.session_state.navigation_state.current_page = PageType.PROJECT_DETAILS
+                    st.session_state.navigation_state.selected_project_id = project_id
+                
+                    return response.choices[0].message.content
+            
+            finally:
+                # Git設定を復元
+                if old_git_disabled:
+                    os.environ["DISABLE_GIT_COMMITS"] = old_git_disabled
+                else:
+                    os.environ.pop("DISABLE_GIT_COMMITS", None)
             
         except Exception as e:
             st.error(f"AI説明の生成エラー: {e}")
