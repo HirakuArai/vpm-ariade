@@ -1,101 +1,159 @@
-# AI Project Manager Prompt Rules
+# AI Project Manager Prompt Rules v2.0
 
-*** LOGGING DIRECTIVE (AI Log Output Guidelines v1.0) ***
-When you generate responses, ensure all JSON outputs follow these standards:
-- Use `json.dumps(obj, ensure_ascii=False)` equivalent formatting
-- Do not wrap JSON in Markdown code fences in logs
-- Python `None` → JSON `null`, `True/False` → `true/false`
-- Include exact token counts from API responses
-- Use ISO-8601 UTC timestamps: YYYY-MM-DDTHH:MM:SS.sssZ
-*** END DIRECTIVE ***
+## Overview
+This document defines the context-dependent prompt rules for the AI Project Manager, ensuring appropriate behavior based on whether a project is currently selected or not.
 
-## 基本方針
+## Context-Dependent Intent Routing
 
-1. **自然な理解**: パターンマッチングではなく、文脈と意図を理解
-2. **柔軟な対応**: 事前定義されていない状況でも適切に判断
-3. **学習志向**: ユーザーの傾向を理解し、個人に最適化
-4. **創発的思考**: 既存のルールにとらわれない創造的な解決策
+### 1. Project Creation Intent Detection
 
-## 判断基準
+#### Rule: Context-Dependent Project Creation
+**Problem**: Previously, project creation keywords would always trigger `create_project` action regardless of context, causing unwanted project creation within existing project conversations.
 
-- ユーザーの真の意図を理解（表面的な言葉ではなく）
-- プロジェクトの状況と文脈を総合考慮
-- 最も価値のある行動を提案
-- 自然で建設的な会話を心がける
+**Solution**: Project creation intent is now context-dependent:
 
-## 重要な判定ルール
+- **Home Chat (No Project Selected)**:
+  - Keywords: "プロジェクトを作成", "プロジェクトとして設定", "新しいプロジェクト", etc.
+  - Action: `create_project`
+  - Reasoning: User is in home context with no project selected
 
-### 1. プロジェクト作成要求
-**キーワード**: 「プロジェクトを作成」「プロジェクトとして設定」「新しいプロジェクト」「開始したい」「始めたい」「プロジェクト化」等
-- **アクション**: create_project
-- **パラメータ**: プロジェクト名と説明をparametersに設定
-- **表現**: 「〜をプロジェクトとして」「〜のプロジェクト」等の表現も含む
+- **Project Chat (Project Already Selected)**:
+  - Same keywords → Action: `general_discussion`
+  - Reasoning: User is discussing project management within existing project context
+  - Exception: Explicit "新しい" (new) keyword still triggers `create_project`
 
-### 2. 削除・除去要求
-**キーワード**: 「消してください」「削除して」「取り除いて」
-- **アクション**: remove_task
-- **パラメータ**: task_idがわからない場合は、削除対象の説明文をdescriptionパラメータに設定
+#### Implementation Location
+- File: `core/ai_project_manager.py`
+- Method: `_get_ai_pm_system_prompt()`
+- Lines: 198-201 (updated prompt rules)
 
-### 3. 情報要求
-**キーワード**: 「教えて」「見せて」「確認したい」
-- **アクション**: information_request
+### 2. Context Detection Logic
 
-### 4. タスク作成条件
-**キーワード**: 明確な「作業」「やる」「実装」「対応」等の実行意図がある場合のみ
-- **アクション**: create_task
+#### Project Context Determination
+```python
+# Determine if project is selected
+project_selected = bool(project_context and project_context.get("identifier"))
 
-### 5. 質問・相談
-**キーワード**: 「どうすれば」「方法は」「アドバイス」
-- **アクション**: general_discussion
-
-## タスク削除時のパラメータ設定
-
-- **task_id**: 分かる場合は数値で設定
-- **description**: 削除対象の説明文（「テスト: データ保存機能の確認」等）
-- **優先度**: 両方設定されている場合はtask_idを優先使用
-
-## JSON応答形式
-
-```json
-{
-  "intent": "project_management|conversation|clarification",
-  "action_type": "create_project|create_task|remove_task|update_status|information_request|general_discussion",
-  "reasoning": "この判断に至った理由と分析",
-  "confidence": 0.0-1.0の信頼度,
-  "target_items": [
-    {
-      "type": "task|project|general",
-      "action": "具体的な実行内容",
-      "parameters": {"key": "value"}
-    }
-  ],
-  "response_content": "ユーザーへの自然で有用な応答メッセージ",
-  "suggested_follow_ups": ["次に聞いてみたい質問例1", "推奨される次の行動2"]
-}
+# Set appropriate subkind for logging
+subkind = RequestContext.PROJECT_CHAT if project_selected else RequestContext.HOME_CHAT
 ```
 
-## プロジェクト作成時の例
+#### Prompt Context Information
+The AI receives explicit context information:
+- **Home Chat**: "プロジェクトが選択されていません"
+- **Project Chat**: "プロジェクト: proj-xxx, ステータス: DRAFT, タスク数: 3件"
 
-**入力**: 「長岡の花火大会の準備をプロジェクトとして設定してください」
+### 3. Updated Prompt Examples
 
-**出力**:
-```json
+#### Example 1: Home Chat Context
+```
+Input: "花火大会をプロジェクトとして設定してください"
+Context: "プロジェクトが選択されていません"
+Expected Output:
 {
-  "intent": "project_management",
   "action_type": "create_project",
-  "reasoning": "ユーザーが明確にプロジェクト作成を要求している",
-  "confidence": 0.9,
-  "target_items": [
-    {
-      "type": "project",
-      "action": "create_new_project",
-      "parameters": {
-        "name": "長岡の花火大会の準備",
-        "description": "長岡の花火大会開催に向けた準備プロジェクト"
-      }
-    }
-  ],
-  "response_content": "長岡の花火大会の準備プロジェクトを作成しました。",
-  "suggested_follow_ups": ["会場準備について相談したい", "スケジュールを確認したい"]
+  "reasoning": "プロジェクト未選択状態でプロジェクト作成を要求している"
 }
 ```
+
+#### Example 2: Project Chat Context
+```
+Input: "このプロジェクトをもっと本格的にプロジェクトとして進めたいです"
+Context: "プロジェクト: proj-xxx, ステータス: DRAFT"
+Expected Output:
+{
+  "action_type": "general_discussion",
+  "reasoning": "既にプロジェクト選択済みのため、プロジェクト運営に関する相談として処理"
+}
+```
+
+### 4. Logging Enhancement
+
+#### RequestContext Enum
+New `RequestContext` enum added for granular analysis:
+- `HOME_CHAT`: Chat from home page (no project selected)
+- `PROJECT_CHAT`: Chat from within a specific project
+- `GENERAL`: General context
+
+#### LogEntry Schema Update
+```python
+class LogEntry(BaseModel):
+    # ... existing fields ...
+    subkind: Optional[RequestContext] = Field(None, description="Request context for granular analysis")
+```
+
+#### Usage in Code
+```python
+subkind = RequestContext.PROJECT_CHAT if project_context else RequestContext.HOME_CHAT
+with log_call("kai", RequestKind.UI_CHAT, subkind=subkind) as log:
+    # ... LLM call ...
+```
+
+## Testing Strategy
+
+### Test Coverage
+- **File**: `tests/test_intent_routing.py`
+- **Scope**: Context-dependent intent routing
+- **Test Cases**:
+  1. Home chat project creation intents
+  2. Project chat context handling
+  3. RequestContext logging verification
+
+### Test Examples
+```python
+def test_home_chat_project_creation():
+    """Test project creation intent from home chat (no project selected)"""
+    result = ai_pm.process_user_input(
+        user_input="花火大会をプロジェクトとして設定してください",
+        project_context={},  # Empty = no project selected
+        conversation_history=[]
+    )
+    assert result.action_type == "create_project"
+
+def test_project_chat_context_handling():
+    """Test project-related keywords within existing project context"""
+    project_context = {"identifier": "proj-test-123", "status": "DRAFT"}
+    result = ai_pm.process_user_input(
+        user_input="このプロジェクトをプロジェクトとして進めたい",
+        project_context=project_context,
+        conversation_history=[]
+    )
+    assert result.action_type == "general_discussion"
+```
+
+## Migration Notes
+
+### Breaking Changes
+1. `LogEntry` schema now includes optional `subkind` field
+2. `log_call()` function signature updated with `subkind` parameter
+3. AI prompt behavior changed for project creation in project contexts
+
+### Backward Compatibility
+- Existing logs without `subkind` remain valid (field is optional)
+- Old `log_call()` usage continues to work (subkind defaults to None)
+
+## Future Enhancements
+
+### Planned Improvements
+1. **Machine Learning Integration**: Use historical context patterns to improve intent detection
+2. **User Preference Learning**: Adapt behavior based on individual user patterns
+3. **Multi-Project Context**: Handle scenarios where multiple projects are referenced
+4. **Context Confidence Scoring**: Add confidence metrics for context detection
+
+### Analytics Opportunities
+With `subkind` logging, we can now analyze:
+- Home vs. Project chat usage patterns
+- Intent distribution by context
+- Context-specific error rates
+- User behavior transitions between contexts
+
+---
+
+**Version**: 2.0  
+**Last Updated**: 2025-06-30  
+**Author**: AI Project Manager Team  
+**Related Files**: 
+- `core/ai_project_manager.py`
+- `core/log_schema.py`
+- `core/prompt_logger.py`
+- `tests/test_intent_routing.py`

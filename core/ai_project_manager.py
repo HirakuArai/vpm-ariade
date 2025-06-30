@@ -113,9 +113,12 @@ class AIProjectManager:
             
             # LLM call loggingを統合
             from .prompt_logger import log_call
-            from .log_schema import RequestKind
+            from .log_schema import RequestKind, RequestContext
             
-            with log_call("kai", RequestKind.UI_CHAT) as log:
+            # Determine subkind based on project context
+            subkind = RequestContext.PROJECT_CHAT if project_context else RequestContext.HOME_CHAT
+            
+            with log_call("kai", RequestKind.UI_CHAT, subkind=subkind) as log:
                 request_data = {
                     "model": get_openai_model() if get_openai_model else "gpt-4.1",
                     "messages": [
@@ -195,9 +198,10 @@ class AIProjectManager:
 - 自然で建設的な会話を心がける
 
 ## 重要な判定ルール:
-1. **プロジェクト作成要求**: 「プロジェクトを作成」「プロジェクトとして設定」「新しいプロジェクト」「開始したい」「始めたい」「プロジェクト化」等はcreate_projectアクション
-   - プロジェクト名と説明をparametersに設定
-   - 「〜をプロジェクトとして」「〜のプロジェクト」等の表現も含む
+1. **プロジェクト作成要求（文脈依存）**: 
+   - **プロジェクト未選択時**: 「プロジェクトを作成」「プロジェクトとして設定」「新しいプロジェクト」等 → create_projectアクション
+   - **プロジェクト選択済み時**: 同じキーワードでも → general_discussionアクション（既存プロジェクトに関する相談として処理）
+   - 判定基準: プロジェクト状況セクションで「プロジェクトが選択されていません」かどうかを必ず確認
 2. **削除・除去要求**: 「消してください」「削除して」「取り除いて」は必ずremove_taskアクション
    - task_idがわからない場合は、削除対象の説明文をdescriptionパラメータに設定
 3. **情報要求**: 「教えて」「見せて」「確認したい」は必ずinformation_requestアクション
@@ -228,12 +232,15 @@ class AIProjectManager:
   "suggested_follow_ups": ["次に聞いてみたい質問例1", "推奨される次の行動2"]
 }
 
-## プロジェクト作成時の例:
-「長岡の花火大会の準備をプロジェクトとして設定してください」→
-{
+## 文脈依存の判定例:
+
+### ホーム会話（プロジェクト未選択）:
+入力: 「長岡の花火大会の準備をプロジェクトとして設定してください」
+プロジェクト状況: 「プロジェクトが選択されていません」
+→ {
   "intent": "project_management",
   "action_type": "create_project",
-  "reasoning": "ユーザーが明確にプロジェクト作成を要求している",
+  "reasoning": "プロジェクト未選択状態でプロジェクト作成を要求している",
   "confidence": 0.9,
   "target_items": [
     {
@@ -247,6 +254,25 @@ class AIProjectManager:
   ],
   "response_content": "長岡の花火大会の準備プロジェクトを作成しました。",
   "suggested_follow_ups": ["会場準備について相談したい", "スケジュールを確認したい"]
+}
+
+### プロジェクト会話（プロジェクト選択済み）:
+入力: 「このプロジェクトをもっと本格的にプロジェクトとして進めたいです」
+プロジェクト状況: 「プロジェクト: proj-20250629-182909-854, ステータス: DRAFT」
+→ {
+  "intent": "conversation", 
+  "action_type": "general_discussion",
+  "reasoning": "既にプロジェクト選択済みのため、プロジェクト運営に関する相談として処理",
+  "confidence": 0.8,
+  "target_items": [
+    {
+      "type": "general",
+      "action": "project_management_consultation",
+      "parameters": {}
+    }
+  ],
+  "response_content": "現在のプロジェクトをより本格的に進めるためのアドバイスをいたします。まず、プロジェクトのステータスをDRAFTからACTIVEに変更し、具体的なタスクとマイルストーンを設定することをお勧めします。",
+  "suggested_follow_ups": ["ステータスをACTIVEに変更したい", "タスクを追加したい"]
 }
 """
     

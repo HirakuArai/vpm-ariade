@@ -218,7 +218,8 @@ class PromptLogger:
         agent: str, 
         kind: RequestKind,
         model: str = "gpt-4.1",
-        task_id: Optional[str] = None
+        task_id: Optional[str] = None,
+        subkind: Optional['RequestContext'] = None
     ) -> Generator[Dict[str, Any], None, None]:
         """
         Context manager for logging LLM calls.
@@ -325,6 +326,7 @@ class PromptLogger:
                     agent=agent,
                     model=model,
                     kind=validated_kind,  # Use validated kind string
+                    subkind=subkind,  # Add context classification
                     task_id=task_id,
                     prompt_tokens=context['prompt_tokens'],
                     completion_tokens=context['completion_tokens'],

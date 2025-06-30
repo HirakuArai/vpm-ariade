@@ -25,12 +25,19 @@ class RequestKind(str, Enum):
     UNKNOWN = "unknown"  # Fallback for unregistered kinds
 
 
+class RequestContext(str, Enum):
+    """Context/subkind for more granular request classification"""
+    HOME_CHAT = "home_chat"        # Chat from home page (no project selected)
+    PROJECT_CHAT = "project_chat"  # Chat from within a specific project
+    GENERAL = "general"            # General context
+
 class LogEntry(BaseModel):
     """Schema for LLM call log entries"""
     ts: str = Field(..., description="ISO-8601 timestamp of the call")
     agent: str = Field(..., pattern="^(kai|claude)$", description="Calling agent")
     model: str = Field(..., description="Model used (e.g., gpt-4.1)")
     kind: RequestKind = Field(..., description="Type of request")
+    subkind: Optional[RequestContext] = Field(None, description="Request context for granular analysis")
     task_id: str = Field(..., description="Internal UUID assigned by Kai")
     prompt_tokens: int = Field(..., ge=0, description="Number of tokens sent")
     completion_tokens: int = Field(..., ge=0, description="Number of tokens received")
