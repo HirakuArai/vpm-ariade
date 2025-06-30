@@ -199,7 +199,14 @@ def process_chat_input_ai(user_input: str, current_project_id: Optional[str] = N
     except Exception as e:
         typing_placeholder.empty()
         logger.error(f"AI-first chat processing failed: {e}")
-        assistant_reply = f"申し訳ありませんが、処理中にエラーが発生しました: {str(e)}"
+        
+        # 詳細なエラー情報をログに出力
+        import traceback
+        error_trace = traceback.format_exc()
+        logger.error(f"Detailed error trace: {error_trace}")
+        print(f"🚨 AI処理エラーの詳細: {error_trace}", flush=True)
+        
+        assistant_reply = f"申し訳ありませんが、処理中にエラーが発生しました。再度お試しください。"
         
         # エラー通知
         NotificationComponents.render_toast_notification(
@@ -248,6 +255,13 @@ def execute_action_plan(action_plan, current_project_id: Optional[str]) -> str:
             
     except Exception as e:
         logger.error(f"Action plan execution failed: {e}")
+        
+        # 詳細なエラー情報をログに出力
+        import traceback
+        error_trace = traceback.format_exc()
+        logger.error(f"Action plan execution error trace: {error_trace}")
+        print(f"🚨 アクションプラン実行エラー: {error_trace}", flush=True)
+        
         return f"アクションの実行中にエラーが発生しました: {str(e)}"
 
 def _execute_task_creation(action_plan, current_project_id: Optional[str]) -> str:

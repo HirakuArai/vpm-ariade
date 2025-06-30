@@ -160,6 +160,12 @@ class AIProjectManager:
         except Exception as e:
             logger.error(f"AI project manager processing failed: {e}")
             
+            # 詳細なエラー情報をログに出力
+            import traceback
+            error_trace = traceback.format_exc()
+            logger.error(f"AI project manager error trace: {error_trace}")
+            print(f"🚨 AIプロジェクトマネージャーエラー: {error_trace}", flush=True)
+            
             # エラーもログに記録
             try:
                 from .prompt_logger import log_call
