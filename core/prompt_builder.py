@@ -24,13 +24,14 @@ class PromptBuilder:
     
     def __init__(self):
         """PromptBuilderを初期化"""
-        self.rules_cache = None
+        self.rules_cache = None  # Force reload each time for development
         self._load_prompt_rules()
     
     def _load_prompt_rules(self) -> str:
         """docs/prompt_rules.mdからルールを読み込み"""
-        if self.rules_cache is not None:
-            return self.rules_cache
+        # Always reload for development - remove cache check
+        # if self.rules_cache is not None:
+        #     return self.rules_cache
             
         try:
             rules_path = Path(__file__).parent.parent / "docs" / "prompt_rules.md"
