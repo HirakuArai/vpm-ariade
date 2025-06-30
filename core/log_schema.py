@@ -57,14 +57,21 @@ def log_to_jsonl(entry: LogEntry, filepath: Union[str, Path]) -> None:
     filepath = Path(filepath)
     filepath.parent.mkdir(parents=True, exist_ok=True)
     
-    with open(filepath, 'a+', encoding='utf-8') as f:
-        # Write with AI Log Output Guidelines v1.0 compliance
-        # - Use ensure_ascii=False for UTF-8 support
-        # - Use separators for compact output
-        # - Handle None/True/False -> null/true/false conversion automatically via Pydantic
-        json_str = entry.model_dump_json(by_alias=True, exclude_none=False)
-        f.write(json_str + '\n')
-        f.flush()
+    try:
+        with open(filepath, 'a+', encoding='utf-8') as f:
+            # Write with AI Log Output Guidelines v1.0 compliance
+            # - Use ensure_ascii=False for UTF-8 support
+            # - Use separators for compact output
+            # - Handle None/True/False -> null/true/false conversion automatically via Pydantic
+            json_str = entry.model_dump_json(by_alias=True, exclude_none=False)
+            f.write(json_str + '\n')
+            f.flush()
+            # ファイルサイズを確認してデバッグ情報を出力
+            file_size = filepath.stat().st_size
+            print(f"✅ JSONLエントリを書き込みました: {filepath.name} (サイズ: {file_size:,} bytes)", flush=True)
+    except Exception as e:
+        print(f"❌ JSONLファイルへの書き込みエラー: {e}", flush=True)
+        raise
 
 
 def from_jsonl(filepath: Union[str, Path]) -> list[LogEntry]:

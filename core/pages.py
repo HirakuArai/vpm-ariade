@@ -304,6 +304,14 @@ class ProjectDetailsPage:
                     os.environ["DISABLE_GIT_COMMITS"] = old_git_disabled
                 else:
                     os.environ.pop("DISABLE_GIT_COMMITS", None)
+                
+                # プロジェクト詳細生成完了後、保留されていたLLMログをGitHubに反映
+                try:
+                    from core.git_ops import commit_and_push_llm_logs
+                    if commit_and_push_llm_logs():
+                        print("✅ プロジェクト詳細生成後のLLMログをGitHubに反映しました", flush=True)
+                except Exception as e:
+                    print(f"⚠️ プロジェクト詳細生成後のLLMログ反映に失敗: {e}", flush=True)
             
         except Exception as e:
             st.error(f"AI説明の生成エラー: {e}")

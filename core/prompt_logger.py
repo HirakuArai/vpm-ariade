@@ -335,6 +335,7 @@ class PromptLogger:
                 
                 log_file = self._get_current_log_file()
                 log_to_jsonl(entry, log_file)
+                print(f"✅ LLMログを書き込みました: {log_file} (task_id: {task_id})", flush=True)
                 
                 # LLMログをGitに自動コミット（環境変数でDisable可能）
                 import os
@@ -342,9 +343,12 @@ class PromptLogger:
                     try:
                         from core.git_ops import commit_and_push_llm_logs
                         commit_and_push_llm_logs()
+                        print(f"✅ LLMログをGitHubにプッシュしました", flush=True)
                     except Exception as e:
                         # ログの保存自体は成功しているので、Gitエラーは警告として処理
                         print(f"⚠️ LLMログのGitコミット失敗: {e}", flush=True)
+                else:
+                    print(f"ℹ️ DISABLE_GIT_COMMITS=1 のため、Gitコミットをスキップしました（ログは保存済み）", flush=True)
 
 
 # Global logger instance
