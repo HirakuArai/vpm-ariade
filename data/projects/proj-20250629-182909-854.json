@@ -6,7 +6,7 @@
   "created_by": "AI Assistant",
   "status": "DRAFT",
   "schema_version": "1.0",
-  "updated_at": "2025-07-01T06:05:53.104313+09:00",
+  "updated_at": "2025-07-01T06:09:48.816171+09:00",
   "change_log": [
     {
       "timestamp": "2025-07-01T06:05:53.104404+09:00",
@@ -22,6 +22,18 @@
         "participants_count": 4,
         "start_date": "2025-08-02",
         "end_date": "2025-08-03"
+      }
+    },
+    {
+      "timestamp": "2025-07-01T06:09:48.816197+09:00",
+      "type": "property_patch",
+      "changed_fields": [
+        "participants_count"
+      ],
+      "description": "Updated 1 properties via generic patch",
+      "source": "apply_property_patch",
+      "properties_updated": {
+        "participants_count": 4
       }
     }
   ],
