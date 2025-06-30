@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict, Any, Callable, Generator
 from pathlib import Path
 
-from .log_schema import LogEntry, RequestKind, log_to_jsonl, get_log_filepath
+from .log_schema import LogEntry, RequestKind, RequestContext, log_to_jsonl, get_log_filepath
 
 
 class PromptLogger:
@@ -219,7 +219,7 @@ class PromptLogger:
         kind: RequestKind,
         model: str = "gpt-4.1",
         task_id: Optional[str] = None,
-        subkind: Optional['RequestContext'] = None
+        subkind: Optional[RequestContext] = None
     ) -> Generator[Dict[str, Any], None, None]:
         """
         Context manager for logging LLM calls.
@@ -362,7 +362,8 @@ def log_call(
     agent: str, 
     kind: RequestKind,
     model: str = "gpt-4.1",
-    task_id: Optional[str] = None
+    task_id: Optional[str] = None,
+    subkind: Optional[RequestContext] = None
 ) -> Generator[Dict[str, Any], None, None]:
     """
     Convenience function for logging LLM calls.
@@ -395,5 +396,5 @@ def log_call(
                 response.usage.completion_tokens
             )
     """
-    with _prompt_logger.log_call(agent, kind, model, task_id) as log_context:
+    with _prompt_logger.log_call(agent, kind, model, task_id, subkind) as log_context:
         yield log_context
