@@ -514,6 +514,9 @@ def render_page_content():
     current_page = current_nav_state.current_page
     selected_project = current_nav_state.selected_project_id
     
+    # デバッグ: ナビゲーション状態をログ出力
+    print(f"🔍 render_page_content: current_page={current_page}, selected_project={selected_project}", flush=True)
+    
     if current_page == PageType.PROJECT_DETAILS:
         if selected_project:
             ProjectDetailsPage.render(selected_project)

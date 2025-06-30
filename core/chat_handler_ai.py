@@ -486,4 +486,15 @@ def _finalize_conversation(assistant_reply: str, current_project_id: Optional[st
         # （PROJECT_CHATページから呼ばれた場合はそのページに留まる）
         st.session_state.navigation_state.selected_project_id = current_project_id
         st.session_state["current_project_id"] = current_project_id
+        
+        # プロジェクト会話の場合も、ナビゲーション状態を明示的に保持
+        if hasattr(st.session_state, 'navigation_state') and st.session_state.navigation_state.current_page:
+            # 現在のページタイプを保持（PROJECT_CHATならそのまま維持）
+            current_page = st.session_state.navigation_state.current_page
+            if current_page == PageType.PROJECT_CHAT:
+                # PROJECT_CHATページの場合はそのまま維持
+                pass
+            else:
+                # 他のプロジェクトページからの場合はHOMEに戻さずに現在のページを維持
+                pass
         # プロジェクト会話の場合は呼び出し元（pages.py）でページ更新を処理

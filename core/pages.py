@@ -490,6 +490,12 @@ class ProjectChatPage:
             from .chat_handler_ai import process_chat_input_ai
             process_chat_input_ai(user_input, project_id)
             
+            # 会話処理後にナビゲーション状態を再確認・強制設定
+            if hasattr(st.session_state, 'navigation_state'):
+                st.session_state.navigation_state.current_page = PageType.PROJECT_CHAT
+                st.session_state.navigation_state.selected_project_id = project_id
+                print(f"🔧 プロジェクト会話後のページ状態を強制設定: PROJECT_CHAT, project_id={project_id}", flush=True)
+            
             # プロジェクト会話の場合は明示的にページ更新を実行
             st.rerun()
             
