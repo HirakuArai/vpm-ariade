@@ -50,8 +50,13 @@ def load_recent_logs(log_dir: Path, since_hours: int) -> List[LogEntry]:
     if not log_dir.exists():
         return entries
     
-    # Find all JSONL files in log directory
+    # Find all JSONL files in log directory, excluding metadata files
+    metadata_files = {"dedup_skipped.jsonl", "metrics_anomalies.jsonl", "dedup_index.json"}
+    
     for log_file in sorted(log_dir.glob("*.jsonl")):
+        # Skip metadata files that don't contain LogEntry format
+        if log_file.name in metadata_files:
+            continue
         # Skip if file is older than cutoff (based on filename)
         try:
             file_date_str = log_file.stem.split("-")[0]  # YYYYMMDD part

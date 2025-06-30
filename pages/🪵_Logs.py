@@ -29,8 +29,13 @@ def load_all_logs(log_dir: Path, since_hours: int) -> list[LogEntry]:
     if not log_dir.exists():
         return entries
     
-    # Find all JSONL files
+    # Find all JSONL files, excluding metadata files
+    metadata_files = {"dedup_skipped.jsonl", "metrics_anomalies.jsonl", "dedup_index.json"}
+    
     for log_file in sorted(log_dir.glob("*.jsonl")):
+        # Skip metadata files that don't contain LogEntry format
+        if log_file.name in metadata_files:
+            continue
         file_entries = from_jsonl(log_file)
         
         # Filter by timestamp

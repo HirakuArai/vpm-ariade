@@ -35,8 +35,11 @@ class PromptLogger:
         log_dir = Path("logs/llm_calls")
         log_dir.mkdir(parents=True, exist_ok=True)
         
-        # Initialize deduplication index file
-        self._dedup_index_file = log_dir / "dedup_index.json"
+        # Initialize metadata directory and deduplication index file
+        metadata_dir = log_dir / "metadata"
+        metadata_dir.mkdir(parents=True, exist_ok=True)
+        
+        self._dedup_index_file = metadata_dir / "dedup_index.json"
         if not self._dedup_index_file.exists():
             self._dedup_index_file.write_text("{}")
     
@@ -136,7 +139,11 @@ class PromptLogger:
     def _log_dedup_skip(self, hash_key: str):
         """Log deduplication skip to separate file"""
         try:
-            dedup_log_file = Path("logs/llm_calls/dedup_skipped.jsonl")
+            # Store metadata in separate subdirectory
+            metadata_dir = Path("logs/llm_calls/metadata")
+            metadata_dir.mkdir(parents=True, exist_ok=True)
+            dedup_log_file = metadata_dir / "dedup_skipped.jsonl"
+            
             skip_entry = {
                 "ts": datetime.utcnow().isoformat(timespec="milliseconds") + "Z",
                 "dedup_skipped": True,
@@ -170,7 +177,11 @@ class PromptLogger:
     def _log_metrics_anomaly(self, task_id: str, prompt_tokens: int, completion_tokens: int):
         """Log token metrics anomaly"""
         try:
-            anomaly_log_file = Path("logs/llm_calls/metrics_anomalies.jsonl")
+            # Store metadata in separate subdirectory  
+            metadata_dir = Path("logs/llm_calls/metadata")
+            metadata_dir.mkdir(parents=True, exist_ok=True)
+            anomaly_log_file = metadata_dir / "metrics_anomalies.jsonl"
+            
             anomaly_entry = {
                 "ts": datetime.utcnow().isoformat(timespec="milliseconds") + "Z",
                 "metrics_anomaly": True,
