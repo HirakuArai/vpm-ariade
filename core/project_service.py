@@ -7,6 +7,11 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any
 from .models import Project, DEFAULT_UNDEF
 
+try:
+    import jsonschema
+except ImportError:
+    jsonschema = None
+
 logger = logging.getLogger(__name__)
 
 PROJECTS_DIR = Path("data/projects")
@@ -602,3 +607,155 @@ def remove_task_by_description(project_id: str, description: str, projects_dir: 
     except Exception as e:
         logger.error("Error removing task by description for project %s: %s", project_id, str(e))
         return False
+
+
+# ==========================================
+# Generic Property Patch Implementation
+# ==========================================
+
+def _load_project_schema() -> Optional[Dict[str, Any]]:
+    """Load project schema for validation"""
+    schema_path = Path("schemas/project_schema.json")
+    if not schema_path.exists():
+        logger.error("Project schema file not found: %s", schema_path)
+        return None
+    
+    try:
+        with open(schema_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        logger.error("Error loading project schema: %s", str(e))
+        return None
+
+
+def apply_property_patch(project_id: str, properties: Dict[str, Any], projects_dir: Path | None = None) -> Dict[str, Any]:
+    """
+    Generic Property Patch - Apply multiple property updates to a project
+    
+    Implements Project Update Spec v1.0:
+    - Schema-driven validation using JSONSchema
+    - Automatic change_log tracking
+    - Single handler for all property updates
+    
+    Args:
+        project_id: The project identifier
+        properties: Dictionary of properties to update
+        projects_dir: Directory containing project files (defaults to PROJECTS_DIR)
+    
+    Returns:
+        Result dictionary with success status and details
+    """
+    if projects_dir is None:
+        projects_dir = PROJECTS_DIR
+    
+    # Validate inputs
+    if not project_id or not properties:
+        return {
+            "success": False,
+            "error": "project_id and properties are required",
+            "error_type": "validation_error"
+        }
+    
+    # Check if project exists
+    path = projects_dir / f"{project_id}.json"
+    if not path.exists():
+        return {
+            "success": False,
+            "error": f"Project {project_id} not found",
+            "error_type": "project_not_found"
+        }
+    
+    try:
+        # Load project data
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Schema validation (if jsonschema is available)
+        if jsonschema:
+            schema = _load_project_schema()
+            if schema and "definitions" in schema and "property_patch" in schema["definitions"]:
+                try:
+                    jsonschema.validate(properties, schema["definitions"]["property_patch"])
+                except jsonschema.ValidationError as ve:
+                    return {
+                        "success": False,
+                        "error": f"Schema validation failed: {ve.message}",
+                        "error_type": "schema_validation_error",
+                        "validation_details": str(ve)
+                    }
+                except Exception as e:
+                    logger.warning("Schema validation failed with unexpected error: %s", str(e))
+        else:
+            logger.warning("jsonschema not available, skipping validation")
+        
+        # Track changes for logging
+        changed_fields = []
+        update_errors = []
+        
+        # Apply each property update
+        for key, value in properties.items():
+            try:
+                # Store old value for change tracking
+                old_value = data.get(key)
+                
+                # Apply the update
+                data[key] = value
+                changed_fields.append(key)
+                
+                logger.debug("Updated %s: %s -> %s", key, old_value, value)
+                
+            except Exception as e:
+                update_errors.append(f"Failed to update {key}: {str(e)}")
+                logger.error("Error updating property %s: %s", key, str(e))
+        
+        # Update timestamp if any changes were made
+        if changed_fields:
+            # Use JST timezone
+            from zoneinfo import ZoneInfo
+            jst = ZoneInfo("Asia/Tokyo")
+            data["updated_at"] = datetime.now(jst).isoformat()
+            
+            # Safe initialization for change_log
+            if "change_log" not in data or isinstance(data["change_log"], str):
+                data["change_log"] = []
+            
+            # Add change log entry
+            data["change_log"].append({
+                "timestamp": datetime.now(jst).isoformat(),
+                "type": "property_patch",
+                "changed_fields": changed_fields,
+                "description": f"Updated {len(changed_fields)} properties via generic patch",
+                "source": "apply_property_patch",
+                "properties_updated": {field: properties[field] for field in changed_fields}
+            })
+            
+            # Save updated project
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            
+            logger.info("Applied property patch to project %s: %s", project_id, changed_fields)
+        
+        # Return success result
+        result = {
+            "success": True,
+            "changed_fields": changed_fields,
+            "changes_applied": len(changed_fields)
+        }
+        
+        if update_errors:
+            result["warnings"] = update_errors
+        
+        return result
+        
+    except Exception as e:
+        error_msg = f"Error applying property patch to project {project_id}: {str(e)}"
+        logger.error(error_msg)
+        
+        # TODO: Send Slack alert for critical errors
+        # _send_slack_alert(f"🚨 Property patch error: {error_msg}")
+        
+        return {
+            "success": False,
+            "error": error_msg,
+            "error_type": "unexpected_error"
+        }

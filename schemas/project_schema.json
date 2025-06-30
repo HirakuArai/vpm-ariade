@@ -1,0 +1,190 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project Schema",
+  "description": "Schema for VPM project data structure with property patch support",
+  "type": "object",
+  "properties": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^proj-[0-9]{8}-[0-9]{6}-[0-9]{3}$",
+      "description": "Unique project identifier"
+    },
+    "overview": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Project overview description"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Human-readable project name"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of creation"
+    },
+    "created_by": {
+      "type": "string",
+      "description": "Creator of the project"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["DRAFT", "ACTIVE", "ON_HOLD", "COMPLETED", "CANCELLED", "ARCHIVED"],
+      "description": "Current project status"
+    },
+    "schema_version": {
+      "type": "string",
+      "description": "Schema version for compatibility"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of last update"
+    },
+    "uuid": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID for project tracking"
+    },
+    "phase": {
+      "type": "string",
+      "enum": ["INCEPTION", "DEFINITION", "PLANNING", "EXECUTION", "MONITORING", "CLOSURE"],
+      "description": "Current project phase"
+    },
+    "completion_percentage": {
+      "type": ["number", "string"],
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Project completion percentage (0-100) or '__UNDEFINED__'"
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"},
+          "description": {"type": "string"},
+          "due_date": {"type": "string"},
+          "status": {"type": "string"}
+        }
+      },
+      "description": "Array of project tasks"
+    },
+    "next_actions": {
+      "type": "array",
+      "items": {"type": "object"},
+      "description": "Array of next actions"
+    },
+    "blocking_issues": {
+      "type": "array",
+      "items": {"type": "object"},
+      "description": "Array of blocking issues"
+    },
+    "phase_requirements": {
+      "type": ["object", "string"],
+      "description": "Phase requirements object or '__UNDEFINED__'"
+    },
+    "phase_history": {
+      "type": "array",
+      "items": {"type": "object"},
+      "description": "Array of phase history entries"
+    },
+    "change_log": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": {"type": "string", "format": "date-time"},
+          "changed_fields": {"type": "array", "items": {"type": "string"}},
+          "description": {"type": "string"}
+        }
+      },
+      "description": "Array of change log entries"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Project start date (YYYY-MM-DD)"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Project end date (YYYY-MM-DD)"
+    },
+    "participants_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of project participants"
+    },
+    "participants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "role": {"type": "string"},
+          "contact": {"type": "string"}
+        }
+      },
+      "description": "Array of project participants"
+    },
+    "budget": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Project budget amount"
+    },
+    "location": {
+      "type": "string",
+      "description": "Project location"
+    },
+    "tags": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Project tags for categorization"
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "urgent"],
+      "description": "Project priority level"
+    },
+    "stakeholders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "role": {"type": "string"},
+          "influence": {"type": "string", "enum": ["low", "medium", "high"]}
+        }
+      },
+      "description": "Array of project stakeholders"
+    }
+  },
+  "required": ["identifier", "overview"],
+  "additionalProperties": false,
+  
+  "definitions": {
+    "property_patch": {
+      "description": "Schema for property patch operations - allows updating specific fields",
+      "type": "object",
+      "properties": {
+        "display_name": {"$ref": "#/properties/display_name"},
+        "status": {"$ref": "#/properties/status"},
+        "phase": {"$ref": "#/properties/phase"},
+        "completion_percentage": {"$ref": "#/properties/completion_percentage"},
+        "start_date": {"$ref": "#/properties/start_date"},
+        "end_date": {"$ref": "#/properties/end_date"},
+        "participants_count": {"$ref": "#/properties/participants_count"},
+        "participants": {"$ref": "#/properties/participants"},
+        "budget": {"$ref": "#/properties/budget"},
+        "location": {"$ref": "#/properties/location"},
+        "tags": {"$ref": "#/properties/tags"},
+        "priority": {"$ref": "#/properties/priority"},
+        "stakeholders": {"$ref": "#/properties/stakeholders"},
+        "overview": {"$ref": "#/properties/overview"}
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    }
+  }
+}

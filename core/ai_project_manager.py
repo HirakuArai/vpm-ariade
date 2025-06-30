@@ -211,8 +211,11 @@ class AIProjectManager:
 2. **削除・除去要求**: 「消してください」「削除して」「取り除いて」は必ずremove_taskアクション
    - task_idがわからない場合は、削除対象の説明文をdescriptionパラメータに設定
 3. **情報要求**: 「教えて」「見せて」「確認したい」は必ずinformation_requestアクション
-4. **タスク作成条件**: 明確な「作業」「やる」「実装」「対応」等の実行意図がある場合のみcreate_task
-5. **質問・相談**: 「どうすれば」「方法は」「アドバイス」はgeneral_discussionアクション
+4. **プロジェクト情報更新**: 「日程」「参加者」「予算」「場所」等のプロジェクト属性更新はupdate_projectアクション
+   - 「参加者は4名です」「日程は8月2日から3日です」等 → update_projectアクション
+   - propertiesパラメータに複数のフィールドをまとめて設定可能
+5. **タスク作成条件**: 明確な「作業」「やる」「実装」「対応」等の実行意図がある場合のみcreate_task
+6. **質問・相談**: 「どうすれば」「方法は」「アドバイス」はgeneral_discussionアクション
 
 ## タスク削除時のパラメータ設定:
 - task_id: 分かる場合は数値で設定
@@ -224,7 +227,7 @@ class AIProjectManager:
 
 {
   "intent": "project_management|conversation|clarification",
-  "action_type": "create_project|create_task|remove_task|update_status|information_request|general_discussion",
+  "action_type": "create_project|create_task|remove_task|update_project|information_request|general_discussion",
   "reasoning": "この判断に至った理由と分析",
   "confidence": 0.0-1.0の信頼度,
   "target_items": [
@@ -279,6 +282,32 @@ class AIProjectManager:
   ],
   "response_content": "現在のプロジェクトをより本格的に進めるためのアドバイスをいたします。まず、プロジェクトのステータスをDRAFTからACTIVEに変更し、具体的なタスクとマイルストーンを設定することをお勧めします。",
   "suggested_follow_ups": ["ステータスをACTIVEに変更したい", "タスクを追加したい"]
+}
+
+### プロジェクト情報更新の例:
+入力: 「参加者は4名です。日程は2025年8月2日、3日の2日間です。」
+プロジェクト状況: 「プロジェクト: proj-20250629-182909-854, ステータス: DRAFT」
+→ {
+  "intent": "project_management",
+  "action_type": "update_project",
+  "reasoning": "プロジェクト情報（参加者数・日程）の更新要求。複数フィールドを一度に設定",
+  "confidence": 0.9,
+  "target_items": [
+    {
+      "type": "project",
+      "action": "set_properties",
+      "parameters": {
+        "identifier": "proj-20250629-182909-854",
+        "properties": {
+          "participants_count": 4,
+          "start_date": "2025-08-02",
+          "end_date": "2025-08-03"
+        }
+      }
+    }
+  ],
+  "response_content": "参加者数4名、日程2025年8月2日〜3日で設定しました。",
+  "suggested_follow_ups": ["参加者の役割分担を決めたい", "会場の準備について相談したい"]
 }
 """
     

@@ -245,6 +245,9 @@ def execute_action_plan(action_plan, current_project_id: Optional[str]) -> str:
         elif action_plan.action_type == "create_project":
             return _execute_project_creation(action_plan, current_project_id)
         
+        elif action_plan.action_type == "update_project":
+            return _execute_project_update(action_plan, current_project_id)
+        
         elif action_plan.action_type == "general_discussion":
             return action_plan.response_content
         
@@ -346,7 +349,15 @@ def _execute_task_removal(action_plan, current_project_id: Optional[str]) -> str
         return f"タスク削除中にエラーが発生しました: {str(e)}"
 
 def _execute_status_update(action_plan, current_project_id: Optional[str]) -> str:
-    """ステータス更新の実行"""
+    """
+    ステータス更新の実行 (DEPRECATED)
+    
+    ⚠️ DEPRECATED: この関数は非推奨です。新しいupdate_projectアクションを使用してください。
+    Project Update Spec v1.0に従い、今後は汎用的なupdate_projectアクションを使用することを推奨します。
+    """
+    # Log deprecation warning
+    logger.warning("🚨 DEPRECATED: update_status action used. Please migrate to update_project action with properties parameter.")
+    
     if not current_project_id:
         return "ステータスを更新するには、プロジェクトを選択してください。"
     
@@ -456,6 +467,113 @@ def _execute_project_creation(action_plan, current_project_id: Optional[str]) ->
     except Exception as e:
         logger.error(f"Project creation failed: {e}")
         return f"プロジェクト作成中にエラーが発生しました: {str(e)}"
+
+def _execute_project_update(action_plan, current_project_id: Optional[str]) -> str:
+    """
+    Generic Project Update Handler - Implements Project Update Spec v1.0
+    
+    Args:
+        action_plan: ActionPlan with update_project action
+        current_project_id: Current project ID
+        
+    Returns:
+        str: User response message
+    """
+    if not current_project_id:
+        return "プロジェクトを更新するには、まずプロジェクトを選択してください。"
+    
+    try:
+        from .project_service import apply_property_patch
+        
+        total_updates = 0
+        update_errors = []
+        success_messages = []
+        
+        for item in action_plan.target_items:
+            if item.get("type") == "project" and item.get("action") == "set_properties":
+                params = item.get("parameters", {})
+                project_id = params.get("identifier", current_project_id)
+                properties = params.get("properties", {})
+                
+                if not properties:
+                    logger.warning("No properties provided for project update")
+                    continue
+                
+                # Apply the property patch
+                result = apply_property_patch(project_id, properties)
+                
+                if result.get("success"):
+                    changed_fields = result.get("changed_fields", [])
+                    total_updates += len(changed_fields)
+                    
+                    # Generate user-friendly update messages
+                    field_messages = []
+                    for field in changed_fields:
+                        value = properties[field]
+                        if field == "start_date":
+                            field_messages.append(f"開始日: {value}")
+                        elif field == "end_date":
+                            field_messages.append(f"終了日: {value}")
+                        elif field == "participants_count":
+                            field_messages.append(f"参加者数: {value}名")
+                        elif field == "participants":
+                            field_messages.append(f"参加者リスト: {len(value) if isinstance(value, list) else 1}名追加")
+                        elif field == "status":
+                            field_messages.append(f"ステータス: {value}")
+                        elif field == "phase":
+                            field_messages.append(f"フェーズ: {value}")
+                        elif field == "budget":
+                            field_messages.append(f"予算: {value}")
+                        elif field == "location":
+                            field_messages.append(f"場所: {value}")
+                        elif field == "priority":
+                            field_messages.append(f"優先度: {value}")
+                        else:
+                            field_messages.append(f"{field}: {value}")
+                    
+                    if field_messages:
+                        success_messages.append("✅ 更新完了: " + "、".join(field_messages))
+                    
+                    logger.info(f"Successfully updated project {project_id}: {changed_fields}")
+                    
+                    # Handle warnings from the update
+                    if result.get("warnings"):
+                        update_errors.extend(result["warnings"])
+                        
+                else:
+                    error_msg = result.get("error", "Unknown error")
+                    error_type = result.get("error_type", "unknown")
+                    update_errors.append(f"更新エラー ({error_type}): {error_msg}")
+                    logger.error(f"Failed to update project {project_id}: {error_msg}")
+        
+        # Generate response message
+        if total_updates > 0:
+            response_parts = [action_plan.response_content]
+            if success_messages:
+                response_parts.extend(success_messages)
+            
+            if update_errors:
+                response_parts.append("⚠️ 一部更新で問題が発生:")
+                response_parts.extend([f"  - {error}" for error in update_errors])
+            
+            return "\n\n".join(response_parts)
+        
+        elif update_errors:
+            return f"{action_plan.response_content}\n\n❌ 更新に失敗しました:\n" + "\n".join([f"  - {error}" for error in update_errors])
+        
+        else:
+            return action_plan.response_content
+            
+    except Exception as e:
+        logger.error(f"Project update execution failed: {e}")
+        
+        # Detailed error logging
+        import traceback
+        error_trace = traceback.format_exc()
+        logger.error(f"Project update error trace: {error_trace}")
+        print(f"🚨 プロジェクト更新エラー: {error_trace}", flush=True)
+        
+        return f"プロジェクト更新中にエラーが発生しました: {str(e)}"
 
 def _finalize_conversation(assistant_reply: str, current_project_id: Optional[str]):
     """会話の最終処理"""
