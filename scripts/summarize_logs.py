@@ -8,16 +8,20 @@ and sample prompts grouped by request kind.
 
 import argparse
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from collections import defaultdict
 from typing import Dict, List, Tuple
 import json
+from zoneinfo import ZoneInfo
 
 # Add project root to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from core.log_schema import LogEntry, RequestKind, from_jsonl
+
+# Japan Standard Time
+JST = ZoneInfo("Asia/Tokyo")
 
 
 def parse_args():
@@ -127,8 +131,13 @@ def summarize_by_kind(entries: List[LogEntry]) -> Dict[str, Dict]:
             # トークン警告フラグを追加
             high_token_warning = "⚠️ " if entry.prompt_tokens > 1000 else ""
             
+            # Convert UTC timestamp to JST
+            utc_time = datetime.fromisoformat(entry.ts.replace('Z', '+00:00'))
+            jst_time = utc_time.astimezone(JST)
+            jst_timestamp = jst_time.strftime("%Y-%m-%d %H:%M:%S")
+            
             kind_summary['samples'].append({
-                'ts': entry.ts,
+                'ts': jst_timestamp,  # JST formatted timestamp
                 'task_id': entry.task_id,
                 'agent': entry.agent,
                 'text': sample_text,
@@ -257,12 +266,16 @@ def generate_html_report(
     total_tokens = sum(s['prompt_tokens'] + s['completion_tokens'] for s in summary.values())
     total_errors = sum(s['errors'] for s in summary.values())
     
+    # Get current time in JST for report timestamp
+    now_jst = datetime.now(JST)
+    report_time = now_jst.strftime("%Y-%m-%d %H:%M:%S JST")
+    
     html_parts.append(f"""
         <h1>🪵 Kai VPM LLM Call Summary</h1>
         <div class="overview">
             <div class="overview-stat">
                 <span class="stat-label">Period:</span>
-                <span class="stat-value">Last {since_hours} hours</span>
+                <span class="stat-value">Last {since_hours} hours (as of {report_time})</span>
             </div>
             <div class="overview-stat">
                 <span class="stat-label">Total Calls:</span>

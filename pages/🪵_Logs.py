@@ -10,13 +10,17 @@ import subprocess
 import sys
 import json
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import tempfile
+from zoneinfo import ZoneInfo
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from core.log_schema import LogEntry, RequestKind, from_jsonl
+
+# Japan Standard Time
+JST = ZoneInfo("Asia/Tokyo")
 
 
 def load_all_logs(log_dir: Path, since_hours: int) -> list[LogEntry]:
@@ -162,7 +166,12 @@ def main():
             # Most recent call
             st.markdown("### Most Recent Call")
             latest = entries[0]
-            st.text(f"Time: {latest.ts}")
+            # Convert UTC to JST
+            utc_time = datetime.fromisoformat(latest.ts.replace('Z', '+00:00'))
+            jst_time = utc_time.astimezone(JST)
+            jst_timestamp = jst_time.strftime("%Y-%m-%d %H:%M:%S JST")
+            
+            st.text(f"Time: {jst_timestamp}")
             st.text(f"Agent: {latest.agent}")
             st.text(f"Kind: {latest.kind}")
             st.text(f"Tokens: {latest.prompt_tokens}/{latest.completion_tokens}")
@@ -240,9 +249,14 @@ def main():
                             preview_text += "..."
                         break
             
+            # Convert timestamp to JST for title
+            utc_time = datetime.fromisoformat(entry.ts.replace('Z', '+00:00'))
+            jst_time = utc_time.astimezone(JST)
+            jst_time_str = jst_time.strftime("%m/%d %H:%M")
+            
             title = (
                 f"{error_indicator}{entry.agent} • {entry.kind} • "
-                f"{entry.prompt_tokens}/{entry.completion_tokens} tokens"
+                f"{jst_time_str} • {entry.prompt_tokens}/{entry.completion_tokens} tokens"
             )
             
             with st.expander(title):
@@ -250,7 +264,12 @@ def main():
                 col1, col2 = st.columns(2)
                 
                 with col1:
-                    st.markdown(f"**Timestamp:** {entry.ts}")
+                    # Convert UTC to JST for display
+                    utc_time = datetime.fromisoformat(entry.ts.replace('Z', '+00:00'))
+                    jst_time = utc_time.astimezone(JST)
+                    jst_timestamp = jst_time.strftime("%Y-%m-%d %H:%M:%S JST")
+                    
+                    st.markdown(f"**Timestamp:** {jst_timestamp}")
                     st.markdown(f"**Task ID:** `{entry.task_id}`")
                     st.markdown(f"**Model:** {entry.model}")
                 
