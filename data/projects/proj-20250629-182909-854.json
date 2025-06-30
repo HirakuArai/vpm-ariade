@@ -1,13 +1,30 @@
 {
   "identifier": "proj-20250629-182909-854",
-  "overview": "\u9577\u5ca1\u306e\u82b1\u706b\u5927\u4f1a\u958b\u50ac\u306b\u5411\u3051\u305f\u6e96\u5099\u30d7\u30ed\u30b8\u30a7\u30af\u30c8",
-  "display_name": "\u9577\u5ca1\u306e\u82b1\u706b\u5927\u4f1a\u306e\u6e96\u5099",
+  "overview": "長岡の花火大会開催に向けた準備プロジェクト",
+  "display_name": "長岡の花火大会の準備",
   "created_at": "2025-06-29T18:29:09.854404",
   "created_by": "AI Assistant",
   "status": "DRAFT",
   "schema_version": "1.0",
-  "updated_at": "2025-06-29T18:29:09.854418",
-  "change_log": [],
+  "updated_at": "2025-07-01T06:05:53.104313+09:00",
+  "change_log": [
+    {
+      "timestamp": "2025-07-01T06:05:53.104404+09:00",
+      "type": "property_patch",
+      "changed_fields": [
+        "participants_count",
+        "start_date",
+        "end_date"
+      ],
+      "description": "Updated 3 properties via generic patch",
+      "source": "apply_property_patch",
+      "properties_updated": {
+        "participants_count": 4,
+        "start_date": "2025-08-02",
+        "end_date": "2025-08-03"
+      }
+    }
+  ],
   "uuid": "b44455b2-f819-4ea5-bd39-2270fb6c8bc9",
   "tasks": [],
   "phase": "INCEPTION",
@@ -15,5 +32,8 @@
   "next_actions": [],
   "blocking_issues": [],
   "phase_requirements": "__UNDEFINED__",
-  "phase_history": []
+  "phase_history": [],
+  "participants_count": 4,
+  "start_date": "2025-08-02",
+  "end_date": "2025-08-03"
 }

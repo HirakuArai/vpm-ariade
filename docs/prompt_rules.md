@@ -1,159 +1,149 @@
-# AI Project Manager Prompt Rules v2.0
+# AI Project Manager Prompt Rules v3.0 - Project Update Spec v1.0
 
 ## Overview
-This document defines the context-dependent prompt rules for the AI Project Manager, ensuring appropriate behavior based on whether a project is currently selected or not.
+Updated prompt rules incorporating Project Update Spec v1.0 with generic property patch functionality.
 
-## Context-Dependent Intent Routing
+## Core Rules
 
-### 1. Project Creation Intent Detection
+### 1. Project Information Updates (NEW - Project Update Spec v1.0)
+**Keywords**: 「日程」「参加者」「予算」「場所」「ステータス」等のプロジェクト属性更新
+- **Action**: `update_project`
+- **Parameters**: Use `properties` object with multiple fields
+- **Examples**:
+  - 「参加者は4名です」→ `properties: {"participants_count": 4}`
+  - 「日程は8月2日から3日です」→ `properties: {"start_date": "2025-08-02", "end_date": "2025-08-03"}`
+  - Combined: `properties: {"participants_count": 4, "start_date": "2025-08-02", "end_date": "2025-08-03"}`
 
-#### Rule: Context-Dependent Project Creation
-**Problem**: Previously, project creation keywords would always trigger `create_project` action regardless of context, causing unwanted project creation within existing project conversations.
+### 2. Project Creation (Context-Dependent)
+- **Home Chat (No Project Selected)**: 「プロジェクトを作成」「プロジェクトとして設定」→ `create_project`
+- **Project Chat (Project Selected)**: Same keywords → `general_discussion`
 
-**Solution**: Project creation intent is now context-dependent:
+### 3. Task Operations
+- **Create**: 「作業」「やる」「実装」「対応」→ `create_task`
+- **Remove**: 「消してください」「削除して」「取り除いて」→ `remove_task`
 
-- **Home Chat (No Project Selected)**:
-  - Keywords: "プロジェクトを作成", "プロジェクトとして設定", "新しいプロジェクト", etc.
-  - Action: `create_project`
-  - Reasoning: User is in home context with no project selected
+### 4. Information Requests
+- **Keywords**: 「教えて」「見せて」「確認したい」→ `information_request`
 
-- **Project Chat (Project Already Selected)**:
-  - Same keywords → Action: `general_discussion`
-  - Reasoning: User is discussing project management within existing project context
-  - Exception: Explicit "新しい" (new) keyword still triggers `create_project`
+### 5. General Discussion
+- **Keywords**: 「どうすれば」「方法は」「アドバイス」→ `general_discussion`
 
-#### Implementation Location
-- File: `core/ai_project_manager.py`
-- Method: `_get_ai_pm_system_prompt()`
-- Lines: 198-201 (updated prompt rules)
+## JSON Response Format
 
-### 2. Context Detection Logic
-
-#### Project Context Determination
-```python
-# Determine if project is selected
-project_selected = bool(project_context and project_context.get("identifier"))
-
-# Set appropriate subkind for logging
-subkind = RequestContext.PROJECT_CHAT if project_selected else RequestContext.HOME_CHAT
-```
-
-#### Prompt Context Information
-The AI receives explicit context information:
-- **Home Chat**: "プロジェクトが選択されていません"
-- **Project Chat**: "プロジェクト: proj-xxx, ステータス: DRAFT, タスク数: 3件"
-
-### 3. Updated Prompt Examples
-
-#### Example 1: Home Chat Context
-```
-Input: "花火大会をプロジェクトとして設定してください"
-Context: "プロジェクトが選択されていません"
-Expected Output:
+```json
 {
-  "action_type": "create_project",
-  "reasoning": "プロジェクト未選択状態でプロジェクト作成を要求している"
+  "intent": "project_management|conversation|clarification",
+  "action_type": "create_project|create_task|remove_task|update_project|information_request|general_discussion",
+  "reasoning": "この判断に至った理由と分析",
+  "confidence": 0.0-1.0,
+  "target_items": [
+    {
+      "type": "task|project|general",
+      "action": "具体的な実行内容",
+      "parameters": {"key": "value"}
+    }
+  ],
+  "response_content": "ユーザーへの自然で有用な応答メッセージ",
+  "suggested_follow_ups": ["次に聞いてみたい質問例1", "推奨される次の行動2"]
 }
 ```
 
-#### Example 2: Project Chat Context
-```
-Input: "このプロジェクトをもっと本格的にプロジェクトとして進めたいです"
-Context: "プロジェクト: proj-xxx, ステータス: DRAFT"
-Expected Output:
+## Project Update Examples
+
+### Example 1: Participants Update
+Input: 「参加者は4名です。」
+Context: プロジェクト選択済み
+```json
 {
-  "action_type": "general_discussion",
-  "reasoning": "既にプロジェクト選択済みのため、プロジェクト運営に関する相談として処理"
+  "intent": "project_management",
+  "action_type": "update_project",
+  "reasoning": "プロジェクト情報（参加者数）の更新要求",
+  "confidence": 0.9,
+  "target_items": [
+    {
+      "type": "project",
+      "action": "set_properties",
+      "parameters": {
+        "identifier": "proj-20250629-182909-854",
+        "properties": {
+          "participants_count": 4
+        }
+      }
+    }
+  ],
+  "response_content": "参加者数4名で設定しました。",
+  "suggested_follow_ups": ["参加者の役割分担を決めたい", "スケジュールを調整したい"]
 }
 ```
 
-### 4. Logging Enhancement
-
-#### RequestContext Enum
-New `RequestContext` enum added for granular analysis:
-- `HOME_CHAT`: Chat from home page (no project selected)
-- `PROJECT_CHAT`: Chat from within a specific project
-- `GENERAL`: General context
-
-#### LogEntry Schema Update
-```python
-class LogEntry(BaseModel):
-    # ... existing fields ...
-    subkind: Optional[RequestContext] = Field(None, description="Request context for granular analysis")
+### Example 2: Date Update
+Input: 「日程は2025年8月2日、3日の2日間です。」
+```json
+{
+  "intent": "project_management",
+  "action_type": "update_project",
+  "reasoning": "プロジェクト日程の更新要求",
+  "confidence": 0.95,
+  "target_items": [
+    {
+      "type": "project",
+      "action": "set_properties",
+      "parameters": {
+        "identifier": "proj-20250629-182909-854",
+        "properties": {
+          "start_date": "2025-08-02",
+          "end_date": "2025-08-03"
+        }
+      }
+    }
+  ],
+  "response_content": "日程を2025年8月2日〜3日で設定しました。",
+  "suggested_follow_ups": ["会場の手配について相談したい", "当日のスケジュールを決めたい"]
+}
 ```
 
-#### Usage in Code
-```python
-subkind = RequestContext.PROJECT_CHAT if project_context else RequestContext.HOME_CHAT
-with log_call("kai", RequestKind.UI_CHAT, subkind=subkind) as log:
-    # ... LLM call ...
-```
-
-## Testing Strategy
-
-### Test Coverage
-- **File**: `tests/test_intent_routing.py`
-- **Scope**: Context-dependent intent routing
-- **Test Cases**:
-  1. Home chat project creation intents
-  2. Project chat context handling
-  3. RequestContext logging verification
-
-### Test Examples
-```python
-def test_home_chat_project_creation():
-    """Test project creation intent from home chat (no project selected)"""
-    result = ai_pm.process_user_input(
-        user_input="花火大会をプロジェクトとして設定してください",
-        project_context={},  # Empty = no project selected
-        conversation_history=[]
-    )
-    assert result.action_type == "create_project"
-
-def test_project_chat_context_handling():
-    """Test project-related keywords within existing project context"""
-    project_context = {"identifier": "proj-test-123", "status": "DRAFT"}
-    result = ai_pm.process_user_input(
-        user_input="このプロジェクトをプロジェクトとして進めたい",
-        project_context=project_context,
-        conversation_history=[]
-    )
-    assert result.action_type == "general_discussion"
+### Example 3: Combined Update
+Input: 「参加者は4名で、日程は8月2日、3日です。」
+```json
+{
+  "intent": "project_management", 
+  "action_type": "update_project",
+  "reasoning": "複数のプロジェクト情報（参加者数・日程）の同時更新",
+  "confidence": 0.9,
+  "target_items": [
+    {
+      "type": "project",
+      "action": "set_properties", 
+      "parameters": {
+        "identifier": "proj-20250629-182909-854",
+        "properties": {
+          "participants_count": 4,
+          "start_date": "2025-08-02",
+          "end_date": "2025-08-03"
+        }
+      }
+    }
+  ],
+  "response_content": "参加者数4名、日程2025年8月2日〜3日で設定しました。",
+  "suggested_follow_ups": ["参加者の役割分担を決めたい", "会場準備について相談したい"]
+}
 ```
 
 ## Migration Notes
 
-### Breaking Changes
-1. `LogEntry` schema now includes optional `subkind` field
-2. `log_call()` function signature updated with `subkind` parameter
-3. AI prompt behavior changed for project creation in project contexts
+### DEPRECATED Actions
+- `update_status` - Use `update_project` with `properties: {"status": "ACTIVE"}` instead
 
-### Backward Compatibility
-- Existing logs without `subkind` remain valid (field is optional)
-- Old `log_call()` usage continues to work (subkind defaults to None)
-
-## Future Enhancements
-
-### Planned Improvements
-1. **Machine Learning Integration**: Use historical context patterns to improve intent detection
-2. **User Preference Learning**: Adapt behavior based on individual user patterns
-3. **Multi-Project Context**: Handle scenarios where multiple projects are referenced
-4. **Context Confidence Scoring**: Add confidence metrics for context detection
-
-### Analytics Opportunities
-With `subkind` logging, we can now analyze:
-- Home vs. Project chat usage patterns
-- Intent distribution by context
-- Context-specific error rates
-- User behavior transitions between contexts
+### New Features (Project Update Spec v1.0)
+- ✅ Schema-driven validation via `schemas/project_schema.json`
+- ✅ Generic `apply_property_patch()` function
+- ✅ Multi-field updates in single operation
+- ✅ Automatic change_log tracking
+- ✅ User-friendly Japanese response messages
 
 ---
 
-**Version**: 2.0  
-**Last Updated**: 2025-06-30  
-**Author**: AI Project Manager Team  
-**Related Files**: 
-- `core/ai_project_manager.py`
-- `core/log_schema.py`
-- `core/prompt_logger.py`
-- `tests/test_intent_routing.py`
+**Version**: 3.0
+**Last Updated**: 2025-07-01
+**Implements**: Project Update Spec v1.0
+**Author**: Kai VPM Team
