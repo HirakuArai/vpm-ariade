@@ -258,44 +258,44 @@ class ProjectDetailsPage:
             try:
                 # LLMロギングを使用してAPIを呼び出し
                 with log_call("kai", RequestKind.PROJECT_DETAIL) as log:
-                request_data = {
-                    "model": get_openai_model(),
-                    "messages": [
-                        {"role": "system", "content": "あなたはプロジェクトマネジメントの専門家で、複雑なプロジェクト情報をわかりやすく整理して説明することが得意です。"},
-                        {"role": "user", "content": prompt}
-                    ],
-                    "temperature": 0.7,
-                    "max_tokens": 2000
-                }
-                
-                log['log_request'](request_data)
-                
-                # OpenAI APIを使用して説明を生成
-                response = openai.chat.completions.create(**request_data)
-                
-                # レスポンスをログに記録
-                response_data = {
-                    "choices": [
-                        {
-                            "message": {
-                                "role": response.choices[0].message.role,
-                                "content": response.choices[0].message.content
-                            }
-                        }
-                    ],
-                    "usage": {
-                        "prompt_tokens": response.usage.prompt_tokens,
-                        "completion_tokens": response.usage.completion_tokens,
-                        "total_tokens": response.usage.total_tokens
+                    request_data = {
+                        "model": get_openai_model(),
+                        "messages": [
+                            {"role": "system", "content": "あなたはプロジェクトマネジメントの専門家で、複雑なプロジェクト情報をわかりやすく整理して説明することが得意です。"},
+                            {"role": "user", "content": prompt}
+                        ],
+                        "temperature": 0.7,
+                        "max_tokens": 2000
                     }
-                }
-                log['log_response'](response_data, response.usage.prompt_tokens, response.usage.completion_tokens)
                 
-                # ナビゲーション状態を再度確認（AI処理後も維持）
-                if hasattr(st.session_state, 'navigation_state'):
-                    st.session_state.navigation_state.current_page = PageType.PROJECT_DETAILS
-                    st.session_state.navigation_state.selected_project_id = project_id
-                
+                    log['log_request'](request_data)
+                    
+                    # OpenAI APIを使用して説明を生成
+                    response = openai.chat.completions.create(**request_data)
+                    
+                    # レスポンスをログに記録
+                    response_data = {
+                        "choices": [
+                            {
+                                "message": {
+                                    "role": response.choices[0].message.role,
+                                    "content": response.choices[0].message.content
+                                }
+                            }
+                        ],
+                        "usage": {
+                            "prompt_tokens": response.usage.prompt_tokens,
+                            "completion_tokens": response.usage.completion_tokens,
+                            "total_tokens": response.usage.total_tokens
+                        }
+                    }
+                    log['log_response'](response_data, response.usage.prompt_tokens, response.usage.completion_tokens)
+                    
+                    # ナビゲーション状態を再度確認（AI処理後も維持）
+                    if hasattr(st.session_state, 'navigation_state'):
+                        st.session_state.navigation_state.current_page = PageType.PROJECT_DETAILS
+                        st.session_state.navigation_state.selected_project_id = project_id
+                    
                     return response.choices[0].message.content
             
             finally:
