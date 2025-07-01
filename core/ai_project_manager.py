@@ -401,47 +401,31 @@ class AIProjectManager:
                     field_data = fields[field_name]
                     if field_data.get("status") == "defined" and field_data.get("value"):
                         value = field_data["value"]
-                        # 質問に関連するフィールドは長めに表示
-                        if isinstance(value, str) and len(value) > 500:
-                            value = value[:500] + "..."
+                        # トークン制限を削除：質問関連フィールドは完全に表示
                         important_fields.append(f"- {field_name}: {value}")
             
             # 残りの基本フィールドを処理
             for field_name in default_priority_order:
-                if len(important_fields) >= 6:  # 質問関連があるため制限を緩める
-                    break
                 if field_name not in question_related_fields and field_name in fields:
                     field_data = fields[field_name]
                     if field_data.get("status") == "defined" and field_data.get("value"):
                         value = field_data["value"]
-                        if isinstance(value, str) and len(value) > 80:
-                            value = value[:80] + "..."
+                        # トークン制限を削除：基本フィールドも完全に表示
                         important_fields.append(f"- {field_name}: {value}")
             
-            # その他のフィールドも少し追加
+            # その他のフィールドも追加
             for field_name, field_data in fields.items():
-                if len(important_fields) >= 8:  # 最大8項目
-                    break
                 if field_name not in question_related_fields and field_name not in default_priority_order:
                     if field_data.get("status") == "defined" and field_data.get("value"):
                         value = field_data["value"]
-                        if isinstance(value, str) and len(value) > 80:
-                            value = value[:80] + "..."
+                        # トークン制限を削除：すべてのフィールドを完全に表示
                         important_fields.append(f"- {field_name}: {value}")
             
             if important_fields:
                 dynamic_summary = f"\n\n重要な項目:\n" + "\n".join(important_fields)
         
-        # 基本的なトークン制限チェック（概算）
+        # トークン制限機能を完全に削除
         full_summary = basic_info + task_summary + dynamic_summary
-        
-        # プロジェクト情報が長すぎる場合は動的情報を削減
-        if len(full_summary) > 1200:  # 文字数による制限
-            if dynamic_summary:
-                lines = dynamic_summary.split('\n')
-                truncated_lines = lines[:4]  # 最初の3項目のみ
-                dynamic_summary = '\n'.join(truncated_lines) + "\n... (他の項目は省略)"
-                full_summary = basic_info + task_summary + dynamic_summary
         
         return full_summary
     
@@ -482,11 +466,11 @@ class AIProjectManager:
         return relevant_fields
     
     def _summarize_conversation_history(self, conversation_history: List[Dict[str, str]]) -> str:
-        """会話履歴を要約"""
+        """会話履歴を要約（制限なし）"""
         if not conversation_history:
             return "新しい会話です"
         
-        # より多くのメッセージを含めて文脈を改善
+        # トークン制限を削除：より多くのメッセージを完全に表示
         recent_messages = conversation_history[-10:]  # 最新10メッセージ
         total_messages = len(conversation_history)
         
@@ -496,13 +480,8 @@ class AIProjectManager:
             role = "ユーザー" if msg.get("role") == "user" else "AI"
             content = msg.get("content", "")
             
-            # 重要な情報を含む場合は長めに保持
-            if any(keyword in content for keyword in ["タスク", "完了", "進捗", "予定", "変更", "問題"]):
-                content_preview = content[:150]  # 重要な内容は150文字
-            else:
-                content_preview = content[:80]   # 通常は80文字
-                
-            summary += f"- {role}: {content_preview}...\n"
+            # 文字数制限を削除：すべての内容を完全に表示
+            summary += f"- {role}: {content}\n"
         
         # プロジェクト固有の履歴がある場合の注釈
         if total_messages > len(recent_messages):

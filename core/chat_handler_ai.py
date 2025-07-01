@@ -94,7 +94,7 @@ def _append_project_log(project_id: str, role: str, content: str) -> None:
     with log_path.open("a", encoding="utf-8") as fp:
         fp.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
 
-def _load_project_conversation_history(project_id: str, max_messages: int = 20, days_back: int = 7) -> List[Dict[str, str]]:
+def _load_project_conversation_history(project_id: str, max_messages: int = 50, days_back: int = 30) -> List[Dict[str, str]]:
     """
     Load recent conversation history for a specific project
     
@@ -233,7 +233,7 @@ def process_chat_input_ai(user_input: str, current_project_id: Optional[str] = N
         except Exception as e:
             logger.error(f"Failed to get project context: {e}")
     
-    # 会話履歴の準備
+    # 会話履歴の準備（制限なし）
     if current_project_id:
         # プロジェクト会話の場合：プロジェクト固有の過去会話履歴を含める
         project_conversation_history = _load_project_conversation_history(current_project_id)
@@ -242,13 +242,8 @@ def process_chat_input_ai(user_input: str, current_project_id: Optional[str] = N
         # プロジェクト履歴 + セッション履歴を結合（重複排除）
         conversation_history = project_conversation_history + session_history
         
-        # トークン制限を考慮して履歴を制限（最新のN件のみ保持）
-        max_history_length = 15  # プロンプトトークンを考慮した適切な長さ
-        if len(conversation_history) > max_history_length:
-            conversation_history = conversation_history[-max_history_length:]
-            logger.info(f"Truncated conversation history to {max_history_length} messages for token limit")
-        
-        logger.info(f"Combined conversation history: {len(project_conversation_history)} project + {len(session_history)} session = {len(conversation_history)} total (final)")
+        # トークン制限を削除：すべての履歴を使用
+        logger.info(f"Combined conversation history: {len(project_conversation_history)} project + {len(session_history)} session = {len(conversation_history)} total")
     else:
         # ホーム会話の場合：セッション履歴のみ使用
         conversation_history = st.session_state.get("history", [])

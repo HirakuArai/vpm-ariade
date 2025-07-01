@@ -122,7 +122,7 @@ class PromptBuilder:
         # 会話履歴の要約
         conversation_summary = self._summarize_conversation_history(conversation_history)
         
-        # ベースプロンプトの作成
+        # ベースプロンプトの作成（トークン制限機能を削除）
         base_prompt = f"""## ユーザー発言
 "{user_input}"
 
@@ -144,32 +144,6 @@ class PromptBuilder:
 2. プロジェクトの現在の状況と優先度
 3. 最も価値のある次のステップ
 4. 自然で建設的な会話の継続
-"""
-        
-        # トークン数チェック
-        estimated_tokens = self.estimate_tokens(base_prompt)
-        
-        if estimated_tokens > MAX_PROMPT_TOKENS:
-            logger.warning(f"Prompt tokens ({estimated_tokens}) exceed limit ({MAX_PROMPT_TOKENS}). Truncating conversation summary.")
-            
-            # 会話履歴を短縮して再構築
-            truncated_summary = self.truncate_conversation_summary(
-                conversation_summary, 
-                max_tokens=150  # 会話履歴用の制限
-            )
-            
-            base_prompt = f"""## ユーザー発言
-"{user_input}"
-
-## 現在のプロジェクト状況
-{project_summary}
-
-## 最近の会話の流れ
-{truncated_summary}
-
-## 求められる判断
-この発言に対して、プロジェクトマネージャーとして最も適切な対応を判断してください。
-パターンマッチングや固定ルールではなく、状況と文脈を総合的に理解して判断してください。
 """
         
         return base_prompt
@@ -223,49 +197,31 @@ class PromptBuilder:
                     field_data = fields[field_name]
                     if field_data.get("status") == "defined" and field_data.get("value"):
                         value = field_data["value"]
-                        # 質問に関連するフィールドは長めに表示
-                        if isinstance(value, str) and len(value) > 500:
-                            value = value[:500] + "..."
+                        # トークン制限を削除：質問関連フィールドは完全に表示
                         important_fields.append(f"- {field_name}: {value}")
             
             # 残りの基本フィールドを処理
             for field_name in default_priority_order:
-                if len(important_fields) >= 6:  # 質問関連があるため制限を緩める
-                    break
                 if field_name not in question_related_fields and field_name in fields:
                     field_data = fields[field_name]
                     if field_data.get("status") == "defined" and field_data.get("value"):
                         value = field_data["value"]
-                        if isinstance(value, str) and len(value) > 80:
-                            value = value[:80] + "..."
+                        # トークン制限を削除：基本フィールドも完全に表示
                         important_fields.append(f"- {field_name}: {value}")
             
-            # その他のフィールドも少し追加
+            # その他のフィールドも追加
             for field_name, field_data in fields.items():
-                if len(important_fields) >= 8:  # 最大8項目
-                    break
                 if field_name not in question_related_fields and field_name not in default_priority_order:
                     if field_data.get("status") == "defined" and field_data.get("value"):
                         value = field_data["value"]
-                        if isinstance(value, str) and len(value) > 80:
-                            value = value[:80] + "..."
+                        # トークン制限を削除：すべてのフィールドを完全に表示
                         important_fields.append(f"- {field_name}: {value}")
             
             if important_fields:
                 dynamic_summary = f"\n\n重要な項目:\n" + "\n".join(important_fields)
         
-        # トークン制限チェック
+        # トークン制限機能を完全に削除
         full_summary = basic_info + task_summary + dynamic_summary
-        estimated_tokens = self.estimate_tokens(full_summary)
-        
-        # プロジェクト情報が長すぎる場合は切り詰め
-        if estimated_tokens > 300:  # プロジェクト情報の上限
-            # 動的情報を削減
-            if dynamic_summary:
-                lines = dynamic_summary.split('\n')
-                truncated_lines = lines[:4]  # 最初の3項目のみ
-                dynamic_summary = '\n'.join(truncated_lines) + "\n... (他の項目は省略)"
-                full_summary = basic_info + task_summary + dynamic_summary
         
         return full_summary
     
@@ -306,17 +262,18 @@ class PromptBuilder:
         return relevant_fields
     
     def _summarize_conversation_history(self, conversation_history: List[Dict[str, str]]) -> str:
-        """会話履歴を要約"""
+        """会話履歴を要約（制限なし）"""
         if not conversation_history:
             return "新しい会話です"
         
-        recent_messages = conversation_history[-6:]  # 最新6メッセージ
+        # トークン制限を削除：すべてのメッセージを完全に表示
+        recent_messages = conversation_history[-10:]  # 最新10メッセージ
         summary = "最近の会話:\n"
         
         for msg in recent_messages:
             role = "ユーザー" if msg.get("role") == "user" else "AI"
-            content = msg.get("content", "")[:100]  # 100文字で切る
-            summary += f"- {role}: {content}...\n"
+            content = msg.get("content", "")  # 文字数制限を削除
+            summary += f"- {role}: {content}\n"
         
         return summary
     
