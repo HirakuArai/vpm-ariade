@@ -83,8 +83,14 @@ def try_git_commit(file_path: str) -> None:
 # ---------------------------------------------------------------------------
 
 def commit_and_push_log(log_path: str = None) -> bool:
-    """JSON 会話ログファイルを 1 会話ごとに即 push するヘルパ"""
+    """JSON 会話ログファイルを 1 会話ごとに即 push するヘルパ（競合回避機能付き）"""
     try:
+        # 最新状態に同期してから実行
+        result = subprocess.run(["git", "pull", "--rebase", "origin", "main"], 
+                              capture_output=True, timeout=10, check=False)
+        if result.returncode != 0:
+            print(f"⚠️ Git pull for log failed: {result.stderr.decode()}", flush=True)
+        
         if log_path:
             try_git_commit(log_path)
         else:
@@ -97,6 +103,9 @@ def commit_and_push_log(log_path: str = None) -> bool:
             if log_file.exists():
                 try_git_commit(str(log_file))
         return True
+    except subprocess.TimeoutExpired:
+        print("⚠️ Git pull for log timed out", flush=True)
+        return False
     except Exception as e:
         print(f"❌ 会話ログのコミット失敗: {e}", flush=True)
         return False
@@ -171,31 +180,73 @@ def check_unprocessed_logs() -> None:
 # ---------------------------------------------------------------------------
 
 def commit_and_push_project_data(project_id: str) -> bool:
-    """プロジェクトデータと関連ファイルをコミット・プッシュ"""
+    """プロジェクトデータと関連ファイルをコミット・プッシュ（競合回避機能付き）"""
     try:
         subprocess.run(["git", "config", "--global", "user.name", "Kai Bot"], check=True)
         subprocess.run(["git", "config", "--global", "user.email", "kai@example.com"], check=True)
         
-        # プロジェクトファイル
-        project_file = f"data/projects/{project_id}.json"
-        subprocess.run(["git", "add", project_file], check=True)
+        # 最新状態に同期（競合回避）
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                # プルして最新状態に同期
+                result = subprocess.run(["git", "pull", "--rebase", "origin", "main"], 
+                                      capture_output=True, timeout=15)
+                if result.returncode != 0:
+                    print(f"⚠️ Git pull failed (attempt {attempt + 1}): {result.stderr.decode()}", flush=True)
+                    if attempt == max_retries - 1:
+                        raise subprocess.CalledProcessError(result.returncode, "git pull")
+                    continue
+                
+                # プロジェクトファイル
+                project_file = f"data/projects/{project_id}.json"
+                subprocess.run(["git", "add", project_file], check=True)
+                
+                # プロジェクト固有会話ログ
+                project_conv_dir = f"data/conversations/{project_id}/"
+                subprocess.run(["git", "add", project_conv_dir], check=True)
+                
+                # 変更があるかチェック
+                result = subprocess.run(["git", "diff", "--cached", "--quiet"], capture_output=True)
+                if result.returncode == 0:
+                    # 変更がない場合
+                    print(f"ℹ️ プロジェクト {project_id} に変更がありません", flush=True)
+                    return True
+                
+                # コミット
+                commit_msg = f"Update project {project_id} data and conversations"
+                subprocess.run(["git", "commit", "-m", commit_msg], capture_output=True, check=True)
+                
+                # プッシュ
+                push_result = subprocess.run(["git", "push", f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"], 
+                                           capture_output=True, timeout=20)
+                
+                if push_result.returncode == 0:
+                    print(f"✅ プロジェクト {project_id} のデータをプッシュしました", flush=True)
+                    return True
+                else:
+                    print(f"⚠️ Git push failed (attempt {attempt + 1}): {push_result.stderr.decode()}", flush=True)
+                    if attempt < max_retries - 1:
+                        # リトライ前に少し待機
+                        import time
+                        time.sleep(1)
+                        continue
+                    else:
+                        raise subprocess.CalledProcessError(push_result.returncode, "git push")
+                        
+            except subprocess.TimeoutExpired:
+                print(f"⚠️ Git operation timed out (attempt {attempt + 1})", flush=True)
+                if attempt == max_retries - 1:
+                    raise
+                continue
         
-        # プロジェクト固有会話ログ
-        project_conv_dir = f"data/conversations/{project_id}/"
-        subprocess.run(["git", "add", project_conv_dir], check=True)
-        
-        # コミット
-        commit_msg = f"Update project {project_id} data and conversations"
-        subprocess.run(["git", "commit", "-m", commit_msg], capture_output=True)
-        
-        # プッシュ
-        subprocess.run(["git", "push", f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"], check=True)
-        
-        print(f"✅ プロジェクト {project_id} のデータをプッシュしました", flush=True)
-        return True
+        return False
         
     except subprocess.CalledProcessError as e:
         print(f"❌ プロジェクトデータのプッシュ失敗: {e}", flush=True)
+        return False
+    except Exception as e:
+        print(f"❌ プロジェクトデータのプッシュで予期しないエラー: {e}", flush=True)
         return False
 
 @kai_capability(
