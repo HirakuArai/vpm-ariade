@@ -83,11 +83,33 @@ def try_git_commit(file_path: str) -> None:
 # ---------------------------------------------------------------------------
 
 def commit_and_push_log(log_path: str = None) -> bool:
-    """JSON 会話ログファイルを 1 会話ごとに即 push するヘルパ（競合回避機能付き）"""
+    """JSON 会話ログファイルを 1 会話ごとに即 push するヘルパ（競合回避・stash機能付き）"""
+    stash_created = False
     try:
+        # 未ステージ変更がある場合はstashする
+        status_result = subprocess.run(["git", "status", "--porcelain"], 
+                                     capture_output=True, timeout=5)
+        if status_result.stdout.strip():
+            print("📦 Stashing unstaged changes before log pull", flush=True)
+            stash_result = subprocess.run(["git", "stash", "--include-untracked"], 
+                                        capture_output=True, timeout=10)
+            if stash_result.returncode == 0:
+                stash_created = True
+            else:
+                print(f"⚠️ Git stash for log failed: {stash_result.stderr.decode()}", flush=True)
+        
         # 最新状態に同期してから実行
         result = subprocess.run(["git", "pull", "--rebase", "origin", "main"], 
                               capture_output=True, timeout=10, check=False)
+        
+        # stashした変更を復元
+        if stash_created:
+            pop_result = subprocess.run(["git", "stash", "pop"], 
+                                      capture_output=True, timeout=10)
+            if pop_result.returncode != 0:
+                print(f"⚠️ Git stash pop for log failed: {pop_result.stderr.decode()}", flush=True)
+            stash_created = False
+        
         if result.returncode != 0:
             print(f"⚠️ Git pull for log failed: {result.stderr.decode()}", flush=True)
         
@@ -104,10 +126,22 @@ def commit_and_push_log(log_path: str = None) -> bool:
                 try_git_commit(str(log_file))
         return True
     except subprocess.TimeoutExpired:
-        print("⚠️ Git pull for log timed out", flush=True)
+        print("⚠️ Git operation for log timed out", flush=True)
+        # タイムアウト時もstashをクリーンアップ
+        if stash_created:
+            try:
+                subprocess.run(["git", "stash", "pop"], capture_output=True, timeout=5)
+            except:
+                pass
         return False
     except Exception as e:
         print(f"❌ 会話ログのコミット失敗: {e}", flush=True)
+        # エラー時もstashをクリーンアップ
+        if stash_created:
+            try:
+                subprocess.run(["git", "stash", "pop"], capture_output=True, timeout=5)
+            except:
+                pass
         return False
 
 def commit_and_push_llm_logs() -> bool:
@@ -185,18 +219,43 @@ def commit_and_push_project_data(project_id: str) -> bool:
         subprocess.run(["git", "config", "--global", "user.name", "Kai Bot"], check=True)
         subprocess.run(["git", "config", "--global", "user.email", "kai@example.com"], check=True)
         
-        # 最新状態に同期（競合回避）
+        # 最新状態に同期（競合回避・stash機能付き）
         max_retries = 3
+        stash_created = False
+        
         for attempt in range(max_retries):
             try:
+                # 未ステージ変更がある場合はstashする
+                status_result = subprocess.run(["git", "status", "--porcelain"], 
+                                             capture_output=True, timeout=5)
+                if status_result.stdout.strip():
+                    print(f"📦 Stashing unstaged changes before pull (attempt {attempt + 1})", flush=True)
+                    stash_result = subprocess.run(["git", "stash", "--include-untracked"], 
+                                                capture_output=True, timeout=10)
+                    if stash_result.returncode == 0:
+                        stash_created = True
+                    else:
+                        print(f"⚠️ Git stash failed: {stash_result.stderr.decode()}", flush=True)
+                
                 # プルして最新状態に同期
                 result = subprocess.run(["git", "pull", "--rebase", "origin", "main"], 
                                       capture_output=True, timeout=15)
+                
+                # stashした変更を復元
+                if stash_created:
+                    pop_result = subprocess.run(["git", "stash", "pop"], 
+                                              capture_output=True, timeout=10)
+                    if pop_result.returncode != 0:
+                        print(f"⚠️ Git stash pop failed: {pop_result.stderr.decode()}", flush=True)
+                    stash_created = False
+                
                 if result.returncode != 0:
                     print(f"⚠️ Git pull failed (attempt {attempt + 1}): {result.stderr.decode()}", flush=True)
                     if attempt == max_retries - 1:
                         raise subprocess.CalledProcessError(result.returncode, "git pull")
                     continue
+                else:
+                    break  # プル成功
                 
                 # プロジェクトファイル
                 project_file = f"data/projects/{project_id}.json"
@@ -236,6 +295,13 @@ def commit_and_push_project_data(project_id: str) -> bool:
                         
             except subprocess.TimeoutExpired:
                 print(f"⚠️ Git operation timed out (attempt {attempt + 1})", flush=True)
+                # タイムアウト時もstashをクリーンアップ
+                if stash_created:
+                    try:
+                        subprocess.run(["git", "stash", "pop"], capture_output=True, timeout=5)
+                        stash_created = False
+                    except:
+                        pass
                 if attempt == max_retries - 1:
                     raise
                 continue
@@ -244,9 +310,21 @@ def commit_and_push_project_data(project_id: str) -> bool:
         
     except subprocess.CalledProcessError as e:
         print(f"❌ プロジェクトデータのプッシュ失敗: {e}", flush=True)
+        # エラー時もstashをクリーンアップ
+        if stash_created:
+            try:
+                subprocess.run(["git", "stash", "pop"], capture_output=True, timeout=5)
+            except:
+                pass
         return False
     except Exception as e:
         print(f"❌ プロジェクトデータのプッシュで予期しないエラー: {e}", flush=True)
+        # エラー時もstashをクリーンアップ
+        if stash_created:
+            try:
+                subprocess.run(["git", "stash", "pop"], capture_output=True, timeout=5)
+            except:
+                pass
         return False
 
 @kai_capability(
