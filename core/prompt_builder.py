@@ -175,24 +175,83 @@ class PromptBuilder:
         return base_prompt
     
     def _summarize_project_context(self, project_context: Dict[str, Any]) -> str:
-        """プロジェクト状況を要約"""
+        """プロジェクト状況を要約（詳細情報含む）"""
         if not project_context:
             return "プロジェクトが選択されていません"
         
         project_id = project_context.get("identifier", "不明")
-        tasks = project_context.get("tasks", [])
+        display_name = project_context.get("display_name", "不明")
+        overview = project_context.get("overview", "")
         status = project_context.get("status", "不明")
+        phase = project_context.get("phase", "不明")
+        completion = project_context.get("completion_percentage", "不明")
+        tasks = project_context.get("tasks", [])
         
+        # 基本情報
+        basic_info = f"""プロジェクト: {project_id}
+プロジェクト名: {display_name}
+概要: {overview}
+ステータス: {status}
+フェーズ: {phase}
+進捗: {completion}%"""
+        
+        # タスク情報
         task_summary = ""
         if tasks:
             task_count = len(tasks)
-            recent_tasks = [f"- {t.get('description', '')} (期日: {t.get('due_date', '')})" 
+            pending_tasks = [t for t in tasks if t.get('status') == 'pending']
+            recent_tasks = [f"- [{t.get('id')}] {t.get('description', '')} (期日: {t.get('due_date', '')}, ステータス: {t.get('status', '')})" 
                           for t in tasks[-3:]]  # 最新3件
-            task_summary = f"\n現在のタスク数: {task_count}件\n最新のタスク:\n" + "\n".join(recent_tasks)
+            task_summary = f"\n\nタスク情報:\n現在のタスク数: {task_count}件 (うち未完了: {len(pending_tasks)}件)\n最新のタスク:\n" + "\n".join(recent_tasks)
         
-        return f"""プロジェクト: {project_id}
-ステータス: {status}
-{task_summary}"""
+        # 動的情報（重要なもののみ）
+        dynamic_summary = ""
+        dynamic_info = project_context.get("dynamic_info", {})
+        if dynamic_info and "fields" in dynamic_info:
+            fields = dynamic_info["fields"]
+            important_fields = []
+            
+            # 定義済みの重要フィールドを抽出（優先度順）
+            priority_order = ["participants", "timeline", "budget", "route_preference", "accommodation"]
+            
+            # 優先度の高いフィールドから処理
+            for field_name in priority_order:
+                if field_name in fields:
+                    field_data = fields[field_name]
+                    if field_data.get("status") == "defined" and field_data.get("value"):
+                        value = field_data["value"]
+                        # 長すぎる値は切り詰め
+                        if isinstance(value, str) and len(value) > 80:
+                            value = value[:80] + "..."
+                        important_fields.append(f"- {field_name}: {value}")
+            
+            # 残りのフィールドも処理（最大5項目まで）
+            for field_name, field_data in fields.items():
+                if len(important_fields) >= 5:
+                    break
+                if field_name not in priority_order and field_data.get("status") == "defined" and field_data.get("value"):
+                    value = field_data["value"]
+                    if isinstance(value, str) and len(value) > 80:
+                        value = value[:80] + "..."
+                    important_fields.append(f"- {field_name}: {value}")
+            
+            if important_fields:
+                dynamic_summary = f"\n\n重要な項目:\n" + "\n".join(important_fields[:5])  # 最大5項目
+        
+        # トークン制限チェック
+        full_summary = basic_info + task_summary + dynamic_summary
+        estimated_tokens = self.estimate_tokens(full_summary)
+        
+        # プロジェクト情報が長すぎる場合は切り詰め
+        if estimated_tokens > 300:  # プロジェクト情報の上限
+            # 動的情報を削減
+            if dynamic_summary:
+                lines = dynamic_summary.split('\n')
+                truncated_lines = lines[:4]  # 最初の3項目のみ
+                dynamic_summary = '\n'.join(truncated_lines) + "\n... (他の項目は省略)"
+                full_summary = basic_info + task_summary + dynamic_summary
+        
+        return full_summary
     
     def _summarize_conversation_history(self, conversation_history: List[Dict[str, str]]) -> str:
         """会話履歴を要約"""
