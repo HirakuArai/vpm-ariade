@@ -199,7 +199,7 @@ def process_chat_input_ai(user_input: str, current_project_id: Optional[str] = N
         # プロジェクト会話時はページ状態を確実に保持
         from .navigation import PageType
         current_page = st.session_state.navigation_state.current_page
-        if current_page not in [PageType.PROJECT_CHAT, PageType.PROJECT_HOME, PageType.PROJECT_TASKS]:
+        if current_page not in [PageType.PROJECT_CHAT, PageType.PROJECT_DETAILS]:
             # プロジェクトページでない場合はPROJECT_CHATに設定
             st.session_state.navigation_state.current_page = PageType.PROJECT_CHAT
             logger.info(f"Set page to PROJECT_CHAT for project conversation (was: {current_page})")
@@ -738,7 +738,7 @@ def _finalize_conversation(assistant_reply: str, current_project_id: Optional[st
             logger.info(f"Project conversation finished, maintaining current page: {current_page}")
             
             # PROJECT_CHATページまたはその他のプロジェクトページを維持
-            if current_page in [PageType.PROJECT_CHAT, PageType.PROJECT_HOME, PageType.PROJECT_TASKS]:
+            if current_page in [PageType.PROJECT_CHAT, PageType.PROJECT_DETAILS]:
                 # 現在のページを維持（rerunしない）
                 logger.info(f"Staying on project page: {current_page}")
             else:
