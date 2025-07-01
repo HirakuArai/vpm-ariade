@@ -116,8 +116,8 @@ class PromptBuilder:
     ) -> str:
         """統一プロンプトを構築（トークン制限付き）"""
         
-        # プロジェクト状況の要約
-        project_summary = self._summarize_project_context(project_context)
+        # プロジェクト状況の要約（質問内容に応じて適応的に）
+        project_summary = self._summarize_project_context(project_context, user_input)
         
         # 会話履歴の要約
         conversation_summary = self._summarize_conversation_history(conversation_history)
@@ -174,8 +174,8 @@ class PromptBuilder:
         
         return base_prompt
     
-    def _summarize_project_context(self, project_context: Dict[str, Any]) -> str:
-        """プロジェクト状況を要約（詳細情報含む）"""
+    def _summarize_project_context(self, project_context: Dict[str, Any], user_input: str = "") -> str:
+        """プロジェクト状況を要約（詳細情報含む・質問内容に適応）"""
         if not project_context:
             return "プロジェクトが選択されていません"
         
@@ -204,39 +204,55 @@ class PromptBuilder:
                           for t in tasks[-3:]]  # 最新3件
             task_summary = f"\n\nタスク情報:\n現在のタスク数: {task_count}件 (うち未完了: {len(pending_tasks)}件)\n最新のタスク:\n" + "\n".join(recent_tasks)
         
-        # 動的情報（重要なもののみ）
+        # 動的情報（質問内容に応じて適応的に抽出）
         dynamic_summary = ""
         dynamic_info = project_context.get("dynamic_info", {})
         if dynamic_info and "fields" in dynamic_info:
             fields = dynamic_info["fields"]
             important_fields = []
             
-            # 定義済みの重要フィールドを抽出（優先度順）
-            priority_order = ["participants", "timeline", "budget", "route_preference", "accommodation"]
+            # 質問内容に応じて関連フィールドを優先
+            question_related_fields = self._identify_relevant_fields(user_input, fields)
             
-            # 優先度の高いフィールドから処理
-            for field_name in priority_order:
+            # 基本的な優先度順
+            default_priority_order = ["participants", "timeline", "budget", "route_preference", "accommodation"]
+            
+            # 質問関連フィールドを最優先で処理
+            for field_name in question_related_fields:
                 if field_name in fields:
                     field_data = fields[field_name]
                     if field_data.get("status") == "defined" and field_data.get("value"):
                         value = field_data["value"]
-                        # 長すぎる値は切り詰め
+                        # 質問に関連するフィールドは長めに表示
+                        if isinstance(value, str) and len(value) > 500:
+                            value = value[:500] + "..."
+                        important_fields.append(f"- {field_name}: {value}")
+            
+            # 残りの基本フィールドを処理
+            for field_name in default_priority_order:
+                if len(important_fields) >= 6:  # 質問関連があるため制限を緩める
+                    break
+                if field_name not in question_related_fields and field_name in fields:
+                    field_data = fields[field_name]
+                    if field_data.get("status") == "defined" and field_data.get("value"):
+                        value = field_data["value"]
                         if isinstance(value, str) and len(value) > 80:
                             value = value[:80] + "..."
                         important_fields.append(f"- {field_name}: {value}")
             
-            # 残りのフィールドも処理（最大5項目まで）
+            # その他のフィールドも少し追加
             for field_name, field_data in fields.items():
-                if len(important_fields) >= 5:
+                if len(important_fields) >= 8:  # 最大8項目
                     break
-                if field_name not in priority_order and field_data.get("status") == "defined" and field_data.get("value"):
-                    value = field_data["value"]
-                    if isinstance(value, str) and len(value) > 80:
-                        value = value[:80] + "..."
-                    important_fields.append(f"- {field_name}: {value}")
+                if field_name not in question_related_fields and field_name not in default_priority_order:
+                    if field_data.get("status") == "defined" and field_data.get("value"):
+                        value = field_data["value"]
+                        if isinstance(value, str) and len(value) > 80:
+                            value = value[:80] + "..."
+                        important_fields.append(f"- {field_name}: {value}")
             
             if important_fields:
-                dynamic_summary = f"\n\n重要な項目:\n" + "\n".join(important_fields[:5])  # 最大5項目
+                dynamic_summary = f"\n\n重要な項目:\n" + "\n".join(important_fields)
         
         # トークン制限チェック
         full_summary = basic_info + task_summary + dynamic_summary
@@ -252,6 +268,42 @@ class PromptBuilder:
                 full_summary = basic_info + task_summary + dynamic_summary
         
         return full_summary
+    
+    def _identify_relevant_fields(self, user_input: str, fields: Dict[str, Any]) -> List[str]:
+        """質問内容から関連するフィールドを特定"""
+        relevant_fields = []
+        user_input_lower = user_input.lower()
+        
+        # キーワードベースの関連性マップ
+        keyword_field_map = {
+            "装備": ["equipment_list"],
+            "道具": ["equipment_list"],
+            "持ち物": ["equipment_list"],
+            "リスト": ["equipment_list"],
+            "ルート": ["route_preference", "itinerary_details"],
+            "行程": ["itinerary_details", "time_estimates"],
+            "スケジュール": ["itinerary_details", "timeline"],
+            "日程": ["timeline", "itinerary_details"],
+            "宿泊": ["accommodation"],
+            "山小屋": ["accommodation"],
+            "参加者": ["participants"],
+            "人数": ["participants"],
+            "予算": ["budget"],
+            "費用": ["budget"],
+            "標高": ["elevation_info"],
+            "時間": ["time_estimates"],
+            "温泉": ["post_activity"],
+            "下山後": ["post_activity"]
+        }
+        
+        # ユーザー入力から関連キーワードを検索
+        for keyword, field_names in keyword_field_map.items():
+            if keyword in user_input_lower:
+                for field_name in field_names:
+                    if field_name in fields and field_name not in relevant_fields:
+                        relevant_fields.append(field_name)
+        
+        return relevant_fields
     
     def _summarize_conversation_history(self, conversation_history: List[Dict[str, str]]) -> str:
         """会話履歴を要約"""
