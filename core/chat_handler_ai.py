@@ -9,7 +9,7 @@ import logging
 import os
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List, Dict
 import streamlit as st
 from zoneinfo import ZoneInfo
 
@@ -94,6 +94,78 @@ def _append_project_log(project_id: str, role: str, content: str) -> None:
     with log_path.open("a", encoding="utf-8") as fp:
         fp.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
 
+def _load_project_conversation_history(project_id: str, max_messages: int = 20, days_back: int = 7) -> List[Dict[str, str]]:
+    """
+    Load recent conversation history for a specific project
+    
+    Args:
+        project_id: Project identifier
+        max_messages: Maximum number of messages to load (default: 20)
+        days_back: Number of days to look back (default: 7)
+        
+    Returns:
+        List of conversation messages in format [{"role": "user/assistant", "content": "..."}]
+    """
+    conversation_history = []
+    project_conv_dir = Path(f"data/conversations/{project_id}")
+    
+    if not project_conv_dir.exists():
+        logger.debug(f"No conversation directory found for project {project_id}")
+        return conversation_history
+    
+    try:
+        # Get date range to search
+        today = datetime.now(_JST)
+        dates_to_check = []
+        for i in range(days_back):
+            date = (today - timedelta(days=i)).strftime("%Y%m%d")
+            dates_to_check.append(date)
+        
+        # Collect all messages from recent days
+        all_messages = []
+        for date in dates_to_check:
+            log_file = project_conv_dir / f"{date}.jsonl"
+            if log_file.exists():
+                try:
+                    with log_file.open("r", encoding="utf-8") as fp:
+                        for line in fp:
+                            line = line.strip()
+                            if line:
+                                try:
+                                    entry = json.loads(line)
+                                    if entry.get("role") in ["user", "assistant"]:
+                                        all_messages.append({
+                                            "role": entry["role"],
+                                            "content": entry["content"],
+                                            "timestamp": entry.get("timestamp", "")
+                                        })
+                                except json.JSONDecodeError as e:
+                                    logger.warning(f"Failed to parse line in {log_file}: {e}")
+                                    continue
+                except Exception as e:
+                    logger.error(f"Error reading conversation file {log_file}: {e}")
+                    continue
+        
+        # Sort by timestamp and take the most recent messages
+        all_messages.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+        recent_messages = all_messages[:max_messages]
+        
+        # Reverse to get chronological order (oldest first)
+        recent_messages.reverse()
+        
+        # Convert to format expected by AI
+        conversation_history = [
+            {"role": msg["role"], "content": msg["content"]} 
+            for msg in recent_messages
+        ]
+        
+        logger.info(f"Loaded {len(conversation_history)} conversation messages for project {project_id}")
+        
+    except Exception as e:
+        logger.error(f"Error loading project conversation history for {project_id}: {e}")
+    
+    return conversation_history
+
 def process_chat_input_ai(user_input: str, current_project_id: Optional[str] = None):
     """
     AI-First チャット入力処理
@@ -151,7 +223,24 @@ def process_chat_input_ai(user_input: str, current_project_id: Optional[str] = N
             logger.error(f"Failed to get project context: {e}")
     
     # 会話履歴の準備
-    conversation_history = st.session_state.get("history", [])
+    if current_project_id:
+        # プロジェクト会話の場合：プロジェクト固有の過去会話履歴を含める
+        project_conversation_history = _load_project_conversation_history(current_project_id)
+        # 現在のセッションの履歴も追加
+        session_history = st.session_state.get("history", [])
+        # プロジェクト履歴 + セッション履歴を結合（重複排除）
+        conversation_history = project_conversation_history + session_history
+        
+        # トークン制限を考慮して履歴を制限（最新のN件のみ保持）
+        max_history_length = 15  # プロンプトトークンを考慮した適切な長さ
+        if len(conversation_history) > max_history_length:
+            conversation_history = conversation_history[-max_history_length:]
+            logger.info(f"Truncated conversation history to {max_history_length} messages for token limit")
+        
+        logger.info(f"Combined conversation history: {len(project_conversation_history)} project + {len(session_history)} session = {len(conversation_history)} total (final)")
+    else:
+        # ホーム会話の場合：セッション履歴のみ使用
+        conversation_history = st.session_state.get("history", [])
     
     # タイピングインジケータ表示
     typing_placeholder = st.empty()

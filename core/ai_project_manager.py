@@ -379,13 +379,27 @@ class AIProjectManager:
         if not conversation_history:
             return "新しい会話です"
         
-        recent_messages = conversation_history[-6:]  # 最新6メッセージ
-        summary = "最近の会話:\n"
+        # より多くのメッセージを含めて文脈を改善
+        recent_messages = conversation_history[-10:]  # 最新10メッセージ
+        total_messages = len(conversation_history)
+        
+        summary = f"最近の会話（直近{len(recent_messages)}件／全{total_messages}件）:\n"
         
         for msg in recent_messages:
             role = "ユーザー" if msg.get("role") == "user" else "AI"
-            content = msg.get("content", "")[:100]  # 100文字で切る
-            summary += f"- {role}: {content}...\n"
+            content = msg.get("content", "")
+            
+            # 重要な情報を含む場合は長めに保持
+            if any(keyword in content for keyword in ["タスク", "完了", "進捗", "予定", "変更", "問題"]):
+                content_preview = content[:150]  # 重要な内容は150文字
+            else:
+                content_preview = content[:80]   # 通常は80文字
+                
+            summary += f"- {role}: {content_preview}...\n"
+        
+        # プロジェクト固有の履歴がある場合の注釈
+        if total_messages > len(recent_messages):
+            summary += f"\n※ このプロジェクトには他に{total_messages - len(recent_messages)}件の過去の会話があります\n"
         
         return summary
     
