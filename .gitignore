@@ -1,7 +1,12 @@
-# 仮想環境
+# 仮想環境とキャッシュ
 venv/
 __pycache__/
+*/__pycache__/
+**/__pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
 
 # 環境変数ファイル
 .env

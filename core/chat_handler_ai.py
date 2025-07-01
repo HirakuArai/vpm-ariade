@@ -689,20 +689,36 @@ def _finalize_conversation(assistant_reply: str, current_project_id: Optional[st
     if current_project_id:
         _append_project_log(current_project_id, "assistant", assistant_reply)
     
-    # Git操作（非同期実行でエラーを回避）
+    # Git操作（レート制限付き非同期実行）
     try:
         from .git_ops import commit_and_push_log, commit_and_push_project_data
         import threading
+        import time
         
         def git_operations():
-            """Git操作を別スレッドで実行"""
+            """Git操作を別スレッドで実行（レート制限付き）"""
             try:
+                # Git操作の前に少し待機（ファイルシステムの安定化）
+                time.sleep(0.5)
+                
+                # 最後のGit操作から一定時間経過している場合のみ実行
+                last_git_time = getattr(st.session_state, '_last_git_operation', 0)
+                current_time = time.time()
+                
+                if current_time - last_git_time < 2.0:  # 2秒以内の連続操作を防ぐ
+                    logger.info("Git operation skipped due to rate limiting")
+                    return
+                
+                st.session_state._last_git_operation = current_time
+                
                 commit_and_push_log()
                 if current_project_id:
                     commit_and_push_project_data(current_project_id)
                 logger.info("Git operations completed successfully")
+                
             except Exception as git_error:
                 logger.error(f"Git operations failed: {git_error}")
+                # Git操作失敗時はStreamlitには影響させない
         
         # Git操作を別スレッドで実行（UIブロッキングを防ぐ）
         git_thread = threading.Thread(target=git_operations, daemon=True)
@@ -710,6 +726,7 @@ def _finalize_conversation(assistant_reply: str, current_project_id: Optional[st
         
     except Exception as e:
         logger.error(f"Error initializing git operations: {e}")
+        # Git操作の失敗はメイン処理に影響させない
     
     # ナビゲーション状態の保持
     if not hasattr(st.session_state, 'navigation_state') or st.session_state.navigation_state is None:

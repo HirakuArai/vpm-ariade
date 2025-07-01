@@ -1,0 +1,16 @@
+[server]
+# ファイルウォッチャーの感度を下げてエラーを軽減
+fileWatcherType = "poll"
+runOnSave = true
+
+[global]
+# デバッグモードを無効化
+developmentMode = false
+
+[logger]
+# ログレベルを調整
+level = "warning"
+
+[runner]
+# 高速リロードを無効化（安定性重視）
+fastReruns = false
