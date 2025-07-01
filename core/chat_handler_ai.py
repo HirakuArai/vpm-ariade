@@ -195,11 +195,22 @@ def process_chat_input_ai(user_input: str, current_project_id: Optional[str] = N
         st.session_state["current_project_id"] = current_project_id
         # プロジェクト会話の場合：現在のページ状態を保持
         st.session_state.navigation_state.selected_project_id = current_project_id
+        
+        # プロジェクト会話時はページ状態を確実に保持
+        from .navigation import PageType
+        current_page = st.session_state.navigation_state.current_page
+        if current_page not in [PageType.PROJECT_CHAT, PageType.PROJECT_HOME, PageType.PROJECT_TASKS]:
+            # プロジェクトページでない場合はPROJECT_CHATに設定
+            st.session_state.navigation_state.current_page = PageType.PROJECT_CHAT
+            logger.info(f"Set page to PROJECT_CHAT for project conversation (was: {current_page})")
+        else:
+            logger.info(f"Maintaining project page: {current_page}")
     else:
         # ホーム会話の場合のみナビゲーション状態をリセット
         st.session_state.navigation_state.current_page = PageType.HOME
         st.session_state.navigation_state.selected_project_id = None
         st.session_state["current_project_id"] = None
+        logger.info("Set to HOME conversation mode")
 
     # AI Project Manager の初期化
     api_key = get_openai_api_key()
@@ -678,14 +689,27 @@ def _finalize_conversation(assistant_reply: str, current_project_id: Optional[st
     if current_project_id:
         _append_project_log(current_project_id, "assistant", assistant_reply)
     
-    # Git操作（既存機能維持）
+    # Git操作（非同期実行でエラーを回避）
     try:
         from .git_ops import commit_and_push_log, commit_and_push_project_data
-        commit_and_push_log()
-        if current_project_id:
-            commit_and_push_project_data(current_project_id)
+        import threading
+        
+        def git_operations():
+            """Git操作を別スレッドで実行"""
+            try:
+                commit_and_push_log()
+                if current_project_id:
+                    commit_and_push_project_data(current_project_id)
+                logger.info("Git operations completed successfully")
+            except Exception as git_error:
+                logger.error(f"Git operations failed: {git_error}")
+        
+        # Git操作を別スレッドで実行（UIブロッキングを防ぐ）
+        git_thread = threading.Thread(target=git_operations, daemon=True)
+        git_thread.start()
+        
     except Exception as e:
-        logger.error(f"Error pushing to git: {e}")
+        logger.error(f"Error initializing git operations: {e}")
     
     # ナビゲーション状態の保持
     if not hasattr(st.session_state, 'navigation_state') or st.session_state.navigation_state is None:
@@ -696,26 +720,35 @@ def _finalize_conversation(assistant_reply: str, current_project_id: Optional[st
     
     # プロジェクト会話の場合は現在のページ状態を保持し、ホーム会話の場合のみHOMEに設定
     if not current_project_id:
+        # ホーム会話の場合：HOMEページに設定してrerun
         st.session_state.navigation_state.current_page = PageType.HOME
         st.session_state.navigation_state.selected_project_id = None
         if "page" in st.query_params:
             st.query_params.clear()
-        # ホーム会話の場合のみ st.rerun() を実行
+        logger.info("Home conversation finished, executing rerun to HOME page")
         st.rerun()
     else:
-        # プロジェクト会話の場合は現在のページ状態を維持
-        # （PROJECT_CHATページから呼ばれた場合はそのページに留まる）
+        # プロジェクト会話の場合：現在のページ状態を維持し、rerunしない
         st.session_state.navigation_state.selected_project_id = current_project_id
         st.session_state["current_project_id"] = current_project_id
         
-        # プロジェクト会話の場合も、ナビゲーション状態を明示的に保持
+        # 現在のページ状態を保持（特にPROJECT_CHATページの場合）
         if hasattr(st.session_state, 'navigation_state') and st.session_state.navigation_state.current_page:
-            # 現在のページタイプを保持（PROJECT_CHATならそのまま維持）
             current_page = st.session_state.navigation_state.current_page
-            if current_page == PageType.PROJECT_CHAT:
-                # PROJECT_CHATページの場合はそのまま維持
-                pass
+            logger.info(f"Project conversation finished, maintaining current page: {current_page}")
+            
+            # PROJECT_CHATページまたはその他のプロジェクトページを維持
+            if current_page in [PageType.PROJECT_CHAT, PageType.PROJECT_HOME, PageType.PROJECT_TASKS]:
+                # 現在のページを維持（rerunしない）
+                logger.info(f"Staying on project page: {current_page}")
             else:
-                # 他のプロジェクトページからの場合はHOMEに戻さずに現在のページを維持
-                pass
-        # プロジェクト会話の場合は呼び出し元（pages.py）でページ更新を処理
+                # 不明なページの場合はPROJECT_CHATに設定
+                st.session_state.navigation_state.current_page = PageType.PROJECT_CHAT
+                logger.info("Set page to PROJECT_CHAT as fallback")
+        else:
+            # ナビゲーション状態が不正な場合のフォールバック
+            st.session_state.navigation_state.current_page = PageType.PROJECT_CHAT
+            logger.info("Fallback: Set page to PROJECT_CHAT")
+        
+        # 重要：プロジェクト会話では st.rerun() を実行しない
+        # 呼び出し元（pages.py）がページの更新を適切に処理します
