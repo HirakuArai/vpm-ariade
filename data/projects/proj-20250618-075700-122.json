@@ -6,7 +6,7 @@
   "created_by": "human_user",
   "status": "ACTIVE",
   "schema_version": "1.0",
-  "updated_at": "2025-06-20T17:40:13.627708",
+  "updated_at": "2025-07-02T03:01:38.057233+09:00",
   "change_log": [
     {
       "timestamp": "2025-06-17T22:57:00.123703",
@@ -35,6 +35,13 @@
       "id": 2,
       "description": "装備リスト作成",
       "due_date": "2025-07-05",
+      "owner": "human_user",
+      "status": "pending"
+    },
+    {
+      "id": 3,
+      "description": "ユーザーから提案のあった追加装備を装備リストに反映し、必要に応じて準備・調達方法も検討する。",
+      "due_date": "2025-07-08",
       "owner": "human_user",
       "status": "pending"
     }
