@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 st.set_page_config(
     page_title="Kai VPM - AI-First Virtual Project Manager", 
-    page_icon="🧠", 
+    page_icon="🤖", 
     initial_sidebar_state="expanded",
     layout="wide"
 )
@@ -697,3 +697,12 @@ with st.sidebar:
                     st.caption(rec)
 
 # 履歴表示（プロジェクト固有履歴＋セッション履歴）  
+
+# ===================================================================
+# CSS読み込み（要求事項に従った実装）
+# ===================================================================
+from pathlib import Path
+import streamlit as st
+
+css = Path("ui_style.css").read_text()
+st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
