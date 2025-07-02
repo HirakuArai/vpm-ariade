@@ -30,148 +30,73 @@ st.set_page_config(
     layout="wide"
 )
 
-# モダンなグローバルスタイルを適用
-st.markdown("""
+# AIテイストのグローバルスタイルを適用
+try:
+    with open('ui_style.css', 'r', encoding='utf-8') as f:
+        css = f.read()
+except FileNotFoundError:
+    st.warning("ui_style.css が見つかりません。デフォルトスタイルを使用します。")
+    css = ""
+
+st.markdown(f"""
 <style>
-/* グローバルフォントとカラーテーマ */
-.stApp {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-}
+{css}
 
-/* サイドバーのスタイリング */
-.css-1d391kg {
-    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-}
+/* メトリクスのカスタマイズ */
+[data-testid="metric-container"] {{
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: var(--shadow-sm);
+}}
 
-/* サイドバーボタンの色による選択状態表現 */
-.stButton > button[data-baseweb="button"][kind="secondary"] {
-    background: rgba(66, 133, 244, 0.5) !important;  /* 50% 透明度 */
-    color: rgba(255, 255, 255, 0.9) !important;
-    border: 1px solid rgba(66, 133, 244, 0.3) !important;
-    transition: all 0.3s ease !important;
-}
+[data-testid="metric-container"] [data-testid="metric-label"] {{
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}}
 
-.stButton > button[data-baseweb="button"][kind="primary"] {
-    background: rgba(66, 133, 244, 1.0) !important;  /* 100% 濃度 */
-    color: white !important;
-    border: 2px solid rgba(66, 133, 244, 1.0) !important;
-    font-weight: 600 !important;
-    box-shadow: 0 4px 15px rgba(66, 133, 244, 0.4) !important;
-    transition: all 0.3s ease !important;
-}
-
-.stButton > button[data-baseweb="button"][kind="primary"]:hover {
-    background: rgba(66, 133, 244, 1.0) !important;
-    box-shadow: 0 6px 20px rgba(66, 133, 244, 0.5) !important;
-    transform: translateY(-2px) !important;
-}
-
-.stButton > button[data-baseweb="button"][kind="secondary"]:hover {
-    background: rgba(66, 133, 244, 0.7) !important;  /* ホバー時は70% */
-    transform: translateY(-1px) !important;
-    box-shadow: 0 2px 10px rgba(66, 133, 244, 0.3) !important;
-}
-
-/* メインコンテンツエリア */
-.main .block-container {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    padding: 2rem;
-    margin-top: 1rem;
-}
-
-/* チャットメッセージのスタイリング */
-.stChatMessage {
-    border-radius: 15px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    margin: 8px 0;
-}
-
-/* ボタンのモダンスタイル */
-.stButton > button {
-    border-radius: 25px;
-    border: none;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+[data-testid="metric-container"] [data-testid="metric-value"] {{
+    font-size: 1.5rem;
     font-weight: 600;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-}
+    color: var(--text-primary);
+}}
 
-.stButton > button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-}
-
-/* インプットフィールドのスタイリング */
-.stTextInput > div > div > input {
-    border-radius: 15px;
-    border: 2px solid #e1e5e9;
-    transition: all 0.3s ease;
-}
-
-.stTextInput > div > div > input:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-/* カードスタイルコンポーネント */
-.stExpander {
-    border-radius: 15px;
-    border: 1px solid #e1e5e9;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(5px);
-}
-
-/* メトリクスのスタイリング */
-.metric-container {
-    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
-    border-radius: 15px;
+/* プロジェクトカード */
+.project-card {{
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     padding: 1rem;
     margin: 0.5rem 0;
-    color: white;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
+    transition: all 0.2s ease;
+}}
 
-/* アニメーション */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+.project-card:hover {{
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-light);
+}}
 
-.fade-in {
-    animation: fadeInUp 0.6s ease-out;
-}
+/* フェーズインジケーター */
+.phase-indicator {{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}}
 
-/* レスポンシブデザイン */
-@media (max-width: 768px) {
-    .main .block-container {
-        padding: 1rem;
-        margin: 0.5rem;
-        border-radius: 15px;
-    }
-}
-
-/* プロジェクト選択の強調 */
-.project-highlight {
-    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-    border-radius: 12px;
-    padding: 1rem;
-    margin: 1rem 0;
-    color: white;
-    font-weight: 600;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(132, 250, 176, 0.3);
-}
+/* アイコン調整 */
+.icon-sm {{ width: 16px; height: 16px; }}
+.icon-md {{ width: 20px; height: 20px; }}
+.icon-lg {{ width: 24px; height: 24px; }}
 </style>
 """, unsafe_allow_html=True)
 
