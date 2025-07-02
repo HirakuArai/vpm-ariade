@@ -216,11 +216,11 @@ class HierarchicalNavigator:
                 # プロジェクト選択時のホーム
                 project_data = self._get_project_summary(selected_project)
                 project_name = project_data.get("name", selected_project)
-                st.title(f"🧠 Kai VPM - {project_name}")
+                st.title(f"🤖 Kai VPM - {project_name}")
                 st.markdown(f"**📍 現在位置**: ホーム > {project_name}")
             else:
                 # メインホーム
-                st.title("🧠 Kai VPM - AI-First Virtual Project Manager")
+                st.title("🤖 Kai VPM - AI-First Virtual Project Manager")
                 st.markdown("**📍 現在位置**: ホーム")
             
             # 選択されたプロジェクトがある場合、プロジェクト情報を表示
