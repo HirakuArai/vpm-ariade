@@ -403,7 +403,7 @@ def render_phase_management_ui(project_id: str):
         
         if next_phase:
             if can_advance:
-                if st.button(f"📈 次フェーズへ進む\n({next_phase})", key="advance_phase"):
+                if st.button(f"次フェーズへ進む\n({next_phase})", key="advance_phase"):
                     success = lifecycle_manager.advance_phase(project_id)
                     if success:
                         st.success(f"フェーズを {next_phase} に進めました！")
