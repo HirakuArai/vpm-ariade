@@ -25,80 +25,12 @@ logger = logging.getLogger(__name__)
 
 st.set_page_config(
     page_title="Kai VPM - AI-First Virtual Project Manager", 
-    page_icon="🤖", 
+    page_icon="assets/icons/robot.svg", 
     initial_sidebar_state="expanded",
     layout="wide"
 )
 
-# AIテイストのグローバルスタイルを適用
-try:
-    with open('ui_style.css', 'r', encoding='utf-8') as f:
-        css = f.read()
-except FileNotFoundError:
-    st.warning("ui_style.css が見つかりません。デフォルトスタイルを使用します。")
-    css = ""
-
-st.markdown(f"""
-<style>
-{css}
-
-/* メトリクスのカスタマイズ */
-[data-testid="metric-container"] {{
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1rem;
-    box-shadow: var(--shadow-sm);
-}}
-
-[data-testid="metric-container"] [data-testid="metric-label"] {{
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}}
-
-[data-testid="metric-container"] [data-testid="metric-value"] {{
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text-primary);
-}}
-
-/* プロジェクトカード */
-.project-card {{
-    background-color: white;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1rem;
-    margin: 0.5rem 0;
-    transition: all 0.2s ease;
-}}
-
-.project-card:hover {{
-    box-shadow: var(--shadow-md);
-    border-color: var(--accent-light);
-}}
-
-/* フェーズインジケーター */
-.phase-indicator {{
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    padding: 0.375rem 0.75rem;
-    border-radius: 6px;
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-}}
-
-/* アイコン調整 */
-.icon-sm {{ width: 16px; height: 16px; }}
-.icon-md {{ width: 20px; height: 20px; }}
-.icon-lg {{ width: 24px; height: 24px; }}
-</style>
-""", unsafe_allow_html=True)
+# CSS will be loaded at the end of the file
 
 # Streamlitのマルチページ機能を無効化
 # pagesディレクトリの存在による自動ページ検出を防ぐ
@@ -699,10 +631,12 @@ with st.sidebar:
 # 履歴表示（プロジェクト固有履歴＋セッション履歴）  
 
 # ===================================================================
-# CSS読み込み（要求事項に従った実装）
+# CSS読み込み（要求事項に従った実装）- app.pyの最後に配置
 # ===================================================================
 from pathlib import Path
-import streamlit as st
 
-css = Path("ui_style.css").read_text()
-st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+try:
+    css = Path("ui_style.css").read_text(encoding="utf-8")
+    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+except FileNotFoundError:
+    st.warning("ui_style.css が見つかりません。デフォルトスタイルを使用します。")

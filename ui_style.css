@@ -43,13 +43,14 @@ h1, .text-3xl {
   line-height: 2.25rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;   /* mb-2 equivalent */
 }
 
 @media (min-width: 768px) {
   h1, .text-4xl {
     font-size: 2.25rem;    /* 36px - md:text-4xl */
     line-height: 2.5rem;
+    margin-bottom: 0.5rem; /* mb-2 equivalent */
   }
 }
 
@@ -114,6 +115,21 @@ p, li, .text-sm {
 
 .css-1d391kg .css-1vencpc {
   background-color: transparent !important;
+}
+
+/* サイドバー選択メニューの軽いインディゴ背景 */
+[data-testid="stSidebar"] .stButton > button[aria-pressed="true"],
+[data-testid="stSidebar"] .css-1n76uvr,
+[data-testid="stSidebar"] .stSelectbox > div[data-baseweb="select"] > div[aria-expanded="true"] {
+  background-color: rgba(99, 102, 241, 0.3) !important;
+  color: var(--text-primary) !important;
+}
+
+/* サイドバーのアクティブナビゲーション項目 */
+[data-testid="stSidebar"] .element-container .stButton > button:hover,
+[data-testid="stSidebar"] .element-container .stButton > button:focus {
+  background-color: rgba(99, 102, 241, 0.3) !important;
+  border-color: #6366f1 !important;
 }
 
 /* メインコンテナ */
@@ -453,4 +469,169 @@ p, li, .text-sm {
 /* 小さなテキストの最小サイズ確保 */
 .text-xs {
   font-size: 0.875rem !important; /* 14px以上を確保 */
+}
+
+/* ===========================
+   プロジェクトカード新仕様
+   =========================== */
+
+/* プロジェクトリストアイテム - 単色背景 + 左アクセントバー */
+.project-card, 
+[data-testid="stSidebar"] .element-container:has(.stButton) {
+  background-color: var(--bg-tertiary) !important;
+  border: none !important;
+  border-left: 4px solid var(--accent) !important;
+  border-radius: 0 8px 8px 0 !important;
+  padding: 0.75rem !important;
+  margin: 0.25rem 0 !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.project-card:hover,
+[data-testid="stSidebar"] .element-container:has(.stButton):hover {
+  background-color: var(--bg-secondary) !important;
+  border-left-color: var(--accent-hover) !important;
+}
+
+/* セクション分割線 - border-slate-300 */
+.stDivider, 
+hr,
+[data-testid="stDivider"] {
+  border-color: #cbd5e1 !important; /* slate-300 */
+  border-width: 1px !important;
+  margin: 1rem 0 !important;
+}
+
+/* Streamlitのデフォルト分割線をオーバーライド */
+.stDivider > div {
+  border-color: #cbd5e1 !important; /* slate-300 */
+}
+
+/* エクスパンダーの境界線も同じ色に */
+.stExpander {
+  border-color: #cbd5e1 !important; /* slate-300 */
+}
+
+/* ===========================
+   アクセシビリティ強化 (90+スコア対策)
+   =========================== */
+
+/* より高いコントラスト比を確保 */
+:root {
+  --text-primary: #111827;     /* gray-900 - さらに濃く */
+  --text-secondary: #374151;   /* gray-700 - さらに濃く */
+  --text-muted: #4b5563;       /* gray-600 - さらに濃く */
+}
+
+/* ボタンのコントラスト改善 */
+.stButton > button {
+  background-color: #3730a3 !important; /* indigo-800 - さらに濃く */
+  font-weight: 600 !important;
+}
+
+.stButton > button:hover {
+  background-color: #312e81 !important; /* indigo-900 */
+}
+
+/* セカンダリボタンのコントラスト改善 */
+.stButton > button[kind="secondary"] {
+  color: #111827 !important; /* gray-900 */
+  border-color: #374151 !important; /* gray-700 */
+  background-color: #f9fafb !important; /* gray-50 */
+}
+
+/* フォーカス表示の強化 */
+.stButton > button:focus-visible {
+  outline: 3px solid #6366f1 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5) !important;
+}
+
+/* インプットフィールドのコントラスト改善 */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea,
+.stSelectbox > div > div > select {
+  border: 2px solid #6b7280 !important; /* gray-500 */
+  color: #111827 !important; /* gray-900 */
+}
+
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus,
+.stSelectbox > div > div > select:focus {
+  border-color: #3730a3 !important; /* indigo-800 */
+  outline: 2px solid #6366f1 !important;
+  outline-offset: 1px !important;
+}
+
+/* ARIAラベルとセマンティック改善 */
+.stExpander > details > summary {
+  cursor: pointer !important;
+  font-weight: 600 !important;
+  color: #111827 !important; /* gray-900 */
+}
+
+/* メトリクスのコントラスト改善 */
+[data-testid="metric-container"] [data-testid="metric-label"] {
+  color: #4b5563 !important; /* gray-600 */
+  font-weight: 600 !important;
+}
+
+[data-testid="metric-container"] [data-testid="metric-value"] {
+  color: #111827 !important; /* gray-900 */
+  font-weight: 700 !important;
+}
+
+/* アラートのコントラスト最適化 */
+.stAlert[data-baseweb="notification"][kind="info"] {
+  color: #1e3a8a !important; /* blue-900 */
+  background-color: rgba(219, 234, 254, 0.8) !important; /* blue-100 */
+}
+
+.stAlert[data-baseweb="notification"][kind="success"] {
+  color: #14532d !important; /* green-900 */
+  background-color: rgba(220, 252, 231, 0.8) !important; /* green-100 */
+}
+
+.stAlert[data-baseweb="notification"][kind="warning"] {
+  color: #92400e !important; /* amber-800 */
+  background-color: rgba(254, 243, 199, 0.8) !important; /* amber-100 */
+}
+
+.stAlert[data-baseweb="notification"][kind="error"] {
+  color: #7f1d1d !important; /* red-900 */
+  background-color: rgba(254, 226, 226, 0.8) !important; /* red-100 */
+}
+
+/* リンクのコントラスト改善（もしあれば） */
+a, .stMarkdown a {
+  color: #3730a3 !important; /* indigo-800 */
+  text-decoration: underline !important;
+}
+
+a:hover, .stMarkdown a:hover {
+  color: #312e81 !important; /* indigo-900 */
+}
+
+/* サイドバーナビゲーションのコントラスト改善 */
+[data-testid="stSidebar"] .stButton > button {
+  color: #111827 !important; /* gray-900 */
+  font-weight: 500 !important;
+}
+
+/* 最小サイズ要件の厳格な適用 */
+.text-xs {
+  font-size: 1rem !important; /* 16px - アクセシビリティ基準 */
+  line-height: 1.5rem !important;
+}
+
+.text-sm {
+  font-size: 1rem !important; /* 16px - アクセシビリティ基準 */
+  line-height: 1.5rem !important;
+}
+
+/* ボタンの最小サイズ確保 */
+.stButton > button {
+  min-height: 44px !important; /* タッチ対応の最小サイズ */
+  min-width: 44px !important;
+  padding: 0.75rem 1.5rem !important;
 }
