@@ -1,4 +1,4 @@
-/* ui_style.css - Kai VPM AI-テイストデザインシステム（完全版） */
+/* UI Style CSS - VPM AI-First Dashboard (Claude Code 完全版) */
 
 /* ===========================
    カラートークン定義
@@ -14,43 +14,36 @@
   --text-secondary: #475569;   /* slate-600 - サブテキスト */
   --text-muted: #64748b;       /* slate-500 - 補助テキスト */
   
-  /* Accent Color */
+  /* Accent Color - indigo-500 */
   --accent: #6366f1;           /* indigo-500 - アクセントカラー */
   --accent-hover: #4f46e5;     /* indigo-600 - ホバー時 */
   --accent-light: #e0e7ff;     /* indigo-100 - 軽いアクセント */
   
   /* Border & Shadow */
   --border-color: #e2e8f0;     /* slate-200 */
-  --border-light: #f1f5f9;     /* slate-50 */
+  --border-light: #cbd5e1;     /* slate-300 - セクション区切り線 */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  
-  /* Status Colors (控えめ) */
-  --status-success: #10b981;   /* emerald-500 */
-  --status-warning: #f59e0b;   /* amber-500 */
-  --status-error: #ef4444;     /* red-500 */
-  --status-info: #3b82f6;      /* blue-500 */
 }
 
 /* ===========================
    タイポグラフィ階層 (Tailwind準拠)
    =========================== */
 
-/* Headings */
+/* Headings - Tailwind基準に縮小 */
 h1, .text-3xl {
   font-size: 1.875rem;     /* 30px - text-3xl */
   line-height: 2.25rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.5rem;   /* mb-2 equivalent */
+  margin-bottom: 0.5rem;   /* mb-2 */
 }
 
 @media (min-width: 768px) {
   h1, .text-4xl {
     font-size: 2.25rem;    /* 36px - md:text-4xl */
     line-height: 2.5rem;
-    margin-bottom: 0.5rem; /* mb-2 equivalent */
+    margin-bottom: 0.5rem; /* mb-2 */
   }
 }
 
@@ -59,21 +52,13 @@ h2, .text-2xl {
   line-height: 2rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 h3, .text-xl {
   font-size: 1.25rem;      /* 20px - text-xl */
   line-height: 1.75rem;
   font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 0.5rem;
-}
-
-h4, .text-lg {
-  font-size: 1.125rem;     /* 18px - text-lg */
-  line-height: 1.75rem;
-  font-weight: 500;
   color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
@@ -89,12 +74,6 @@ p, li, .text-sm {
   font-size: 1rem;         /* 16px - text-base */
   line-height: 1.5rem;
   color: var(--text-secondary);
-}
-
-.text-xs {
-  font-size: 0.75rem;      /* 12px - text-xs */
-  line-height: 1rem;
-  color: var(--text-muted);
 }
 
 /* ===========================
@@ -119,17 +98,11 @@ p, li, .text-sm {
 
 /* サイドバー選択メニューの軽いインディゴ背景 */
 [data-testid="stSidebar"] .stButton > button[aria-pressed="true"],
-[data-testid="stSidebar"] .css-1n76uvr,
-[data-testid="stSidebar"] .stSelectbox > div[data-baseweb="select"] > div[aria-expanded="true"] {
-  background-color: rgba(99, 102, 241, 0.3) !important;
-  color: var(--text-primary) !important;
-}
-
-/* サイドバーのアクティブナビゲーション項目 */
 [data-testid="stSidebar"] .element-container .stButton > button:hover,
 [data-testid="stSidebar"] .element-container .stButton > button:focus {
   background-color: rgba(99, 102, 241, 0.3) !important;
-  border-color: #6366f1 !important;
+  color: var(--text-primary) !important;
+  border-color: var(--accent) !important;
 }
 
 /* メインコンテナ */
@@ -173,22 +146,72 @@ p, li, .text-sm {
   border-color: var(--accent) !important;
 }
 
-/* 無効化ボタン */
-.stButton > button:disabled {
+/* ===========================
+   プロジェクトリスト - 単色背景+左アクセントバー
+   =========================== */
+
+/* プロジェクト項目の縦幅削減・スタイリング */
+.project-item, 
+[data-testid="stSidebar"] .element-container:has(.stButton) {
   background-color: var(--bg-secondary) !important;
-  color: var(--text-muted) !important;
-  cursor: not-allowed !important;
-  opacity: 0.6 !important;
+  border: none !important;
+  border-left: 4px solid var(--accent) !important;
+  border-radius: 0 6px 6px 0 !important;
+  padding: 0.25rem 0.5rem !important; /* py-1 px-2 相当 */
+  margin: 0.125rem 0 !important;
+  min-height: 36px !important;
+  transition: background-color 0.2s ease !important;
+  font-size: 0.875rem !important; /* text-sm */
+  line-height: 1.25rem !important; /* leading-5 */
 }
 
-/* チャットメッセージ */
-.stChatMessage {
+.project-item:hover,
+[data-testid="stSidebar"] .element-container:has(.stButton):hover {
   background-color: var(--bg-tertiary) !important;
-  border-radius: 8px !important;
-  padding: 1rem !important;
-  margin: 0.5rem 0 !important;
-  border: 1px solid var(--border-color) !important;
+  border-left-color: var(--accent-hover) !important;
 }
+
+/* プロジェクトリストのスクロール制御 */
+[data-testid="stSidebar"] .stContainer {
+  max-height: 60vh !important;
+  overflow-y: auto !important;
+}
+
+/* ===========================
+   区切り線の視認性向上
+   =========================== */
+
+/* セクション間の水平線 - border-slate-300 */
+.stDivider, 
+hr,
+[data-testid="stDivider"] {
+  border-color: var(--border-light) !important; /* slate-300 */
+  border-width: 1px !important;
+  margin: 1rem 0 !important;
+}
+
+.stDivider > div {
+  border-color: var(--border-light) !important; /* slate-300 */
+}
+
+/* エクスパンダーの境界線も同じ色に */
+.stExpander {
+  background-color: white !important;
+  border: 1px solid var(--border-light) !important; /* slate-300 */
+  border-radius: 8px !important;
+  margin: 0.5rem 0 !important;
+}
+
+.stExpander > details > summary {
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  color: var(--text-primary) !important;
+  padding: 0.75rem 1rem !important;
+}
+
+/* ===========================
+   その他のコンポーネント
+   =========================== */
 
 /* インプットフィールド */
 .stTextInput > div > div > input,
@@ -208,21 +231,6 @@ p, li, .text-sm {
   border-color: var(--accent) !important;
   box-shadow: 0 0 0 3px var(--accent-light) !important;
   outline: none !important;
-}
-
-/* エクスパンダー */
-.stExpander {
-  background-color: white !important;
-  border: 1px solid var(--border-color) !important;
-  border-radius: 8px !important;
-  margin: 0.5rem 0 !important;
-}
-
-.stExpander > details > summary {
-  font-size: 0.875rem !important;
-  font-weight: 500 !important;
-  color: var(--text-primary) !important;
-  padding: 0.75rem 1rem !important;
 }
 
 /* メトリクス */
@@ -270,55 +278,17 @@ p, li, .text-sm {
 
 .stAlert[data-baseweb="notification"][kind="info"] {
   background-color: rgba(59, 130, 246, 0.1) !important;
-  border-color: var(--status-info) !important;
+  border-color: #3b82f6 !important;
   color: var(--text-primary) !important;
 }
 
-.stAlert[data-baseweb="notification"][kind="success"] {
-  background-color: rgba(16, 185, 129, 0.1) !important;
-  border-color: var(--status-success) !important;
-  color: var(--text-primary) !important;
-}
-
-.stAlert[data-baseweb="notification"][kind="warning"] {
-  background-color: rgba(245, 158, 11, 0.1) !important;
-  border-color: var(--status-warning) !important;
-  color: var(--text-primary) !important;
-}
-
-.stAlert[data-baseweb="notification"][kind="error"] {
-  background-color: rgba(239, 68, 68, 0.1) !important;
-  border-color: var(--status-error) !important;
-  color: var(--text-primary) !important;
-}
-
-/* タブ */
-.stTabs [data-baseweb="tab-list"] {
+/* チャットメッセージ */
+.stChatMessage {
   background-color: var(--bg-tertiary) !important;
   border-radius: 8px !important;
-  padding: 0.25rem !important;
-  gap: 0.25rem !important;
-}
-
-.stTabs [data-baseweb="tab"] {
-  font-size: 0.875rem !important;
-  font-weight: 500 !important;
-  color: var(--text-secondary) !important;
-  background-color: transparent !important;
-  border-radius: 6px !important;
-  padding: 0.5rem 1rem !important;
-  transition: all 0.2s ease !important;
-}
-
-.stTabs [data-baseweb="tab"]:hover {
-  background-color: var(--bg-secondary) !important;
-  color: var(--text-primary) !important;
-}
-
-.stTabs [aria-selected="true"] {
-  background-color: white !important;
-  color: var(--accent) !important;
-  box-shadow: var(--shadow-sm) !important;
+  padding: 1rem !important;
+  margin: 0.5rem 0 !important;
+  border: 1px solid var(--border-color) !important;
 }
 
 /* レスポンシブデザイン */
@@ -349,289 +319,4 @@ p, li, .text-sm {
 
 .text-center {
   text-align: center !important;
-}
-
-/* カード風コンポーネント */
-.card {
-  background-color: white !important;
-  border: 1px solid var(--border-color) !important;
-  border-radius: 8px !important;
-  padding: 1.5rem !important;
-  margin: 0.5rem 0 !important;
-  box-shadow: var(--shadow-sm) !important;
-  transition: all 0.2s ease !important;
-}
-
-.card:hover {
-  box-shadow: var(--shadow-md) !important;
-  border-color: var(--accent-light) !important;
-}
-
-/* ステータスインジケーター */
-.status-indicator {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 0.5rem !important;
-  font-size: 0.875rem !important;
-  font-weight: 500 !important;
-  padding: 0.25rem 0.75rem !important;
-  border-radius: 4px !important;
-  background-color: var(--bg-tertiary) !important;
-  border: 1px solid var(--border-color) !important;
-  color: var(--text-primary) !important;
-}
-
-.status-indicator::before {
-  content: "" !important;
-  width: 8px !important;
-  height: 8px !important;
-  border-radius: 50% !important;
-  background-color: var(--accent) !important;
-}
-
-/* ===========================
-   本番用スタイル（Tailwind準拠）
-   =========================== */
-   
-/* フォントサイズの更なる細分化 */
-.text-2xs {
-  font-size: 0.6875rem;    /* 11px */
-  line-height: 1rem;
-}
-
-/* AI風デザイン要素 */
-.ai-gradient {
-  background: linear-gradient(135deg, var(--accent-light) 0%, var(--bg-tertiary) 100%);
-}
-
-.ai-glow {
-  box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
-}
-
-/* アクセシビリティ向上 */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
-  }
-}
-
-/* コントラスト比改善 */
-.stButton > button {
-  background-color: #4f46e5 !important; /* より濃いindigo-600 */
-}
-
-.stButton > button[kind="secondary"] {
-  color: #1f2937 !important; /* より濃いslate-800 */
-  border-color: #4b5563 !important; /* より濃いslate-600 */
-}
-
-/* フォーカス表示の改善 */
-.stButton > button:focus,
-.stTextInput > div > div > input:focus,
-.stTextArea > div > div > textarea:focus {
-  outline: 2px solid #6366f1 !important;
-  outline-offset: 2px !important;
-}
-
-/* テキストコントラスト改善 */
-p, li, .text-sm {
-  color: #374151 !important; /* より濃いgray-700 */
-}
-
-/* アラートのコントラスト改善 */
-.stAlert[data-baseweb="notification"][kind="info"] {
-  color: #1e40af !important; /* より濃いblue-800 */
-}
-
-.stAlert[data-baseweb="notification"][kind="success"] {
-  color: #065f46 !important; /* より濃いemerald-800 */
-}
-
-.stAlert[data-baseweb="notification"][kind="warning"] {
-  color: #92400e !important; /* より濃いamber-800 */
-}
-
-.stAlert[data-baseweb="notification"][kind="error"] {
-  color: #991b1b !important; /* より濃いred-800 */
-}
-
-/* ARIAラベルとセマンティック改善 */
-.stExpander > details > summary {
-  cursor: pointer !important;
-}
-
-/* キーボードナビゲーション改善 */
-.stButton > button:focus-visible {
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5) !important;
-}
-
-/* 小さなテキストの最小サイズ確保 */
-.text-xs {
-  font-size: 0.875rem !important; /* 14px以上を確保 */
-}
-
-/* ===========================
-   プロジェクトカード新仕様
-   =========================== */
-
-/* プロジェクトリストアイテム - 単色背景 + 左アクセントバー */
-.project-card, 
-[data-testid="stSidebar"] .element-container:has(.stButton) {
-  background-color: var(--bg-tertiary) !important;
-  border: none !important;
-  border-left: 4px solid var(--accent) !important;
-  border-radius: 0 8px 8px 0 !important;
-  padding: 0.75rem !important;
-  margin: 0.25rem 0 !important;
-  transition: background-color 0.2s ease !important;
-}
-
-.project-card:hover,
-[data-testid="stSidebar"] .element-container:has(.stButton):hover {
-  background-color: var(--bg-secondary) !important;
-  border-left-color: var(--accent-hover) !important;
-}
-
-/* セクション分割線 - border-slate-300 */
-.stDivider, 
-hr,
-[data-testid="stDivider"] {
-  border-color: #cbd5e1 !important; /* slate-300 */
-  border-width: 1px !important;
-  margin: 1rem 0 !important;
-}
-
-/* Streamlitのデフォルト分割線をオーバーライド */
-.stDivider > div {
-  border-color: #cbd5e1 !important; /* slate-300 */
-}
-
-/* エクスパンダーの境界線も同じ色に */
-.stExpander {
-  border-color: #cbd5e1 !important; /* slate-300 */
-}
-
-/* ===========================
-   アクセシビリティ強化 (90+スコア対策)
-   =========================== */
-
-/* より高いコントラスト比を確保 */
-:root {
-  --text-primary: #111827;     /* gray-900 - さらに濃く */
-  --text-secondary: #374151;   /* gray-700 - さらに濃く */
-  --text-muted: #4b5563;       /* gray-600 - さらに濃く */
-}
-
-/* ボタンのコントラスト改善 */
-.stButton > button {
-  background-color: #3730a3 !important; /* indigo-800 - さらに濃く */
-  font-weight: 600 !important;
-}
-
-.stButton > button:hover {
-  background-color: #312e81 !important; /* indigo-900 */
-}
-
-/* セカンダリボタンのコントラスト改善 */
-.stButton > button[kind="secondary"] {
-  color: #111827 !important; /* gray-900 */
-  border-color: #374151 !important; /* gray-700 */
-  background-color: #f9fafb !important; /* gray-50 */
-}
-
-/* フォーカス表示の強化 */
-.stButton > button:focus-visible {
-  outline: 3px solid #6366f1 !important;
-  outline-offset: 2px !important;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5) !important;
-}
-
-/* インプットフィールドのコントラスト改善 */
-.stTextInput > div > div > input,
-.stTextArea > div > div > textarea,
-.stSelectbox > div > div > select {
-  border: 2px solid #6b7280 !important; /* gray-500 */
-  color: #111827 !important; /* gray-900 */
-}
-
-.stTextInput > div > div > input:focus,
-.stTextArea > div > div > textarea:focus,
-.stSelectbox > div > div > select:focus {
-  border-color: #3730a3 !important; /* indigo-800 */
-  outline: 2px solid #6366f1 !important;
-  outline-offset: 1px !important;
-}
-
-/* ARIAラベルとセマンティック改善 */
-.stExpander > details > summary {
-  cursor: pointer !important;
-  font-weight: 600 !important;
-  color: #111827 !important; /* gray-900 */
-}
-
-/* メトリクスのコントラスト改善 */
-[data-testid="metric-container"] [data-testid="metric-label"] {
-  color: #4b5563 !important; /* gray-600 */
-  font-weight: 600 !important;
-}
-
-[data-testid="metric-container"] [data-testid="metric-value"] {
-  color: #111827 !important; /* gray-900 */
-  font-weight: 700 !important;
-}
-
-/* アラートのコントラスト最適化 */
-.stAlert[data-baseweb="notification"][kind="info"] {
-  color: #1e3a8a !important; /* blue-900 */
-  background-color: rgba(219, 234, 254, 0.8) !important; /* blue-100 */
-}
-
-.stAlert[data-baseweb="notification"][kind="success"] {
-  color: #14532d !important; /* green-900 */
-  background-color: rgba(220, 252, 231, 0.8) !important; /* green-100 */
-}
-
-.stAlert[data-baseweb="notification"][kind="warning"] {
-  color: #92400e !important; /* amber-800 */
-  background-color: rgba(254, 243, 199, 0.8) !important; /* amber-100 */
-}
-
-.stAlert[data-baseweb="notification"][kind="error"] {
-  color: #7f1d1d !important; /* red-900 */
-  background-color: rgba(254, 226, 226, 0.8) !important; /* red-100 */
-}
-
-/* リンクのコントラスト改善（もしあれば） */
-a, .stMarkdown a {
-  color: #3730a3 !important; /* indigo-800 */
-  text-decoration: underline !important;
-}
-
-a:hover, .stMarkdown a:hover {
-  color: #312e81 !important; /* indigo-900 */
-}
-
-/* サイドバーナビゲーションのコントラスト改善 */
-[data-testid="stSidebar"] .stButton > button {
-  color: #111827 !important; /* gray-900 */
-  font-weight: 500 !important;
-}
-
-/* 最小サイズ要件の厳格な適用 */
-.text-xs {
-  font-size: 1rem !important; /* 16px - アクセシビリティ基準 */
-  line-height: 1.5rem !important;
-}
-
-.text-sm {
-  font-size: 1rem !important; /* 16px - アクセシビリティ基準 */
-  line-height: 1.5rem !important;
-}
-
-/* ボタンの最小サイズ確保 */
-.stButton > button {
-  min-height: 44px !important; /* タッチ対応の最小サイズ */
-  min-width: 44px !important;
-  padding: 0.75rem 1.5rem !important;
 }

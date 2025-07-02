@@ -33,22 +33,22 @@ class HierarchicalNavigator:
         """初期化"""
         self.page_config = {
             PageType.HOME: {
-                "title": "🏠 ホーム",
+                "title": "ホーム",
                 "description": "メイン会話ページ",
                 "requires_project": False
             },
             PageType.PROJECT_DETAILS: {
-                "title": "📄 プロジェクト詳細",
+                "title": "プロジェクト詳細",
                 "description": "プロジェクトの詳細ドキュメント",
                 "requires_project": True
             },
             PageType.PROJECT_CHAT: {
-                "title": "💬 プロジェクト会話",
+                "title": "プロジェクト会話",
                 "description": "プロジェクトについて質問・相談",
                 "requires_project": True
             },
             PageType.CONVERSATION_HISTORY: {
-                "title": "💬 会話履歴",
+                "title": "会話履歴",
                 "description": "プロジェクト会話ログ",
                 "requires_project": True
             }
@@ -90,7 +90,7 @@ class HierarchicalNavigator:
             # ホームページボタンの選択状態表示
             is_home_selected = st.session_state.navigation_state.current_page == PageType.HOME and not st.session_state.navigation_state.selected_project_id
             
-            if st.button("🏠 ホーム", use_container_width=True, 
+            if st.button("ホーム", use_container_width=True, 
                         type="primary" if is_home_selected else "secondary",
                         key=f"nav_home_button_{st.session_state.nav_session_id}"):
                 st.session_state.navigation_state.current_page = PageType.HOME
@@ -236,7 +236,7 @@ class HierarchicalNavigator:
                 # ページタイプから直接設定を取得
                 config = self.page_config.get(current_page, {})
             
-            title = config.get("title", "🏠 ホーム")  # デフォルトをホームに変更
+            title = config.get("title", "ホーム")  # デフォルトをホームに変更
             st.title(title)
             
             selected_project = st.session_state.navigation_state.selected_project_id
@@ -245,7 +245,7 @@ class HierarchicalNavigator:
                 project_name = project_data.get("name", selected_project)
                 
                 # パンくずリスト表示
-                page_name = config.get("title", "ページ").replace("📄 ", "").replace("💬 ", "").replace("📋 ", "")
+                page_name = config.get("title", "ページ")
                 st.markdown(f"**📍 現在位置**: ホーム > {project_name} > {page_name}")
                 
                 # プロジェクト情報バー

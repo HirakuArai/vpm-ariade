@@ -241,16 +241,17 @@ def render_phase_management_ui(project_id: str):
         st.progress(progress_percentage, text=f"フェーズ進捗: {current_index + 1}/{len(phase_names)}")
         
         # 現在フェーズの表示
-        phase_emoji = {
-            "INCEPTION": "💡",
-            "DEFINITION": "📋", 
-            "PLANNING": "📅",
-            "EXECUTION": "🚀",
-            "MONITORING": "📊",
-            "CLOSURE": "✅"
+        phase_names = {
+            "INCEPTION": "着想",
+            "DEFINITION": "定義", 
+            "PLANNING": "計画",
+            "EXECUTION": "実行",
+            "MONITORING": "監視",
+            "CLOSURE": "完了"
         }
         
-        st.info(f"{phase_emoji.get(current_phase.value, '📌')} **現在**: {current_phase.value}")
+        phase_display = phase_names.get(current_phase.value, current_phase.value)
+        st.info(f"**現在フェーズ**: {phase_display}")
         st.metric("完了率", f"{completion:.1f}%")
         
         # フェーズ進行チェック
@@ -285,7 +286,7 @@ def render_phase_management_ui(project_id: str):
         # フェーズ履歴（展開可能）
         phase_history = progress_info.get("phase_history", [])
         if phase_history:
-            with st.expander("📚 フェーズ履歴"):
+            with st.expander("フェーズ履歴"):
                 for entry in reversed(phase_history[-5:]):  # 最新5件
                     timestamp = entry.get("timestamp", "")
                     from_phase = entry.get("from_phase", "")
@@ -321,11 +322,11 @@ nav_state = navigator.render_sidebar_navigation()
 # デバッグ・リセット機能（JavaScriptエラー対処用）
 with st.sidebar:
     st.divider()
-    with st.expander("🔧 デバッグ・リセット", expanded=False):
+    with st.expander("デバッグ・リセット", expanded=False):
         col1, col2 = st.columns(2)
         
         with col1:
-            if st.button("🔄 セッション\nリセット", help="JavaScriptエラー時に使用", use_container_width=True):
+            if st.button("セッション\nリセット", help="JavaScriptエラー時に使用", use_container_width=True):
                 # セッション状態をクリア
                 keys_to_clear = [k for k in st.session_state.keys() if k not in ['navigation_state']]
                 for key in keys_to_clear:
@@ -334,7 +335,7 @@ with st.sidebar:
                 st.rerun()
         
         with col2:
-            if st.button("ℹ️ JS エラー\n対処法", help="JavaScript Failed to fetch対処法", use_container_width=True):
+            if st.button("JS エラー\n対処法", help="JavaScript Failed to fetch対処法", use_container_width=True):
                 st.info("""
                 **JavaScriptエラー対処法:**
                 1. ハードリフレッシュ:
@@ -349,7 +350,7 @@ with st.sidebar:
         st.caption(f"Streamlit v{st.__version__}")
         
         # エラー診断
-        if st.button("🔍 エラー診断", use_container_width=True):
+        if st.button("エラー診断", use_container_width=True):
             st.write("**ブラウザ情報:**")
             st.code("User-Agent取得にはJavaScriptが必要です")
             st.write("**推奨ブラウザ:** Chrome, Firefox, Safari最新版")
@@ -406,13 +407,13 @@ def render_home_page():
             from core.lifecycle_manager import ProjectLifecycleManager
             
             # 動的スキーマ視覚化
-            with st.expander("📊 プロジェクト情報収集状況", expanded=True):
+            with st.expander("プロジェクト情報収集状況", expanded=True):
                 schema = get_project_schema(current_project_id)
                 ProjectVisualization.render_schema_progress(schema)
                 ProjectVisualization.render_field_cards(schema)
             
             # フェーズ進捗視覚化
-            with st.expander("🗺️ フェーズ進捗", expanded=False):
+            with st.expander("フェーズ進捗", expanded=False):
                 lifecycle_manager = ProjectLifecycleManager()
                 current_phase = lifecycle_manager.get_current_phase(current_project_id)
                 progress_info = lifecycle_manager.get_phase_progress(current_project_id)
@@ -457,26 +458,26 @@ def render_home_page():
                             st.error(f"❌ 評価中にエラーが発生しました: {e}")
             
             # 推奨アクション
-            with st.expander("💡 推奨アクション", expanded=False):
+            with st.expander("推奨アクション", expanded=False):
                 pending_questions = schema.get_pending_questions(max_questions=5)
                 
                 if pending_questions:
-                    st.info("💬 **次の会話で聞いてみましょう:**")
+                    st.info("**次の会話で聞いてみましょう:**")
                     for field_name, questions in pending_questions:
                         st.write(f"**{field_name}**: {questions[0]}")
                 else:
                     st.success("🎉 必要な情報がすべて収集されています！")
             
             # プロジェクト削除
-            with st.expander("🗑️ プロジェクト管理", expanded=False):
-                st.warning("⚠️ **危険な操作**")
+            with st.expander("プロジェクト管理", expanded=False):
+                st.warning("**危険な操作**")
                 
                 # 削除確認の状態管理
                 if f"confirm_delete_{current_project_id}" not in st.session_state:
                     st.session_state[f"confirm_delete_{current_project_id}"] = False
                 
                 if not st.session_state[f"confirm_delete_{current_project_id}"]:
-                    if st.button("🗑️ このプロジェクトを削除する", type="secondary", key=f"delete_btn_{current_project_id}"):
+                    if st.button("このプロジェクトを削除する", type="secondary", key=f"delete_btn_{current_project_id}"):
                         st.session_state[f"confirm_delete_{current_project_id}"] = True
                         st.rerun()
                 else:
@@ -485,7 +486,7 @@ def render_home_page():
                     
                     col1, col2 = st.columns(2)
                     with col1:
-                        if st.button("✅ はい、削除する", type="primary", key=f"confirm_yes_{current_project_id}"):
+                        if st.button("はい、削除する", type="primary", key=f"confirm_yes_{current_project_id}"):
                             try:
                                 # プロジェクトをARCHIVEDステータスに変更
                                 set_status(current_project_id, "ARCHIVED")
@@ -505,7 +506,7 @@ def render_home_page():
                                 st.error(f"削除に失敗しました: {e}")
                     
                     with col2:
-                        if st.button("❌ いいえ、キャンセル", key=f"confirm_no_{current_project_id}"):
+                        if st.button("いいえ、キャンセル", key=f"confirm_no_{current_project_id}"):
                             st.session_state[f"confirm_delete_{current_project_id}"] = False
                             st.rerun()
             
@@ -516,7 +517,7 @@ def render_home_page():
     else:
         # レスポンシブレイアウトでウェルカムメッセージを表示
         welcome_items = [
-            lambda: st.info("💡 左サイドバーからプロジェクトを選択するか、自然な言葉でプロジェクト作成を依頼してください。"),
+            lambda: st.info("左サイドバーからプロジェクトを選択するか、自然な言葉でプロジェクト作成を依頼してください。"),
             lambda: st.markdown("**例:**\n- 「ウェブサイト開発プロジェクトを始めたい」\n- 「会社研修を企画したい」\n- 「新商品の開発プロジェクトを作成して」")
         ]
         
@@ -531,7 +532,7 @@ def render_chat_interface():
     # セッション履歴表示（プロジェクト未選択時のホーム画面）
     history = st.session_state.get("history", [])
     if history:
-        st.markdown("### 💬 現在のセッション")
+        st.markdown("### 現在のセッション")
         for msg in history:
             role = msg.get("role", "")
             content = msg.get("content", "")
@@ -546,13 +547,13 @@ def render_chat_interface():
                 st.json(history[-1] if history else "履歴なし")
     
     st.divider()
-    st.markdown("### 💬 AI との会話")
+    st.markdown("### AI との会話")
     
     # プロジェクト作成のヒント
     current_nav_state = st.session_state.navigation_state
     current_project_id = current_nav_state.selected_project_id
     if not current_project_id:
-        st.info("💡 自然な言葉でプロジェクト作成やタスク追加を依頼してください。\n例：「ウェブサイト開発を始めたい」「データベース設計を来週までに完了したい」")
+        st.info("自然な言葉でプロジェクト作成やタスク追加を依頼してください。\n例：「ウェブサイト開発を始めたい」「データベース設計を来週までに完了したい」")
     
     # チャット入力
     user_input = st.chat_input("メッセージを入力してください…（自然な言葉でプロジェクト作成やタスク追加可能）")
@@ -600,12 +601,12 @@ with st.sidebar:
     st.divider()
     
     # システム状態表示
-    with st.expander("⚙️ システム状態", expanded=False):
+    with st.expander("システム状態", expanded=False):
         NotificationComponents.render_system_status()
     
     # AI品質管理ダッシュボード
     if st.session_state.get("ai_quality_manager"):
-        with st.expander("📊 AI品質管理", expanded=False):
+        with st.expander("AI品質管理", expanded=False):
             quality_manager = st.session_state["ai_quality_manager"]
             
             # 品質レポート表示
@@ -634,9 +635,7 @@ with st.sidebar:
 # CSS読み込み（要求事項に従った実装）- app.pyの最後に配置
 # ===================================================================
 from pathlib import Path
+import streamlit as st
 
-try:
-    css = Path("ui_style.css").read_text(encoding="utf-8")
-    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
-except FileNotFoundError:
-    st.warning("ui_style.css が見つかりません。デフォルトスタイルを使用します。")
+css = Path("ui_style.css").read_text()
+st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
