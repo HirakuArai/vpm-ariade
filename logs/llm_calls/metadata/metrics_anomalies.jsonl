@@ -1,2 +1,3 @@
 {"ts":"2025-06-29T20:27:45.449Z","metrics_anomaly":true,"task_id":"test-uuid","prompt_tokens":0,"completion_tokens":50}
 {"ts":"2025-06-29T20:27:45.449Z","metrics_anomaly":true,"task_id":"test-uuid","prompt_tokens":100,"completion_tokens":0}
+{"ts":"2025-07-03T20:35:05.787Z","metrics_anomaly":true,"task_id":"8891895f-5566-4c4c-9c5f-096742384d3d","prompt_tokens":0,"completion_tokens":0}
