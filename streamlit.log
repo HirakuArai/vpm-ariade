@@ -1,10 +1,12 @@
 
   You can now view your Streamlit app in your browser.
 
-  URL: http://0.0.0.0:8501
+  URL: http://0.0.0.0:8502
 
-  For better performance, install the Watchdog module:
-
-  $ xcode-select --install
-  $ pip install watchdog
-            
+🔍 render_page_content: current_page=PageType.HOME, selected_project=None
+🔍 render_page_content: current_page=PageType.HOME, selected_project=None
+INFO:core.chat_handler_ai:Set to HOME conversation mode
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+✅ JSONLエントリを書き込みました: 20250703_04.jsonl (サイズ: 9,437 bytes)
+✅ LLMログを書き込みました: logs/llm_calls/20250703_04.jsonl (task_id: 2e28d0e8-fb23-4d01-a6a4-369a9d6ec361)
+  Stopping...

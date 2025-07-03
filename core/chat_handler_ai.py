@@ -197,7 +197,6 @@ def process_chat_input_ai(user_input: str, current_project_id: Optional[str] = N
         st.session_state.navigation_state.selected_project_id = current_project_id
         
         # プロジェクト会話時はページ状態を確実に保持
-        from .navigation import PageType
         current_page = st.session_state.navigation_state.current_page
         if current_page not in [PageType.PROJECT_CHAT, PageType.PROJECT_DETAILS]:
             # プロジェクトページでない場合はPROJECT_CHATに設定
