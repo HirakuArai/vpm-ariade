@@ -521,14 +521,18 @@ def _execute_project_creation(action_plan, current_project_id: Optional[str]) ->
                     "description": project_description
                 })
                 
-                # 最初に作成されたプロジェクトを自動選択
+                # 最初に作成されたプロジェクトを自動選択（ホーム会話の場合は選択しない）
                 if len(created_projects) == 1:
-                    # ナビゲーション状態を更新
-                    if hasattr(st.session_state, 'navigation_state'):
-                        st.session_state.navigation_state.selected_project_id = project_id
-                        st.session_state["current_project_id"] = project_id
-                    
-                    logger.info(f"Created and selected project: {project_id}")
+                    # ホーム会話（current_project_id が None）の場合は自動選択しない
+                    if current_project_id is not None:
+                        # プロジェクト会話の場合のみ自動選択
+                        if hasattr(st.session_state, 'navigation_state'):
+                            st.session_state.navigation_state.selected_project_id = project_id
+                            st.session_state["current_project_id"] = project_id
+                        logger.info(f"Created and selected project: {project_id}")
+                    else:
+                        # ホーム会話の場合は作成のみ、選択はしない
+                        logger.info(f"Created project without auto-selection: {project_id}")
                     
                     # 新しく作成されたプロジェクトをGitにコミット
                     try:

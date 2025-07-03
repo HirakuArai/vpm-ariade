@@ -10,3 +10,7 @@ INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1
 ✅ JSONLエントリを書き込みました: 20250703_04.jsonl (サイズ: 9,437 bytes)
 ✅ LLMログを書き込みました: logs/llm_calls/20250703_04.jsonl (task_id: 2e28d0e8-fb23-4d01-a6a4-369a9d6ec361)
   Stopping...
+remote: Invalid username or password.
+fatal: Authentication failed for 'https://github.com/HirakuArai/vpm-ariade.git/'
+❌ LLMログのプッシュ失敗: Command '['git', 'push', 'https://your_github_token_here@github.com/HirakuArai/vpm-ariade.git']' returned non-zero exit status 128.
+✅ LLMログをGitHubにプッシュしました

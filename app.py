@@ -531,20 +531,30 @@ def render_chat_interface():
     """チャットインターフェースの描画"""
     # セッション履歴表示（プロジェクト未選択時のホーム画面）
     history = st.session_state.get("history", [])
+    
+    # 常にデバッグ情報を表示（一時的にトラブルシューティング用）
+    with st.expander("🔍 デバッグ情報", expanded=False):
+        st.write(f"履歴の長さ: {len(history)}")
+        st.write(f"セッション状態のキー: {list(st.session_state.keys())}")
+        if history:
+            st.write("最新の履歴:")
+            st.json(history[-1])
+        else:
+            st.write("履歴なし")
+    
+    # 履歴の表示
     if history:
         st.markdown("### 現在のセッション")
-        for msg in history:
+        for i, msg in enumerate(history):
             role = msg.get("role", "")
             content = msg.get("content", "")
             if role and content:
-                st.chat_message(role).markdown(content)
+                with st.chat_message(role):
+                    st.markdown(content)
+            else:
+                st.warning(f"メッセージ {i+1}: 不正な形式 - role: '{role}', content: '{content[:50]}...'")
     else:
-        # デバッグ情報（開発中のみ）
-        with st.expander("🔍 デバッグ情報", expanded=False):
-            st.write(f"履歴の長さ: {len(history)}")
-            st.write(f"セッション状態のキー: {list(st.session_state.keys())}")
-            if history:
-                st.json(history[-1] if history else "履歴なし")
+        st.info("まだ会話履歴がありません。下のチャット入力からメッセージを送信してください。")
     
     st.divider()
     st.markdown("### AI との会話")
@@ -593,8 +603,21 @@ render_page_content()
 # ホームページの場合のみ会話機能を表示（プロジェクト未選択時のみ）
 # 最新のナビゲーション状態を取得
 current_nav_state = st.session_state.navigation_state
+
+# デバッグ情報の表示（一時的に）
+st.sidebar.write("🔍 ナビゲーション状態:")
+st.sidebar.write(f"ページ: {current_nav_state.current_page}")
+st.sidebar.write(f"プロジェクトID: {current_nav_state.selected_project_id}")
+st.sidebar.write(f"チャット表示条件: {current_nav_state.current_page == PageType.HOME and not current_nav_state.selected_project_id}")
+
 if current_nav_state.current_page == PageType.HOME and not current_nav_state.selected_project_id:
     render_chat_interface()
+else:
+    # チャット非表示の理由を表示
+    if current_nav_state.current_page != PageType.HOME:
+        st.info(f"チャットは HOME ページでのみ利用可能です。現在: {current_nav_state.current_page.value}")
+    elif current_nav_state.selected_project_id:
+        st.info(f"プロジェクト選択時はプロジェクトページでチャットをご利用ください。選択中: {current_nav_state.selected_project_id}")
 
 # サイドバーに拡張機能を追加
 with st.sidebar:
