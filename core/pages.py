@@ -151,13 +151,10 @@ class ProjectDetailsPage:
         """プロジェクト詳細ページの描画"""
         st.subheader("📄 プロジェクト詳細ドキュメント")
         
-        # ナビゲーション状態を明示的に保持
+        # ナビゲーション状態を確保
         if hasattr(st.session_state, 'navigation_state'):
             st.session_state.navigation_state.current_page = PageType.PROJECT_DETAILS
             st.session_state.navigation_state.selected_project_id = project_id
-        
-        # プロジェクト詳細ページ専用の保護フラグ
-        st.session_state._in_project_details = True
         
         try:
             # プロジェクトデータの読み込み
@@ -172,29 +169,20 @@ class ProjectDetailsPage:
             if cache_key not in st.session_state:
                 # AIによるプロジェクト説明生成
                 with st.spinner("🤖 AIがプロジェクト詳細を整理中..."):
-                    # ナビゲーション状態を一時的に固定
-                    original_page = st.session_state.navigation_state.current_page
-                    original_project = st.session_state.navigation_state.selected_project_id
-                    
-                    detailed_description = ProjectDetailsPage._generate_ai_description(project_id, project_data)
-                    st.session_state[cache_key] = detailed_description
-                    
-                    # ナビゲーション状態を強制的に復元
-                    st.session_state.navigation_state.current_page = PageType.PROJECT_DETAILS
-                    st.session_state.navigation_state.selected_project_id = project_id
+                    try:
+                        detailed_description = ProjectDetailsPage._generate_ai_description(project_id, project_data)
+                        st.session_state[cache_key] = detailed_description
+                    except Exception as e:
+                        st.error(f"AI説明の生成に失敗しました: {e}")
+                        detailed_description = None
             else:
                 detailed_description = st.session_state[cache_key]
-            
-            # ページ表示前に最終ナビゲーション状態チェック
-            if hasattr(st.session_state, 'navigation_state'):
-                st.session_state.navigation_state.current_page = PageType.PROJECT_DETAILS
-                st.session_state.navigation_state.selected_project_id = project_id
             
             # AI生成の説明を表示
             if detailed_description:
                 st.markdown(detailed_description)
             else:
-                st.error("AIによるプロジェクト説明の生成に失敗しました")
+                st.warning("AI説明が利用できません。生データを確認してください。")
                 
             # 生データ表示オプション
             with st.expander("🔍 生データを確認", expanded=False):
@@ -208,9 +196,6 @@ class ProjectDetailsPage:
                     cache_key = f"project_detail_ai_{project_id}"
                     if cache_key in st.session_state:
                         del st.session_state[cache_key]
-                    # ナビゲーション状態を保持しながらリロード
-                    st.session_state.navigation_state.current_page = PageType.PROJECT_DETAILS
-                    st.session_state.navigation_state.selected_project_id = project_id
                     st.rerun()
             
         except Exception as e:
@@ -224,11 +209,6 @@ class ProjectDetailsPage:
             from core.v2.openai_config import get_openai_model
             from core.prompt_logger import log_call
             from core.log_schema import RequestKind
-            
-            # ナビゲーション状態を保持（AI処理中の状態変更を防ぐ）
-            if hasattr(st.session_state, 'navigation_state'):
-                st.session_state.navigation_state.current_page = PageType.PROJECT_DETAILS
-                st.session_state.navigation_state.selected_project_id = project_id
             
             # プロンプトの作成
             prompt = f"""
@@ -290,11 +270,6 @@ class ProjectDetailsPage:
                         }
                     }
                     log['log_response'](response_data, response.usage.prompt_tokens, response.usage.completion_tokens)
-                    
-                    # ナビゲーション状態を再度確認（AI処理後も維持）
-                    if hasattr(st.session_state, 'navigation_state'):
-                        st.session_state.navigation_state.current_page = PageType.PROJECT_DETAILS
-                        st.session_state.navigation_state.selected_project_id = project_id
                     
                     return response.choices[0].message.content
             
