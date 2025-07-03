@@ -687,14 +687,14 @@ def _finalize_conversation(assistant_reply: str, current_project_id: Optional[st
     if current_project_id:
         _append_project_log(current_project_id, "assistant", assistant_reply)
     
-    # Git操作（同期化機能付き）
+    # Git操作（非ブロッキング・エラー耐性強化版）
     try:
         from .git_ops import commit_and_push_log, commit_and_push_project_data
         import threading
         import time
         
         def git_operations():
-            """Git操作を別スレッドで実行（同期化・競合回避付き）"""
+            """Git操作を別スレッドで実行（エラー耐性強化版）"""
             try:
                 # Git操作ロックの取得
                 git_lock = getattr(st.session_state, '_git_operation_lock', None)
@@ -702,33 +702,25 @@ def _finalize_conversation(assistant_reply: str, current_project_id: Optional[st
                     st.session_state._git_operation_lock = threading.Lock()
                     git_lock = st.session_state._git_operation_lock
                 
-                # ロック取得を試行（タイムアウト付き）
-                if not git_lock.acquire(timeout=5.0):
+                # ロック取得を試行（タイムアウト短縮）
+                if not git_lock.acquire(timeout=2.0):
                     logger.warning("Git operation skipped: another operation in progress")
                     return
                 
                 try:
-                    # Git操作の前に少し待機（ファイルシステムの安定化）
-                    time.sleep(0.5)
-                    
-                    # 最後のGit操作から一定時間経過している場合のみ実行
+                    # レート制限チェック
                     last_git_time = getattr(st.session_state, '_last_git_operation', 0)
                     current_time = time.time()
                     
-                    if current_time - last_git_time < 3.0:  # 3秒以内の連続操作を防ぐ
+                    if current_time - last_git_time < 5.0:  # 5秒以内の連続操作を防ぐ
                         logger.info("Git operation skipped due to rate limiting")
                         return
                     
                     st.session_state._last_git_operation = current_time
                     
-                    # Git操作実行（プル→コミット→プッシュ）
+                    # Git操作実行（タイムアウト短縮・認証エラー対策）
                     try:
-                        # まず最新状態に同期
-                        import subprocess
-                        subprocess.run(["git", "pull", "--rebase", "origin", "main"], 
-                                     capture_output=True, check=False, timeout=10)
-                        
-                        # ログのコミット・プッシュ
+                        # ログのコミット・プッシュ（認証不要な場合のみ）
                         commit_and_push_log()
                         
                         # プロジェクトデータのコミット・プッシュ
@@ -737,24 +729,24 @@ def _finalize_conversation(assistant_reply: str, current_project_id: Optional[st
                             
                         logger.info("Git operations completed successfully")
                         
-                    except subprocess.TimeoutExpired:
-                        logger.warning("Git operation timed out")
                     except Exception as git_error:
-                        logger.error(f"Git operations failed: {git_error}")
+                        # Git操作のエラーはログに記録するが、メイン処理をブロックしない
+                        logger.warning(f"Git operations failed (non-blocking): {git_error}")
                         
                 finally:
                     # ロックを確実に解放
                     git_lock.release()
                     
             except Exception as git_error:
-                logger.error(f"Git operation error: {git_error}")
+                logger.warning(f"Git operation thread error (non-blocking): {git_error}")
         
         # Git操作を別スレッドで実行（UIブロッキングを防ぐ）
         git_thread = threading.Thread(target=git_operations, daemon=True)
         git_thread.start()
+        logger.info("Git operations started in background thread")
         
     except Exception as e:
-        logger.error(f"Error initializing git operations: {e}")
+        logger.warning(f"Git operations initialization failed (non-blocking): {e}")
         # Git操作の失敗はメイン処理に影響させない
     
     # ナビゲーション状態の保持
