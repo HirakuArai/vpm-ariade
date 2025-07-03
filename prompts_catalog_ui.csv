@@ -1,0 +1,26 @@
+filepath,line_no,symbol,preview
+/Users/hiraku/projects/vpm-ariade/core/ai_project_manager.py,189,AIProjectManager._get_ai_pm_system_prompt,AI Project Managerのシステムプロンプト
+/Users/hiraku/projects/vpm-ariade/core/ai_project_manager.py,318,AIProjectManager._build_unified_prompt,統一判断用のプロンプトを構築
+/Users/hiraku/projects/vpm-ariade/core/conversation_analyzer.py,168,ConversationAnalyzer._build_extraction_prompt,情報抽出用システムプロンプトを構築
+/Users/hiraku/projects/vpm-ariade/core/conversation_engine.py,61,PhaseAwareConversationEngine.get_system_prompt,フェーズ特化型システムプロンプトを生成
+/Users/hiraku/projects/vpm-ariade/core/minutes_utils.py,8,PROMPT_TMPL,You are Kai's Minutes Assistant. Output ...
+/Users/hiraku/projects/vpm-ariade/core/project_analyzer.py,98,ProjectContentAnalyzer._build_analysis_prompt,分析用システムプロンプトを構築
+/Users/hiraku/projects/vpm-ariade/core/project_prompt.py,20,get_project_prompt,     Generate project-specific context p...
+/Users/hiraku/projects/vpm-ariade/core/project_prompt.py,257,get_system_prompt,Get system prompt with caching for perfo...
+/Users/hiraku/projects/vpm-ariade/core/project_prompt.py,297,get_full_system_prompt,Get full system prompt including project...
+/Users/hiraku/projects/vpm-ariade/core/prompt_builder.py,23,PromptBuilder,安全なJSON出力とトークン管理を行うプロンプトビルダー
+/Users/hiraku/projects/vpm-ariade/core/prompt_builder.py,26,PromptBuilder.__init__,PromptBuilderを初期化
+/Users/hiraku/projects/vpm-ariade/core/prompt_builder.py,31,PromptBuilder._load_prompt_rules,docs/prompt_rules.mdからルールを読み込み
+/Users/hiraku/projects/vpm-ariade/core/prompt_builder.py,50,PromptBuilder.estimate_tokens,テキストのトークン数を概算
+/Users/hiraku/projects/vpm-ariade/core/prompt_builder.py,55,PromptBuilder.truncate_conversation_summary,会話履歴を指定トークン数以内に切り詰め
+/Users/hiraku/projects/vpm-ariade/core/prompt_builder.py,81,PromptBuilder.build_system_prompt,システムプロンプトを構築
+/Users/hiraku/projects/vpm-ariade/core/prompt_builder.py,82,base_prompt,あなたは経験豊富なバーチャルプロジェクトマネージャーです。 ユーザーとの自然な対...
+/Users/hiraku/projects/vpm-ariade/core/prompt_builder.py,117,PromptBuilder.build_unified_prompt,統一プロンプトを構築（トークン制限付き）
+/Users/hiraku/projects/vpm-ariade/core/prompt_builder.py,152,PromptBuilder._summarize_project_context,プロジェクト状況を要約（詳細情報含む・質問内容に適応）
+/Users/hiraku/projects/vpm-ariade/core/prompt_builder.py,229,PromptBuilder._identify_relevant_fields,質問内容から関連するフィールドを特定
+/Users/hiraku/projects/vpm-ariade/core/prompt_builder.py,265,PromptBuilder._summarize_conversation_history,会話履歴を要約（制限なし）
+/Users/hiraku/projects/vpm-ariade/core/prompt_builder.py,281,PromptBuilder.safe_json_response,安全なJSON文字列を生成（エスケープ重複を防ぐ）
+/Users/hiraku/projects/vpm-ariade/core/prompt_builder.py,299,create_prompt_builder,PromptBuilderのファクトリ関数
+/Users/hiraku/projects/vpm-ariade/core/prompt_logger.py,21,PromptLogger,Manages logging of LLM API calls with AI...
+/Users/hiraku/projects/vpm-ariade/core/prompt_logger.py,28,PromptLogger.__init__,Initialize the prompt logger
+/Users/hiraku/projects/vpm-ariade/core/prompt_logger.py,34,PromptLogger._ensure_log_directory,Ensure the log directory exists
