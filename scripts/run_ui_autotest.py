@@ -73,6 +73,16 @@ def run_playwright_automation():
             # Wait for page to load
             page.wait_for_timeout(3000)
             
+            # Check for Ariade persona display
+            try:
+                ariade_indicator = page.query_selector('div:has-text("現在の人格：Ariade"), div:has-text("現在の人格：ariade")')
+                if ariade_indicator:
+                    print("✅ Ariade persona detected on home page")
+                else:
+                    print("⚠️ Ariade persona not found on page")
+            except Exception as e:
+                print(f"Could not check Ariade persona: {e}")
+            
             # Try multiple selectors for chat input
             input_selectors = [
                 'textarea[placeholder*="メッセージ"]',  # Japanese placeholder

@@ -399,6 +399,10 @@ def render_page_content():
 
 def render_home_page():
     """ホームページ（メイン会話ページ）の描画"""
+    # 現在の人格表示
+    active_role = st.session_state.get("active_role", "ariade")
+    st.info(f"🤖 現在の人格：{active_role.capitalize()}")
+    
     # プロジェクト情報の視覚化（選択されている場合）
     current_project_id = nav_state.selected_project_id
     if current_project_id:
@@ -574,6 +578,9 @@ if "current_project_id" not in st.session_state:
     st.session_state["current_project_id"] = None
 if "update_candidates" not in st.session_state:
     st.session_state["update_candidates"] = []
+# Persona Switcher初期化 - active_roleをariadeに固定
+if "active_role" not in st.session_state:
+    st.session_state["active_role"] = "ariade"
 
 # AI Intent Detector初期化
 if "ai_intent_detector" not in st.session_state:

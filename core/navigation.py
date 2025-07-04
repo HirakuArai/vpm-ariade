@@ -95,6 +95,8 @@ class HierarchicalNavigator:
                         key=f"nav_home_button_{st.session_state.nav_session_id}"):
                 st.session_state.navigation_state.current_page = PageType.HOME
                 st.session_state.navigation_state.selected_project_id = None
+                # ホーム復帰時にactive_roleをariadeに固定
+                st.session_state["active_role"] = "ariade"
                 st.rerun()
             
             st.divider()
