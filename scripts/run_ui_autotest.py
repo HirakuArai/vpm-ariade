@@ -167,20 +167,44 @@ def kill_streamlit_processes():
         print(f"Error killing processes: {e}")
 
 
-def count_trace_lines() -> int:
-    """Count lines in the trace JSONL file."""
+def count_trace_lines() -> tuple[int, int, int]:
+    """Count lines in the trace JSONL file and return (total_lines, valid_symbols_count, tagged_symbols_count)."""
     trace_file = Path(__file__).parent.parent / "trace_llm_calls.jsonl"
     
     if not trace_file.exists():
-        return 0
+        return 0, 0, 0
     
     try:
+        import json
+        total_lines = 0
+        valid_symbols = 0
+        tagged_symbols = 0
+        
+        # Known PROMPT_ID tags to identify
+        known_tags = ['system_base', 'unified_builder', 'extraction_builder', 'analysis_builder']
+        
         with open(trace_file, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            return len([line for line in lines if line.strip()])
+            for line in f:
+                line = line.strip()
+                if line:
+                    total_lines += 1
+                    try:
+                        data = json.loads(line)
+                        symbol = data.get('symbol', '<unknown>')
+                        
+                        if symbol != "<unknown>":
+                            valid_symbols += 1
+                            
+                            # Check if symbol is a PROMPT_ID tag
+                            if symbol in known_tags:
+                                tagged_symbols += 1
+                    except json.JSONDecodeError:
+                        continue
+        
+        return total_lines, valid_symbols, tagged_symbols
     except Exception as e:
         print(f"Error reading trace file: {e}")
-        return 0
+        return 0, 0, 0
 
 
 def count_recent_llm_calls(start_time: float) -> int:
@@ -265,26 +289,29 @@ def main():
             print("UI automation failed, but continuing to check traces")
         
         # Count trace lines from custom tracer
-        custom_trace_count = count_trace_lines()
+        custom_trace_total, custom_trace_symbols, custom_trace_tagged = count_trace_lines()
         
         # Count LLM calls from existing log system
         existing_log_count = count_recent_llm_calls(automation_start_time)
         
-        total_count = custom_trace_count + existing_log_count
+        total_count = custom_trace_total + existing_log_count
         
         print(f"LLM calls traced: {total_count}")
-        if custom_trace_count > 0:
-            print(f"  - Custom tracer: {custom_trace_count}")
+        if custom_trace_total > 0:
+            print(f"  - Custom tracer: {custom_trace_total}")
         if existing_log_count > 0:
             print(f"  - Existing logs: {existing_log_count}")
         
-        # Success condition: at least 1 LLM call detected
-        success = total_count >= 1
+        print(f"Traced symbols: {custom_trace_symbols}")
+        print(f"Traced tagged symbols: {custom_trace_tagged}")
+        
+        # Success condition: at least 1 tagged symbol traced
+        success = custom_trace_tagged >= 1
         
         if success:
             print("✅ Autotest PASSED")
         else:
-            print("❌ Autotest FAILED - No LLM calls traced")
+            print(f"❌ Autotest FAILED - Tagged symbols traced: {custom_trace_tagged} (need >= 1)")
         
         return success
         

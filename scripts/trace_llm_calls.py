@@ -11,6 +11,8 @@ import subprocess
 import time
 import signal
 import os
+import inspect
+import re
 from pathlib import Path
 from typing import Dict, Any, Set
 import csv
@@ -26,6 +28,9 @@ class LLMCallTracer:
         
     def setup_tracing(self):
         """Setup function call tracing."""
+        # Store original methods
+        self.original_methods = {}
+        
         # Monkey patch OpenAI calls
         try:
             import openai
@@ -33,68 +38,179 @@ class LLMCallTracer:
         except ImportError:
             print("OpenAI not available for tracing")
         
-        # Setup general function tracing
-        sys.setprofile(self._profile_function)
+        # Don't use sys.setprofile as it can cause issues
+        # sys.setprofile(self._profile_function)
+        
+    def restore_original_methods(self):
+        """Restore original methods to prevent issues."""
+        try:
+            import openai
+            
+            if 'chat_create' in self.original_methods:
+                openai.chat.completions.create = self.original_methods['chat_create']
+                
+            if 'chat_completion_create' in self.original_methods:
+                openai.ChatCompletion.create = self.original_methods['chat_completion_create']
+                
+            print("Restored original OpenAI methods")
+        except Exception as e:
+            print(f"Error restoring original methods: {e}")
         
     def _patch_openai(self, openai_module):
         """Patch OpenAI API calls."""
-        original_create = None
+        # Store original methods for restoration
+        self.original_methods = {}
         
-        # Try to find and patch the create method
         try:
-            if hasattr(openai_module, 'ChatCompletion'):
-                original_create = openai_module.ChatCompletion.create
-                openai_module.ChatCompletion.create = self._wrap_openai_create(original_create)
-            elif hasattr(openai_module, 'chat') and hasattr(openai_module.chat, 'completions'):
-                original_create = openai_module.chat.completions.create
-                openai_module.chat.completions.create = self._wrap_openai_create(original_create)
+            # OpenAI v1.x structure: openai.chat.completions.create
+            if hasattr(openai_module, 'chat') and hasattr(openai_module.chat, 'completions'):
+                self.original_methods['chat_create'] = openai_module.chat.completions.create
+                openai_module.chat.completions.create = self._wrap_openai_create(self.original_methods['chat_create'])
+                print("Patched openai.chat.completions.create")
+            
+            # OpenAI v0.x structure: openai.ChatCompletion.create (fallback)
+            elif hasattr(openai_module, 'ChatCompletion'):
+                self.original_methods['chat_completion_create'] = openai_module.ChatCompletion.create
+                openai_module.ChatCompletion.create = self._wrap_openai_create(self.original_methods['chat_completion_create'])
+                print("Patched openai.ChatCompletion.create")
+            
+            # Try to also patch client instances
+            try:
+                import openai
+                client = openai.OpenAI()
+                if hasattr(client, 'chat') and hasattr(client.chat, 'completions'):
+                    self.original_methods['client_create'] = client.chat.completions.create
+                    client.chat.completions.create = self._wrap_openai_create(self.original_methods['client_create'])
+                    print("Patched client.chat.completions.create")
+            except Exception as e:
+                print(f"Could not patch client instance: {e}")
+                
         except Exception as e:
             print(f"Error patching OpenAI: {e}")
     
     def _wrap_openai_create(self, original_func):
         """Wrap OpenAI create function to trace calls."""
         def wrapper(*args, **kwargs):
+            symbol = "<unknown>"
             try:
+                print(f"OpenAI call intercepted with kwargs keys: {list(kwargs.keys())}")
+                
+                # Extract prompt variable name using stack inspection
+                symbol = self._extract_variable_symbol(args, kwargs)
+                print(f"Extracted symbol: {symbol}")
+                
                 # Extract prompt information
-                self._extract_prompt_info(args, kwargs)
+                self._extract_prompt_info(args, kwargs, symbol)
             except Exception as e:
                 print(f"Error extracting prompt info: {e}")
+                import traceback
+                traceback.print_exc()
+                # Still log with unknown symbol
+                self._extract_prompt_info(args, kwargs, symbol)
             
             # Call original function
             return original_func(*args, **kwargs)
         
         return wrapper
     
-    def _extract_prompt_info(self, args, kwargs):
+    def _extract_prompt_id_from_content(self, content):
+        """Extract PROMPT_ID from content string."""
+        if isinstance(content, str):
+            # Look for PROMPT_ID tag: <!--PROMPT_ID:system_base-->
+            match = re.search(r'<!--PROMPT_ID:(\w+)-->', content)
+            if match:
+                return match.group(1)
+        return None
+    
+    def _extract_variable_symbol(self, args, kwargs):
+        """Extract variable name or PROMPT_ID from the arguments."""
+        try:
+            # First, try to extract PROMPT_ID from content
+            prompt_id = None
+            
+            # Check messages parameter for PROMPT_ID
+            if 'messages' in kwargs:
+                messages = kwargs['messages']
+                if isinstance(messages, list):
+                    for msg in messages:
+                        if isinstance(msg, dict) and 'content' in msg:
+                            content = msg['content']
+                            prompt_id = self._extract_prompt_id_from_content(content)
+                            if prompt_id:
+                                print(f"Found PROMPT_ID in messages: {prompt_id}")
+                                return prompt_id
+            
+            # Check prompt parameter for PROMPT_ID
+            if 'prompt' in kwargs:
+                prompt = kwargs['prompt']
+                prompt_id = self._extract_prompt_id_from_content(prompt)
+                if prompt_id:
+                    print(f"Found PROMPT_ID in prompt: {prompt_id}")
+                    return prompt_id
+            
+            # If no PROMPT_ID found, fall back to variable name detection
+            # Get the caller's frame (go back several levels to find the actual caller)
+            frame = inspect.currentframe()
+            for _ in range(4):  # Go back through wrapper layers
+                if frame is None:
+                    break
+                frame = frame.f_back
+            
+            if frame is None:
+                return "messages"  # Default fallback
+            
+            local_vars = frame.f_locals
+            func_name = frame.f_code.co_name
+            
+            print(f"Checking frame: {func_name} with vars: {list(local_vars.keys())}")
+            
+            # Look for common variable names first
+            common_names = ['messages', 'request_messages', 'prompt', 'system_prompt', 'user_prompt']
+            for name in common_names:
+                if name in local_vars:
+                    print(f"Found common variable: {name}")
+                    return name
+            
+            # Look for any variable containing 'prompt' or 'message'
+            for var_name in local_vars.keys():
+                if any(keyword in var_name.lower() for keyword in ['prompt', 'message']):
+                    if not var_name.startswith('_'):
+                        print(f"Found keyword variable: {var_name}")
+                        return var_name
+            
+            # Use function name if it's related to prompts
+            if any(keyword in func_name.lower() for keyword in ['prompt', 'chat', 'message', 'ai']):
+                return f"function_{func_name}"
+            
+            # Final fallback based on content
+            if 'messages' in kwargs:
+                return 'messages'
+            elif 'prompt' in kwargs:
+                return 'prompt'
+            
+            return "<unknown>"
+            
+        except Exception as e:
+            print(f"Error in _extract_variable_symbol: {e}")
+            # Safe fallback
+            if 'messages' in kwargs:
+                return 'messages'
+            elif 'prompt' in kwargs:
+                return 'prompt'
+            return "<unknown>"
+    
+    def _extract_prompt_info(self, args, kwargs, symbol="<unknown>"):
         """Extract prompt information from API call arguments."""
-        symbols = set()
-        
-        # Check messages parameter
-        if 'messages' in kwargs:
-            messages = kwargs['messages']
-            if isinstance(messages, list):
-                for msg in messages:
-                    if isinstance(msg, dict) and 'content' in msg:
-                        content = msg['content']
-                        if isinstance(content, str):
-                            # Look for variable names in content
-                            symbols.update(self._extract_symbols_from_text(content))
-        
-        # Check prompt parameter
-        if 'prompt' in kwargs:
-            prompt = kwargs['prompt']
-            if isinstance(prompt, str):
-                symbols.update(self._extract_symbols_from_text(prompt))
-        
-        # Log the call
+        # Log the call with symbol
         call_info = {
-            'symbols': list(symbols),
+            'symbol': symbol,
             'timestamp': time.time(),
             'function': 'openai_create'
         }
         
         self.call_log.append(call_info)
-        self.traced_symbols.update(symbols)
+        if symbol != "<unknown>":
+            self.traced_symbols.add(symbol)
         
         # Write to JSONL immediately
         self._write_to_jsonl(call_info)
@@ -128,7 +244,7 @@ class LLMCallTracer:
                         self.traced_symbols.add(var_name)
                         
                         call_info = {
-                            'symbols': [var_name],
+                            'symbol': var_name,
                             'timestamp': time.time(),
                             'function': func_name
                         }
@@ -194,6 +310,12 @@ def start_streamlit_with_tracing():
         print(f"Error starting Streamlit: {e}")
     
     finally:
+        # Restore original methods
+        try:
+            tracer.restore_original_methods()
+        except Exception as e:
+            print(f"Error restoring methods: {e}")
+            
         # Kill Streamlit process
         if process:
             try:
@@ -228,7 +350,10 @@ def load_traced_symbols_from_jsonl() -> Set[str]:
                 if line:
                     try:
                         call_info = json.loads(line)
-                        if 'symbols' in call_info:
+                        if 'symbol' in call_info and call_info['symbol'] != "<unknown>":
+                            symbols.add(call_info['symbol'])
+                        # Backward compatibility with old format
+                        elif 'symbols' in call_info:
                             symbols.update(call_info['symbols'])
                     except json.JSONDecodeError as e:
                         print(f"Error parsing JSONL line: {e}")

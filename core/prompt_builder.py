@@ -106,7 +106,10 @@ class PromptBuilder:
 """
         # <RULES>プレースホルダーを実際のルールに置換
         rules_content = self._load_prompt_rules()
-        return base_prompt.replace("<RULES>", rules_content)
+        result = base_prompt.replace("<RULES>", rules_content)
+        
+        # PROMPT_IDタグを先頭に付与
+        return f"<!--PROMPT_ID:system_base-->\n{result}"
     
     def build_unified_prompt(
         self, 
@@ -146,7 +149,8 @@ class PromptBuilder:
 4. 自然で建設的な会話の継続
 """
         
-        return base_prompt
+        # PROMPT_IDタグを先頭に付与
+        return f"<!--PROMPT_ID:unified_builder-->\n{base_prompt}"
     
     def _summarize_project_context(self, project_context: Dict[str, Any], user_input: str = "") -> str:
         """プロジェクト状況を要約（詳細情報含む・質問内容に適応）"""
