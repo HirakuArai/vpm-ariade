@@ -7,8 +7,12 @@ import streamlit as st
 import json
 import os
 import sys
+import logging
 from datetime import datetime
 from pathlib import Path
+
+# ロガーの設定
+logger = logging.getLogger(__name__)
 
 # プロジェクトルートをパスに追加
 project_root = Path(__file__).parent.parent
