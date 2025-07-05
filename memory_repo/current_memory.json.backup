@@ -1,6 +1,6 @@
 {
   "memory_version": "2.0",
-  "last_updated": "2025-07-05T18:51:08.080418+00:00",
+  "last_updated": "2025-07-05T18:51:08.080615+00:00",
   "current_memory": {
     "active_projects": [],
     "user_preferences": {
@@ -46,6 +46,12 @@
       "timestamp": "2025-07-05T18:51:08.080332+00:00",
       "event_type": "user_message",
       "description": "Memory Chat: テストメッセージです",
+      "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-05T18:51:08.080549+00:00",
+      "event_type": "system",
+      "description": "Memory Chat回答: メモリを参照して回答しました...",
       "importance": "medium"
     }
   ]

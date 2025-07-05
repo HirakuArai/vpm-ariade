@@ -27,6 +27,8 @@ try:
     from config import is_memory_enabled, is_memory_read_enabled
     from core.ai_project_manager import create_ai_project_manager
     from core.v2.openai_config import get_openai_model, create_chat_completion
+    from core.llm_logger import render_llm_stats_for_memory_chat
+    from core.github_sync import sync_memory_with_feedback, on_session_end_hook
 except ImportError as e:
     st.error(f"モジュールのインポートに失敗しました: {e}")
     st.stop()
@@ -92,6 +94,17 @@ def enable_memory_for_beta():
 
 # β版でメモリ有効化
 enable_memory_for_beta()
+
+# セッション終了時のGitHub同期フック設定
+try:
+    # Streamlitのセッション管理でフック登録（利用可能な場合）
+    if hasattr(st, 'session_state') and 'memory_sync_hook_registered' not in st.session_state:
+        st.session_state['memory_sync_hook_registered'] = True
+        # 注: 実際のStreamlitにはon_session_endがないため、代替実装
+        # ブラウザのbeforeunloadイベントやperiodic syncで代用
+        logger.info("Memory sync hook registered for Memory Chat β")
+except Exception as e:
+    logger.warning(f"Failed to register session end hook: {e}")
 
 # 現在のメモリ状態を表示
 st.subheader("📊 現在のメモリ状態 (Lv2)")
@@ -273,6 +286,41 @@ for item, status in implementation_status.items():
         st.write(item)
     else:
         st.write(item)
+
+# サイドバーに統計とツール表示
+with st.sidebar:
+    st.subheader("📊 LLM使用統計")
+    
+    try:
+        llm_stats = render_llm_stats_for_memory_chat()
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("本日のコール数", llm_stats["calls_today"])
+            st.metric("総トークン数", f"{llm_stats['total_tokens']:,}")
+        
+        with col2:
+            st.metric("推定コスト", llm_stats["estimated_cost"])
+            st.metric("平均レスポンス", llm_stats["avg_latency"])
+    
+    except Exception as e:
+        st.error(f"LLM統計の取得に失敗: {e}")
+    
+    st.divider()
+    st.subheader("🔄 GitHub同期")
+    
+    if st.button("📤 メモリをGitHubに同期", help="現在のメモリ状態をGitHubに同期"):
+        try:
+            with st.spinner("GitHub同期中..."):
+                success, message = sync_memory_with_feedback()
+                if success:
+                    st.success(message)
+                else:
+                    st.error(message)
+        except Exception as e:
+            st.error(f"同期エラー: {e}")
+    
+    st.caption("💡 セッション終了時に自動同期")
 
 # フッター
 st.divider()

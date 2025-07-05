@@ -17,8 +17,17 @@ It enforces the absolute requirement to use GPT-4.1 consistently for all AI inte
 
 import os
 import logging
+import time
 from typing import Dict, Any, Optional
 import openai
+
+# LLM Logger import
+try:
+    from ..llm_logger import log_llm_call
+except ImportError:
+    # Fallback if llm_logger is not available
+    def log_llm_call(*args, **kwargs):
+        pass
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +88,7 @@ def create_chat_completion(
     **kwargs
 ) -> Any:
     """
-    Create a chat completion with enforced model consistency.
+    Create a chat completion with enforced model consistency and LLM logging.
     
     Args:
         messages: List of message dictionaries
@@ -105,7 +114,55 @@ def create_chat_completion(
     params["model"] = get_openai_model()  # Always enforce the required model
     params["messages"] = messages
     
-    return client.chat.completions.create(**params)
+    # Start timing for LLM logger
+    start_time = time.time()
+    
+    try:
+        # Execute API call
+        response = client.chat.completions.create(**params)
+        
+        # Calculate latency
+        end_time = time.time()
+        latency_ms = (end_time - start_time) * 1000
+        
+        # Log the call
+        try:
+            if hasattr(response, 'usage') and response.usage:
+                log_llm_call(
+                    model=response.model or params["model"],
+                    prompt_tokens=response.usage.prompt_tokens,
+                    completion_tokens=response.usage.completion_tokens,
+                    latency_ms=latency_ms,
+                    request_data={
+                        "model": params["model"],
+                        "max_tokens": params.get("max_tokens"),
+                        "temperature": params.get("temperature"),
+                        "message_count": len(messages)
+                    }
+                )
+        except Exception as log_error:
+            logger.warning(f"Failed to log LLM call: {log_error}")
+        
+        return response
+        
+    except Exception as e:
+        # Log error calls too
+        end_time = time.time()
+        latency_ms = (end_time - start_time) * 1000
+        
+        try:
+            log_llm_call(
+                model=params["model"],
+                prompt_tokens=0,
+                completion_tokens=0,
+                latency_ms=latency_ms,
+                request_data={"error": str(e)}
+            )
+        except Exception:
+            pass  # Don't let logging errors interfere with error handling
+        
+        # Re-raise the original exception
+        raise
 
 def validate_model_usage(model_name: str) -> bool:
     """
