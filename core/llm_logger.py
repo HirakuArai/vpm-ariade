@@ -33,7 +33,7 @@ def log_llm_call(
     response_data: Optional[Dict] = None,
     agent: str = "kai",
     kind: str = "ui_chat",
-    subkind: Optional[str] = "memory_chat",
+    subkind: Optional[str] = "general",
     task_id: Optional[str] = None
 ) -> None:
     """
