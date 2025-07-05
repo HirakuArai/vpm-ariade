@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def push_memory_to_github(commit_message: Optional[str] = None) -> bool:
     """
-    Memory repoファイルをGitHubに自動Push
+    Memory repoファイルをGitHubに自動Push（仕様書準拠版）
     
     Args:
         commit_message: カスタムコミットメッセージ
@@ -31,45 +31,65 @@ def push_memory_to_github(commit_message: Optional[str] = None) -> bool:
             ts = datetime.now().strftime("%Y-%m-%d %H:%M")
             commit_message = f"chore: memory sync {ts}"
         
-        # Git操作の実行
-        commands = [
-            ["git", "add", "memory_repo/"],
-            ["git", "commit", "-m", commit_message],
-            ["git", "push", "origin", "main"]
-        ]
-        
-        for cmd in commands:
-            try:
-                result = subprocess.run(
-                    cmd,
-                    cwd=repo_root,
-                    capture_output=True,
-                    text=True,
-                    env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
-                    timeout=30  # 30秒でタイムアウト
-                )
-                
-                if result.returncode != 0:
-                    # Commitが空の場合は正常（何も変更がない）
-                    if "nothing to commit" in result.stdout or "nothing to commit" in result.stderr:
-                        logger.info("No memory changes to commit")
-                        return True
-                    
-                    # その他のエラー
-                    logger.warning(f"Git command failed: {' '.join(cmd)}")
-                    logger.warning(f"stdout: {result.stdout}")
-                    logger.warning(f"stderr: {result.stderr}")
+        # Git操作の実行（仕様書準拠）
+        try:
+            # 1. git add memory_repo
+            subprocess.run(
+                ["git", "add", "memory_repo"],
+                cwd=repo_root,
+                check=False,
+                capture_output=True,
+                text=True
+            )
+            
+            # 2. git commit -m "chore: memory sync YYYY-MM-DD HH:MM"
+            commit_result = subprocess.run(
+                ["git", "commit", "-m", commit_message],
+                cwd=repo_root,
+                check=False,
+                capture_output=True,
+                text=True
+            )
+            
+            # コミットが空の場合は正常終了
+            if commit_result.returncode != 0:
+                if "nothing to commit" in commit_result.stdout or "nothing to commit" in commit_result.stderr:
+                    logger.info("No memory changes to commit")
+                    return True
+                else:
+                    logger.warning(f"Git commit failed: {commit_result.stderr}")
                     return False
-                    
-            except subprocess.TimeoutExpired:
-                logger.error(f"Git command timed out: {' '.join(cmd)}")
+            
+            # 3. git push origin main
+            push_result = subprocess.run(
+                ["git", "push", "origin", "main"],
+                cwd=repo_root,
+                env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            if push_result.returncode != 0:
+                # エラーハンドリング（仕様書準拠）
+                if "403" in push_result.stderr or "401" in push_result.stderr:
+                    logger.error(f"Git push authentication failed: {push_result.stderr}")
+                    logger.error("Check GITHUB_PAT token and permissions")
+                else:
+                    logger.error(f"Git push failed: {push_result.stderr}")
                 return False
-            except subprocess.CalledProcessError as e:
-                logger.error(f"Git command error: {e}")
-                return False
-        
-        logger.info("Memory files successfully pushed to GitHub")
-        return True
+            
+            logger.info("Memory files successfully pushed to GitHub")
+            return True
+            
+        except subprocess.TimeoutExpired:
+            logger.error("Git push timed out")
+            return False
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Git command error: {e}")
+            if "403" in str(e) or "401" in str(e):
+                logger.error("Authentication error - check GITHUB_PAT token")
+            return False
         
     except Exception as e:
         logger.error(f"Unexpected error during GitHub sync: {e}")
@@ -137,7 +157,7 @@ def setup_git_credentials():
 # セッション終了時のフック関数
 def on_session_end_hook():
     """
-    Streamlitセッション終了時に実行されるフック
+    Streamlitセッション終了時に実行されるフック（仕様書準拠版）
     """
     try:
         logger.info("Session ending - attempting memory sync to GitHub")
@@ -157,6 +177,51 @@ def on_session_end_hook():
             
     except Exception as e:
         logger.error(f"Session end hook error: {e}")
+
+
+# Streamlit用のセッション終了フック（代替実装）
+def setup_session_end_hook():
+    """
+    Streamlit用のセッション終了フック設定
+    st.on_session_endが存在しないため、代替実装を提供
+    """
+    import atexit
+    
+    def cleanup():
+        """プロセス終了時のクリーンアップ"""
+        try:
+            on_session_end_hook()
+        except Exception as e:
+            logger.error(f"Cleanup hook error: {e}")
+    
+    # プロセス終了時にフックを実行
+    atexit.register(cleanup)
+    logger.info("Session end hook registered via atexit")
+
+
+# Memory Chat用の手動同期関数
+def manual_memory_sync():
+    """
+    Memory Chat β用の手動同期関数（仕様書準拠・エラーハンドリング付き）
+    
+    Returns:
+        tuple: (success: bool, message: str)
+    """
+    try:
+        success = push_memory_to_github()
+        
+        if success:
+            return True, "✅ メモリファイルをGitHubに同期しました"
+        else:
+            return False, "❌ GitHub同期に失敗しました（詳細はログを確認）"
+            
+    except subprocess.CalledProcessError as e:
+        if "403" in str(e) or "401" in str(e):
+            return False, "❌ 認証エラー: GITHUB_PAT トークンを確認してください"
+        else:
+            return False, f"❌ Git push failed: {str(e)}"
+    except Exception as e:
+        return False, f"❌ 同期エラー: {str(e)}"
 
 
 # Streamlit用のヘルパー関数

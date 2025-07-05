@@ -31,8 +31,8 @@ try:
     from config import is_memory_enabled, is_memory_read_enabled
     from core.ai_project_manager import create_ai_project_manager
     from core.v2.openai_config import get_openai_model, create_chat_completion
-    from core.llm_logger import render_llm_stats_for_memory_chat
-    from core.github_sync import sync_memory_with_feedback, on_session_end_hook
+    from core.llm_logger import render_llm_stats_for_memory_chat, get_recent_llm_calls, format_messages_for_display
+    from core.github_sync import sync_memory_with_feedback, on_session_end_hook, setup_session_end_hook, manual_memory_sync
 except ImportError as e:
     st.error(f"モジュールのインポートに失敗しました: {e}")
     st.stop()
@@ -99,13 +99,11 @@ def enable_memory_for_beta():
 # β版でメモリ有効化
 enable_memory_for_beta()
 
-# セッション終了時のGitHub同期フック設定
+# セッション終了時のGitHub同期フック設定（仕様書準拠）
 try:
-    # Streamlitのセッション管理でフック登録（利用可能な場合）
-    if hasattr(st, 'session_state') and 'memory_sync_hook_registered' not in st.session_state:
+    if 'memory_sync_hook_registered' not in st.session_state:
         st.session_state['memory_sync_hook_registered'] = True
-        # 注: 実際のStreamlitにはon_session_endがないため、代替実装
-        # ブラウザのbeforeunloadイベントやperiodic syncで代用
+        setup_session_end_hook()  # atexitベースのフック設定
         logger.info("Memory sync hook registered for Memory Chat β")
 except Exception as e:
     logger.warning(f"Failed to register session end hook: {e}")
@@ -310,13 +308,51 @@ with st.sidebar:
     except Exception as e:
         st.error(f"LLM統計の取得に失敗: {e}")
     
+    # LLM Call Logs詳細表示（仕様書準拠）
+    st.divider()
+    st.subheader("📋 LLM Call Logs")
+    
+    try:
+        recent_calls = get_recent_llm_calls(limit=5)
+        
+        if recent_calls:
+            for i, call in enumerate(recent_calls):
+                with st.expander(f"📞 Call {i+1}: {call['model']} ({call['prompt_tokens']}+{call['completion_tokens']} tokens)", expanded=False):
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        st.write(f"**時刻**: {call['timestamp'][:19].replace('T', ' ')}")
+                        st.write(f"**レスポンス時間**: {call['latency_ms']:.1f}ms")
+                        st.write(f"**タスクID**: {call['task_id']}")
+                    
+                    with col2:
+                        st.write(f"**モデル**: {call['model']}")
+                        st.write(f"**トークン**: {call['prompt_tokens']} + {call['completion_tokens']}")
+                    
+                    st.write("**プロンプト（messages）**:")
+                    st.markdown(format_messages_for_display(call['messages']))
+                    
+                    st.write("**レスポンス**:")
+                    response_text = call['response']
+                    if len(response_text) > 300:
+                        st.markdown(f"{response_text[:300]}...")
+                        if st.button(f"全文表示 {i+1}", key=f"full_response_{i}"):
+                            st.markdown(response_text)
+                    else:
+                        st.markdown(response_text)
+        else:
+            st.write("まだLLM呼び出しログがありません")
+            
+    except Exception as e:
+        st.error(f"LLM Call Logs表示エラー: {e}")
+    
     st.divider()
     st.subheader("🔄 GitHub同期")
     
     if st.button("📤 メモリをGitHubに同期", help="現在のメモリ状態をGitHubに同期"):
         try:
             with st.spinner("GitHub同期中..."):
-                success, message = sync_memory_with_feedback()
+                success, message = manual_memory_sync()
                 if success:
                     st.success(message)
                 else:

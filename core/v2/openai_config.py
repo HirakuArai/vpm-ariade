@@ -125,7 +125,7 @@ def create_chat_completion(
         end_time = time.time()
         latency_ms = (end_time - start_time) * 1000
         
-        # Log the call
+        # Log the call（仕様書準拠・完全記録版）
         try:
             if hasattr(response, 'usage') and response.usage:
                 log_llm_call(
@@ -133,6 +133,8 @@ def create_chat_completion(
                     prompt_tokens=response.usage.prompt_tokens,
                     completion_tokens=response.usage.completion_tokens,
                     latency_ms=latency_ms,
+                    messages=messages,  # ← プロンプト全文
+                    response=response.choices[0].message.content if response.choices else "",  # ← 返答全文
                     request_data={
                         "model": params["model"],
                         "max_tokens": params.get("max_tokens"),

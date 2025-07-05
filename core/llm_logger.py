@@ -6,22 +6,64 @@ OpenAI API呼び出しログ機能
 import json
 import time
 import logging
+import gzip
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import functools
 
 logger = logging.getLogger(__name__)
 
-# ログディレクトリ
-LLM_LOGS_DIR = Path("logs/llm_calls")
+# ログディレクトリ（仕様書準拠）
+LLM_LOGS_DIR = Path("logs/llm")
 LLM_LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
+# ファイルサイズ制限（1MB）
+MAX_FILE_SIZE = 1024 * 1024  # 1MB
 
 
 def get_daily_log_file() -> Path:
-    """今日のLLMログファイルパスを取得"""
+    """今日のLLMログファイルパスを取得（仕様書準拠）"""
     today = datetime.now().strftime("%Y-%m-%d")
     return LLM_LOGS_DIR / f"{today}.jsonl"
+
+
+def rotate_log_if_needed(log_file: Path) -> Path:
+    """
+    ログファイルが1MB超の場合、gzipローテーションを実行
+    
+    Args:
+        log_file: 対象のログファイルパス
+        
+    Returns:
+        Path: 使用すべきログファイルパス
+    """
+    try:
+        if log_file.exists() and log_file.stat().st_size > MAX_FILE_SIZE:
+            # ローテーション実行
+            timestamp = datetime.now().strftime("%H%M%S")
+            rotated_name = f"{log_file.stem}_{timestamp}.jsonl.gz"
+            rotated_path = log_file.parent / rotated_name
+            
+            # gzip圧縮
+            with open(log_file, 'rb') as f_in:
+                with gzip.open(rotated_path, 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+            
+            # 元ファイルを削除
+            log_file.unlink()
+            
+            logger.info(f"Log file rotated: {log_file} -> {rotated_path}")
+            
+            # 新しいファイルを作成
+            log_file.touch()
+            
+        return log_file
+        
+    except Exception as e:
+        logger.error(f"Log rotation failed: {e}")
+        return log_file
 
 
 def log_llm_call(
@@ -29,6 +71,8 @@ def log_llm_call(
     prompt_tokens: int,
     completion_tokens: int,
     latency_ms: float,
+    messages: Optional[List[Dict]] = None,
+    response: Optional[str] = None,
     request_data: Optional[Dict] = None,
     response_data: Optional[Dict] = None,
     agent: str = "kai",
@@ -37,38 +81,47 @@ def log_llm_call(
     task_id: Optional[str] = None
 ) -> None:
     """
-    LLM呼び出しをログに記録（既存ログ形式互換）
+    LLM呼び出しをログに記録（仕様書準拠・完全記録版）
     
     Args:
         model: 使用したモデル名
         prompt_tokens: プロンプトトークン数
         completion_tokens: 生成トークン数  
         latency_ms: レスポンス時間（ミリ秒）
-        request_data: リクエストデータ（オプション）
-        response_data: レスポンスデータ（オプション）
+        messages: プロンプト全文（messagesパラメータ）
+        response: 返答全文（response.choices[0].message.content）
+        request_data: リクエストデータ（下位互換用）
+        response_data: レスポンスデータ（下位互換用）
         agent: エージェント名（デフォルト: kai）
         kind: ログ種別（デフォルト: ui_chat）
-        subkind: サブ種別（デフォルト: memory_chat）
+        subkind: サブ種別（デフォルト: general）
         task_id: タスクID（オプション）
     """
     try:
-        # 既存ログ形式に合わせた構造
+        # 仕様書準拠のログ構造
         log_entry = {
-            "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
-            "agent": agent,
+            "ts": datetime.now(timezone.utc).isoformat() + "Z",
             "model": model,
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "latency_ms": round(latency_ms, 2),
+            "messages": messages or [],  # ← プロンプト全文
+            "response": response or "",   # ← 返答全文
+            
+            # 既存ログ形式との互換性
+            "agent": agent,
             "kind": kind,
             "subkind": subkind,
             "task_id": task_id or f"memory-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
-            "prompt_tokens": prompt_tokens,
-            "completion_tokens": completion_tokens,
             "error": None,
             "request": request_data or {},
-            "response": response_data or {}
+            "response_data": response_data or {}
         }
         
-        # ファイルに追記
+        # ファイル書き込み（ローテーション対応）
         log_file = get_daily_log_file()
+        log_file = rotate_log_if_needed(log_file)
+        
         with open(log_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
             
@@ -269,6 +322,85 @@ def render_llm_stats_for_memory_chat():
             "estimated_cost": "$0.0000",
             "avg_latency": "0.0ms"
         }
+
+
+def get_recent_llm_calls(limit: int = 10) -> List[Dict[str, Any]]:
+    """
+    最新のLLM呼び出しログを取得（仕様書準拠）
+    
+    Args:
+        limit: 取得する件数（デフォルト: 10）
+        
+    Returns:
+        List[Dict]: 最新のLLM呼び出しログリスト
+    """
+    try:
+        log_file = get_daily_log_file()
+        if not log_file.exists():
+            return []
+        
+        recent_calls = []
+        
+        with open(log_file, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            
+        # 最新のN件を取得（逆順で読み込み）
+        for line in reversed(lines[-limit:]):
+            if line.strip():
+                try:
+                    entry = json.loads(line.strip())
+                    # UIで表示するために整形
+                    formatted_entry = {
+                        "timestamp": entry.get("ts", ""),
+                        "model": entry.get("model", ""),
+                        "prompt_tokens": entry.get("prompt_tokens", 0),
+                        "completion_tokens": entry.get("completion_tokens", 0),
+                        "latency_ms": entry.get("latency_ms", 0),
+                        "messages": entry.get("messages", []),
+                        "response": entry.get("response", ""),
+                        "task_id": entry.get("task_id", "")
+                    }
+                    recent_calls.append(formatted_entry)
+                except json.JSONDecodeError:
+                    continue
+        
+        return recent_calls
+        
+    except Exception as e:
+        logger.error(f"Failed to get recent LLM calls: {e}")
+        return []
+
+
+def format_messages_for_display(messages: List[Dict]) -> str:
+    """
+    メッセージリストを表示用に整形
+    
+    Args:
+        messages: OpenAI API messagesパラメータ
+        
+    Returns:
+        str: 表示用に整形されたメッセージ
+    """
+    try:
+        if not messages:
+            return "No messages"
+        
+        formatted = []
+        for msg in messages:
+            role = msg.get("role", "unknown")
+            content = msg.get("content", "")
+            
+            # 長すぎる場合は短縮
+            if len(content) > 200:
+                content = content[:200] + "..."
+            
+            formatted.append(f"**{role.title()}**: {content}")
+        
+        return "\n\n".join(formatted)
+        
+    except Exception as e:
+        logger.error(f"Failed to format messages: {e}")
+        return "Format error"
 
 
 if __name__ == "__main__":

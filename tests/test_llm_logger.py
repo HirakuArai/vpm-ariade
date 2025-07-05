@@ -16,7 +16,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from core.llm_logger import (
     log_llm_call, count_today_calls, get_today_stats, 
-    estimate_cost, render_llm_stats_for_memory_chat
+    estimate_cost, render_llm_stats_for_memory_chat,
+    get_recent_llm_calls, format_messages_for_display, rotate_log_if_needed
 )
 
 
@@ -41,13 +42,22 @@ class TestLLMLogger(unittest.TestCase):
             shutil.rmtree(self.test_dir)
     
     def test_log_llm_call(self):
-        """Test LLM call logging"""
+        """Test LLM call logging (仕様書準拠版)"""
+        # テストデータ
+        test_messages = [
+            {"role": "system", "content": "You are helpful."},
+            {"role": "user", "content": "Hello!"}
+        ]
+        test_response = "Hi there!"
+        
         # Log a test call
         log_llm_call(
-            model="gpt-4-turbo",
+            model="gpt-4.1",
             prompt_tokens=100,
             completion_tokens=50,
-            latency_ms=1500.5
+            latency_ms=1500.5,
+            messages=test_messages,
+            response=test_response
         )
         
         # Check if file was created
@@ -61,13 +71,14 @@ class TestLLMLogger(unittest.TestCase):
             
             # Parse JSON
             log_entry = json.loads(content)
-            self.assertEqual(log_entry["model"], "gpt-4-turbo")
+            self.assertEqual(log_entry["model"], "gpt-4.1")
             self.assertEqual(log_entry["prompt_tokens"], 100)
             self.assertEqual(log_entry["completion_tokens"], 50)
-            self.assertEqual(log_entry["total_tokens"], 150)
             self.assertEqual(log_entry["latency_ms"], 1500.5)
-            self.assertIn("timestamp", log_entry)
-            self.assertIn("cost_estimate_usd", log_entry)
+            self.assertEqual(log_entry["messages"], test_messages)
+            self.assertEqual(log_entry["response"], test_response)
+            self.assertIn("ts", log_entry)
+            self.assertIn("task_id", log_entry)
     
     def test_estimate_cost(self):
         """Test cost estimation"""
@@ -163,6 +174,58 @@ class TestLLMLogger(unittest.TestCase):
         self.assertEqual(stats["calls"], 3)
         # Total tokens: (100+50) + (200+100) + (300+150) = 900
         self.assertEqual(stats["total_tokens"], 900)
+    
+    def test_get_recent_llm_calls(self):
+        """Test recent LLM calls retrieval (仕様書準拠)"""
+        # Log some test calls
+        test_data = [
+            {
+                "model": "gpt-4.1",
+                "prompt_tokens": 100,
+                "completion_tokens": 50,
+                "latency_ms": 1000.0,
+                "messages": [{"role": "user", "content": f"Test {i}"}],
+                "response": f"Response {i}"
+            }
+            for i in range(3)
+        ]
+        
+        for data in test_data:
+            log_llm_call(**data)
+        
+        # Get recent calls
+        recent_calls = get_recent_llm_calls(limit=2)
+        
+        # Check results
+        self.assertEqual(len(recent_calls), 2)
+        self.assertIn("timestamp", recent_calls[0])
+        self.assertIn("messages", recent_calls[0])
+        self.assertIn("response", recent_calls[0])
+        self.assertEqual(recent_calls[0]["model"], "gpt-4.1")
+    
+    def test_format_messages_for_display(self):
+        """Test message formatting for display"""
+        test_messages = [
+            {"role": "system", "content": "You are helpful."},
+            {"role": "user", "content": "Hello!"},
+            {"role": "assistant", "content": "Hi there!"}
+        ]
+        
+        formatted = format_messages_for_display(test_messages)
+        
+        self.assertIn("**System**: You are helpful.", formatted)
+        self.assertIn("**User**: Hello!", formatted)
+        self.assertIn("**Assistant**: Hi there!", formatted)
+    
+    def test_format_long_messages(self):
+        """Test truncation of long messages"""
+        long_content = "x" * 300  # Longer than 200 char limit
+        test_messages = [{"role": "user", "content": long_content}]
+        
+        formatted = format_messages_for_display(test_messages)
+        
+        self.assertIn("...", formatted)  # Should be truncated
+        self.assertLess(len(formatted), len(long_content))
 
 
 class TestLLMLoggerErrorHandling(unittest.TestCase):
