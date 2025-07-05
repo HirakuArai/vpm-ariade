@@ -38,8 +38,8 @@ def parse_args():
     parser.add_argument(
         "--log-dir",
         type=Path,
-        default=Path("logs/llm_calls"),
-        help="Log directory path (default: logs/llm_calls)"
+        default=Path("logs/llm"),
+        help="Log directory path (default: logs/llm)"
     )
     return parser.parse_args()
 

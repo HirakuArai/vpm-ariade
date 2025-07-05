@@ -127,4 +127,4 @@ def get_log_filepath(timestamp: Optional[datetime] = None) -> Path:
         timestamp = datetime.now()
     
     filename = timestamp.strftime("%Y%m%d-%H%M%S.jsonl")
-    return Path("logs/llm_calls") / filename
+    return Path("logs/llm") / filename

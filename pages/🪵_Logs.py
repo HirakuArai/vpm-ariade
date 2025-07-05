@@ -141,7 +141,7 @@ def main():
         st.header("Quick Stats")
         
         # Load logs for additional stats
-        log_dir = Path("logs/llm_calls")
+        log_dir = Path("logs/llm")
         entries = load_all_logs(log_dir, since_hours)
         
         # Display quick stats
