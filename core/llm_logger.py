@@ -30,10 +30,14 @@ def log_llm_call(
     completion_tokens: int,
     latency_ms: float,
     request_data: Optional[Dict] = None,
-    response_data: Optional[Dict] = None
+    response_data: Optional[Dict] = None,
+    agent: str = "kai",
+    kind: str = "ui_chat",
+    subkind: Optional[str] = "memory_chat",
+    task_id: Optional[str] = None
 ) -> None:
     """
-    LLM呼び出しをログに記録
+    LLM呼び出しをログに記録（既存ログ形式互換）
     
     Args:
         model: 使用したモデル名
@@ -42,30 +46,33 @@ def log_llm_call(
         latency_ms: レスポンス時間（ミリ秒）
         request_data: リクエストデータ（オプション）
         response_data: レスポンスデータ（オプション）
+        agent: エージェント名（デフォルト: kai）
+        kind: ログ種別（デフォルト: ui_chat）
+        subkind: サブ種別（デフォルト: memory_chat）
+        task_id: タスクID（オプション）
     """
     try:
+        # 既存ログ形式に合わせた構造
         log_entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
+            "agent": agent,
             "model": model,
+            "kind": kind,
+            "subkind": subkind,
+            "task_id": task_id or f"memory-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
             "prompt_tokens": prompt_tokens,
             "completion_tokens": completion_tokens,
-            "total_tokens": prompt_tokens + completion_tokens,
-            "latency_ms": round(latency_ms, 2),
-            "cost_estimate_usd": estimate_cost(model, prompt_tokens, completion_tokens)
+            "error": None,
+            "request": request_data or {},
+            "response": response_data or {}
         }
-        
-        # オプショナルデータを追加
-        if request_data:
-            log_entry["request"] = request_data
-        if response_data:
-            log_entry["response"] = response_data
         
         # ファイルに追記
         log_file = get_daily_log_file()
         with open(log_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
             
-        logger.debug(f"LLM call logged: {model} ({log_entry['total_tokens']} tokens, {latency_ms:.2f}ms)")
+        logger.debug(f"LLM call logged: {model} ({prompt_tokens + completion_tokens} tokens, {latency_ms:.2f}ms)")
         
     except Exception as e:
         logger.error(f"Failed to log LLM call: {e}")
@@ -144,9 +151,22 @@ def get_today_stats() -> Dict[str, Any]:
                     try:
                         entry = json.loads(line.strip())
                         calls += 1
-                        total_tokens += entry.get("total_tokens", 0)
-                        total_cost += entry.get("cost_estimate_usd", 0.0)
-                        total_latency += entry.get("latency_ms", 0.0)
+                        
+                        # 新しい形式のログから統計を計算
+                        prompt_tokens = entry.get("prompt_tokens", 0)
+                        completion_tokens = entry.get("completion_tokens", 0)
+                        total_tokens += prompt_tokens + completion_tokens
+                        
+                        # コスト推定（モデル情報から）
+                        model = entry.get("model", "gpt-4.1")
+                        cost = estimate_cost(model, prompt_tokens, completion_tokens)
+                        total_cost += cost
+                        
+                        # レスポンス時間は現在の値を使用
+                        # 古い形式との互換性のため、複数のフィールドを確認
+                        latency = entry.get("latency_ms", 0.0)
+                        total_latency += latency
+                        
                     except json.JSONDecodeError:
                         continue
         

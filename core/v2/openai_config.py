@@ -138,7 +138,10 @@ def create_chat_completion(
                         "max_tokens": params.get("max_tokens"),
                         "temperature": params.get("temperature"),
                         "message_count": len(messages)
-                    }
+                    },
+                    agent="kai",
+                    kind="ui_chat",
+                    subkind="openai_api"
                 )
         except Exception as log_error:
             logger.warning(f"Failed to log LLM call: {log_error}")
@@ -156,7 +159,10 @@ def create_chat_completion(
                 prompt_tokens=0,
                 completion_tokens=0,
                 latency_ms=latency_ms,
-                request_data={"error": str(e)}
+                request_data={"error": str(e)},
+                agent="kai",
+                kind="ui_chat",
+                subkind="openai_api_error"
             )
         except Exception:
             pass  # Don't let logging errors interfere with error handling
