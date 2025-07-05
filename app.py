@@ -59,6 +59,7 @@ try:
     from core.navigation import navigator, PageType
     from core.pages import ProjectDetailsPage, ProjectChatPage, ConversationHistoryPage
     from core.ai_intent_detector import AIIntentDetector
+    from core.memory_bridge import log_event, update_project_context  # ← Memory Layer Phase 2
 except (ImportError, KeyError) as e:
     logger.error(f"Failed to import Kai modules: {e}")
     st.error(f"モジュールの読み込みに失敗しました: {e}")
@@ -143,6 +144,14 @@ def _append_log(role: str, content: str) -> None:
     data["messages"].append({"role": role, "content": content, "ts": now_iso})
     with log_path.open("w", encoding="utf-8") as fp:
         json.dump(data, fp, ensure_ascii=False, indent=2)
+    
+    # Memory Layer Phase 2: Log conversation event
+    try:
+        log_event("user_message" if role == "user" else "system", 
+                 f"{role}: {content[:100]}..." if len(content) > 100 else f"{role}: {content}",
+                 importance="medium")
+    except Exception as e:
+        logger.warning(f"Failed to log event to memory layer: {e}")
 
 
 def _project_log_path(project_id: str) -> Path:
@@ -169,6 +178,15 @@ def _append_project_log(project_id: str, role: str, content: str) -> None:
     # Append to JSONL file
     with log_path.open("a", encoding="utf-8") as fp:
         fp.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
+    
+    # Memory Layer Phase 2: Log project-specific event
+    try:
+        log_event("user_message" if role == "user" else "project_update",
+                 f"[{project_id}] {role}: {content[:100]}..." if len(content) > 100 else f"[{project_id}] {role}: {content}",
+                 project_id=project_id,
+                 importance="medium")
+    except Exception as e:
+        logger.warning(f"Failed to log project event to memory layer: {e}")
 
 
 def load_project_conversation_history(project_id: str) -> List[Dict]:
@@ -436,6 +454,14 @@ def render_home_page():
                                 result = lifecycle_manager.advance_phase(current_project_id)
                                 if result.get("success"):
                                     st.success(f"✅ {result.get('new_phase')} フェーズに進みました！")
+                                    # Memory Layer Phase 2: Log phase advancement
+                                    try:
+                                        log_event("project_updated", 
+                                                 f"フェーズ進行: {result.get('new_phase')}",
+                                                 project_id=current_project_id,
+                                                 importance="high")
+                                    except Exception as e:
+                                        logger.warning(f"Failed to log phase advancement: {e}")
                                     st.rerun()
                                 else:
                                     st.error(f"❌ フェーズ進行に失敗: {result.get('message')}")
@@ -494,6 +520,15 @@ def render_home_page():
                             try:
                                 # プロジェクトをARCHIVEDステータスに変更
                                 set_status(current_project_id, "ARCHIVED")
+                                
+                                # Memory Layer Phase 2: Log project deletion
+                                try:
+                                    log_event("project_updated",
+                                             f"プロジェクト削除: {current_project_id}",
+                                             project_id=current_project_id,
+                                             importance="high")
+                                except Exception as e:
+                                    logger.warning(f"Failed to log project deletion: {e}")
                                 
                                 # ナビゲーション状態をリセット
                                 st.session_state.navigation_state.selected_project_id = None

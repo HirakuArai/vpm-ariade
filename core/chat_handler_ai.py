@@ -22,6 +22,7 @@ except ImportError:
 from .ai_project_manager import create_ai_project_manager
 from .enhanced_ui_components import InteractiveComponents, NotificationComponents
 from .navigation import PageType
+from .memory_bridge import log_event, update_project_context  # Memory Layer Phase 2
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +70,14 @@ def _append_log(role: str, content: str) -> None:
     data["messages"].append({"role": role, "content": content, "ts": now_iso})
     with log_path.open("w", encoding="utf-8") as fp:
         json.dump(data, fp, ensure_ascii=False, indent=2)
+    
+    # Memory Layer Phase 2: Log conversation event
+    try:
+        log_event("user_message" if role == "user" else "system", 
+                 f"{role}: {content[:100]}..." if len(content) > 100 else f"{role}: {content}",
+                 importance="medium")
+    except Exception as e:
+        logger.warning(f"Failed to log event to memory layer: {e}")
 
 def _project_log_path(project_id: str) -> Path:
     """Return Path for today's project-specific conversation log."""
@@ -93,6 +102,15 @@ def _append_project_log(project_id: str, role: str, content: str) -> None:
     # Append to JSONL file
     with log_path.open("a", encoding="utf-8") as fp:
         fp.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
+    
+    # Memory Layer Phase 2: Log project-specific event
+    try:
+        log_event("user_message" if role == "user" else "project_update",
+                 f"[{project_id}] {role}: {content[:100]}..." if len(content) > 100 else f"[{project_id}] {role}: {content}",
+                 project_id=project_id,
+                 importance="medium")
+    except Exception as e:
+        logger.warning(f"Failed to log project event to memory layer: {e}")
 
 def _load_project_conversation_history(project_id: str, max_messages: int = 50, days_back: int = 30) -> List[Dict[str, str]]:
     """

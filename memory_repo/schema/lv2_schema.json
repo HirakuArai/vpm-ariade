@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Memory Layer Phase 2 Schema",
+  "description": "Level 2 常駐メモリ + イベントログスキーマ",
+  "type": "object",
+  "properties": {
+    "memory_version": {
+      "type": "string",
+      "const": "2.0"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "current_memory": {
+      "type": "object",
+      "description": "常駐メモリ (Lv2)",
+      "properties": {
+        "active_projects": {
+          "type": "array",
+          "description": "アクティブプロジェクト情報",
+          "items": {
+            "type": "object",
+            "properties": {
+              "project_id": { "type": "string" },
+              "name": { "type": "string" },
+              "status": { "type": "string" },
+              "last_interaction": { "type": "string", "format": "date-time" },
+              "key_context": { "type": "string" }
+            },
+            "required": ["project_id", "name", "status"]
+          }
+        },
+        "user_preferences": {
+          "type": "object",
+          "description": "ユーザー設定",
+          "properties": {
+            "language": { "type": "string", "default": "ja" },
+            "communication_style": { "type": "string" },
+            "project_templates": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "session_context": {
+          "type": "object",
+          "description": "セッション固有の文脈",
+          "properties": {
+            "current_focus": { "type": "string" },
+            "recent_topics": { "type": "array", "items": { "type": "string" } },
+            "pending_actions": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      },
+      "required": ["active_projects", "user_preferences", "session_context"]
+    },
+    "events": {
+      "type": "array",
+      "description": "イベントログ（最近の重要な出来事）",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "event_type": {
+            "type": "string",
+            "enum": ["user_message", "project_created", "project_updated", "task_completed", "error", "system"]
+          },
+          "project_id": { "type": "string" },
+          "description": { "type": "string" },
+          "importance": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"]
+          },
+          "metadata": { "type": "object" }
+        },
+        "required": ["timestamp", "event_type", "description", "importance"]
+      }
+    }
+  },
+  "required": ["memory_version", "last_updated", "current_memory", "events"]
+}
