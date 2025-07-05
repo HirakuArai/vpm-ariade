@@ -1,6 +1,6 @@
 {
   "memory_version": "2.0",
-  "last_updated": "2025-07-05T15:11:24.926377+00:00",
+  "last_updated": "2025-07-05T18:51:08.080615+00:00",
   "current_memory": {
     "active_projects": [],
     "user_preferences": {
@@ -28,6 +28,30 @@
       "timestamp": "2025-07-05T15:11:24.926052+00:00",
       "event_type": "system",
       "description": "Memory Chat Stage B テスト",
+      "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-05T18:13:57.269357+00:00",
+      "event_type": "system",
+      "description": "Memory Chat β修正テスト",
+      "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-05T18:51:08.079488+00:00",
+      "event_type": "system",
+      "description": "最終確認テスト - ボタンクリック",
+      "importance": "low"
+    },
+    {
+      "timestamp": "2025-07-05T18:51:08.080332+00:00",
+      "event_type": "user_message",
+      "description": "Memory Chat: テストメッセージです",
+      "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-05T18:51:08.080549+00:00",
+      "event_type": "system",
+      "description": "Memory Chat回答: メモリを参照して回答しました...",
       "importance": "medium"
     }
   ]

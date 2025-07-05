@@ -37,7 +37,8 @@ class MemoryBridge:
     
     def load_current_memory(self) -> Dict[str, Any]:
         """Load current memory state"""
-        if not is_memory_enabled():
+        # Check both global setting and instance config (for beta override)
+        if not (is_memory_enabled() or self.config.get("enabled", False)):
             return self._get_empty_memory()
         
         try:
@@ -53,7 +54,8 @@ class MemoryBridge:
     
     def save_current_memory(self, memory: Dict[str, Any]) -> bool:
         """Save current memory state"""
-        if not is_memory_enabled():
+        # Check both global setting and instance config (for beta override)
+        if not (is_memory_enabled() or self.config.get("enabled", False)):
             return False
         
         try:
@@ -82,7 +84,8 @@ class MemoryBridge:
     def log_event(self, event_type: str, description: str, project_id: Optional[str] = None, 
                   importance: str = "medium", metadata: Optional[Dict] = None) -> bool:
         """Log an event to memory"""
-        if not is_memory_enabled():
+        # Check both global setting and instance config (for beta override)
+        if not (is_memory_enabled() or self.config.get("enabled", False)):
             return False
         
         try:
@@ -118,7 +121,8 @@ class MemoryBridge:
     def update_project_context(self, project_id: str, name: str, status: str, 
                              key_context: Optional[str] = None) -> bool:
         """Update project context in memory"""
-        if not is_memory_enabled():
+        # Check both global setting and instance config (for beta override)
+        if not (is_memory_enabled() or self.config.get("enabled", False)):
             return False
         
         try:
@@ -158,7 +162,8 @@ class MemoryBridge:
     
     def get_context_for_ai(self, max_events: int = 10) -> str:
         """Get formatted context for AI"""
-        if not is_memory_enabled():
+        # Check both global setting and instance config (for beta override)
+        if not (is_memory_enabled() or self.config.get("enabled", False)):
             return ""
         
         try:
