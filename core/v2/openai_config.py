@@ -172,6 +172,98 @@ def create_chat_completion(
         # Re-raise the original exception
         raise
 
+
+def create_memory_update_completion(
+    messages: list,
+    client: Optional[openai.OpenAI] = None,
+    **kwargs
+) -> Any:
+    """
+    Create a chat completion specifically for memory updates with proper logging.
+    
+    This function is identical to create_chat_completion but logs with kind="memory_update"
+    to distinguish memory update calls from regular chat calls.
+    
+    Args:
+        messages: List of message dictionaries
+        client: Optional OpenAI client instance
+        **kwargs: Additional parameters (model will be overridden)
+        
+    Returns:
+        Chat completion response
+    """
+    if client is None:
+        client = get_openai_client()
+    
+    # Enforce the required model
+    if "model" in kwargs:
+        logger.warning(f"Model parameter '{kwargs['model']}' ignored. Using required model: {REQUIRED_OPENAI_MODEL}")
+    
+    # Set default parameters and override with kwargs, but always enforce the model
+    params = get_default_openai_params()
+    params.update(kwargs)
+    params["model"] = get_openai_model()  # Always enforce the required model
+    params["messages"] = messages
+    
+    # Start timing for LLM logger
+    start_time = time.time()
+    
+    try:
+        # Execute API call
+        response = client.chat.completions.create(**params)
+        
+        # Calculate latency
+        end_time = time.time()
+        latency_ms = (end_time - start_time) * 1000
+        
+        # Log the call with kind="memory_update"
+        try:
+            if hasattr(response, 'usage') and response.usage:
+                log_llm_call(
+                    model=response.model or params["model"],
+                    prompt_tokens=response.usage.prompt_tokens,
+                    completion_tokens=response.usage.completion_tokens,
+                    latency_ms=latency_ms,
+                    messages=messages,  # ← プロンプト全文
+                    response=response.choices[0].message.content if response.choices else "",  # ← 返答全文
+                    request_data={
+                        "model": params["model"],
+                        "max_tokens": params.get("max_tokens"),
+                        "temperature": params.get("temperature"),
+                        "message_count": len(messages)
+                    },
+                    agent="kai",
+                    kind="memory_update",  # ← 重要: memory_updateとして記録
+                    subkind="n_plus_1_patch"
+                )
+        except Exception as log_error:
+            logger.warning(f"Failed to log memory update LLM call: {log_error}")
+        
+        return response
+        
+    except Exception as e:
+        # Log error calls too
+        end_time = time.time()
+        latency_ms = (end_time - start_time) * 1000
+        
+        try:
+            log_llm_call(
+                model=params["model"],
+                prompt_tokens=0,
+                completion_tokens=0,
+                latency_ms=latency_ms,
+                request_data={"error": str(e)},
+                agent="kai",
+                kind="memory_update",
+                subkind="n_plus_1_patch_error"
+            )
+        except Exception:
+            pass  # Don't let logging errors interfere with error handling
+        
+        # Re-raise the original exception
+        raise
+
+
 def validate_model_usage(model_name: str) -> bool:
     """
     Validate that the provided model name matches the required model.

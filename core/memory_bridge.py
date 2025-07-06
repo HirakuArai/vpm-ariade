@@ -259,3 +259,116 @@ def get_context_for_ai(max_events: int = 10) -> str:
 def load_current_memory() -> Dict[str, Any]:
     """Load current memory (convenience function)"""
     return memory_bridge.load_current_memory()
+
+
+def update_memory_with_llm(user_message: str, assistant_response: str, memory_context: str) -> Optional[str]:
+    """
+    LLMを使用して記憶を更新（N+1パッチ生成）
+    
+    Args:
+        user_message: ユーザーのメッセージ
+        assistant_response: AIの応答
+        memory_context: 現在のメモリコンテキスト
+        
+    Returns:
+        str: 更新された記憶のパッチ（JSON形式）
+    """
+    from core.v2.openai_config import create_memory_update_completion, get_openai_model
+    
+    try:
+        print(f"[DEBUG] Starting memory update with LLM")
+        # 記憶更新用のプロンプト（JSON生成を確実にする）
+        system_prompt = """あなたはKai VPMの記憶管理システムです。
+ユーザーとアシスタントの会話を分析し、記憶すべき重要な情報を抽出して、
+既存の記憶を更新するJSONパッチを生成してください。
+
+【重要】必ず正確なJSON形式で回答してください。JSONの前後に説明文は不要です。
+
+【現在の記憶】
+{memory_context}
+
+【更新ルール】
+1. 新しい重要な情報のみを追加（好み、プロジェクト進捗、決定事項）
+2. 一時的な会話内容は記憶しない
+3. 記憶すべき情報がない場合は空の配列を返す
+
+【出力例】
+{
+  "events_to_add": [
+    {
+      "event_type": "user_preference",
+      "description": "ユーザーの好きな色は青色",
+      "importance": "medium"
+    }
+  ],
+  "context_updates": {}
+}
+
+以下のフォーマットで必ず回答してください："""
+        
+        print(f"[DEBUG] Creating messages with memory_context: {memory_context[:100] if memory_context else 'None'}...")
+        
+        # フォーマット文字列を安全に処理（format()の代わりにreplace()を使用）
+        try:
+            formatted_system_prompt = system_prompt.replace("{memory_context}", memory_context or "記憶がありません")
+            print(f"[DEBUG] System prompt formatted successfully")
+        except Exception as format_error:
+            print(f"[DEBUG] Format error: {format_error}")
+            raise format_error
+        
+        messages = [
+            {"role": "system", "content": formatted_system_prompt},
+            {"role": "user", "content": f"以下の会話から記憶すべき内容を抽出してください：\n\nユーザー: {user_message}\nアシスタント: {assistant_response}"}
+        ]
+        print(f"[DEBUG] Messages created successfully")
+        
+        # LLMを呼び出して記憶パッチを生成（memory_updateとして記録）
+        print(f"[DEBUG] About to call create_memory_update_completion")
+        response = create_memory_update_completion(
+            model=get_openai_model(),
+            messages=messages,
+            max_tokens=500,
+            temperature=0.3  # 記憶更新は一貫性重視で低温度
+        )
+        print(f"[DEBUG] LLM call completed successfully")
+        
+        memory_patch = response.choices[0].message.content
+        
+        # デバッグ: レスポンスを確認
+        print(f"[DEBUG] Memory patch response: {memory_patch}")
+        logger.info(f"Memory patch response: {memory_patch}")
+        
+        # パッチを適用
+        try:
+            print(f"[DEBUG] Attempting to parse JSON: {memory_patch[:100]}...")
+            patch_data = json.loads(memory_patch)
+            
+            # イベントを追加
+            if "events_to_add" in patch_data:
+                for event in patch_data["events_to_add"]:
+                    log_event(
+                        event_type=event.get("event_type", "system"),
+                        description=event.get("description", ""),
+                        importance=event.get("importance", "medium")
+                    )
+            
+            # コンテキストを更新
+            if "context_updates" in patch_data:
+                for field, value in patch_data["context_updates"].items():
+                    if field == "current_focus":
+                        update_project_context(current_focus=value)
+                    # 他のフィールドも必要に応じて追加
+            
+            logger.info("Memory updated with LLM-generated patch")
+            return memory_patch
+            
+        except json.JSONDecodeError as e:
+            logger.warning(f"Failed to parse memory patch JSON. Error: {e}")
+            logger.warning(f"Raw response: {memory_patch}")
+            
+            # JSONパースに失敗してもレスポンス自体は返す（ログ記録のため）
+            return memory_patch
+            
+    except Exception as e:
+        logger.error(f"Failed to update memory with LLM: {e}")
+        return None

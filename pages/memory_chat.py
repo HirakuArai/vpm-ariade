@@ -27,7 +27,7 @@ st.set_page_config(
 
 # Memory Layer モジュールのインポート
 try:
-    from core.memory_bridge import memory_bridge, log_event, load_current_memory, get_context_for_ai
+    from core.memory_bridge import memory_bridge, log_event, load_current_memory, get_context_for_ai, update_memory_with_llm
     from config import is_memory_enabled, is_memory_read_enabled
     from core.ai_project_manager import create_ai_project_manager
     from core.v2.openai_config import get_openai_model, create_chat_completion
@@ -232,6 +232,22 @@ if user_input:
                     log_event("system", f"Memory Chat回答: {assistant_reply[:100]}...", importance="medium")
                 except Exception as e:
                     st.warning(f"回答のメモリログに失敗: {e}")
+                
+                # 記憶をLLMで更新（N+1パッチ生成）
+                try:
+                    with st.spinner("記憶を更新中..."):
+                        memory_patch = update_memory_with_llm(
+                            user_message=user_input,
+                            assistant_response=assistant_reply,
+                            memory_context=memory_context
+                        )
+                        if memory_patch:
+                            logger.info(f"Memory updated with patch: {memory_patch[:100]}...")
+                        else:
+                            logger.warning("Memory update returned no patch")
+                except Exception as e:
+                    logger.error(f"記憶の更新に失敗: {e}")
+                    # エラーが発生してもユーザー体験を損なわないよう、警告は表示しない
                     
             except Exception as e:
                 error_msg = f"AI回答の生成に失敗しました: {e}"
@@ -308,38 +324,114 @@ with st.sidebar:
     except Exception as e:
         st.error(f"LLM統計の取得に失敗: {e}")
     
-    # LLM Call Logs詳細表示（仕様書準拠）
+    # LLM Call Logs詳細表示（仕様書準拠・kind別表示）
     st.divider()
     st.subheader("📋 LLM Call Logs")
     
     try:
-        recent_calls = get_recent_llm_calls(limit=5)
+        # 最新のログを取得して読み込み（直接ファイルを読んでkind情報を含める）
+        from pathlib import Path
+        import json
+        from datetime import datetime
         
-        if recent_calls:
-            for i, call in enumerate(recent_calls):
-                with st.expander(f"📞 Call {i+1}: {call['model']} ({call['prompt_tokens']}+{call['completion_tokens']} tokens)", expanded=False):
-                    col1, col2 = st.columns(2)
-                    
-                    with col1:
-                        st.write(f"**時刻**: {call['timestamp'][:19].replace('T', ' ')}")
-                        st.write(f"**レスポンス時間**: {call['latency_ms']:.1f}ms")
-                        st.write(f"**タスクID**: {call['task_id']}")
-                    
-                    with col2:
-                        st.write(f"**モデル**: {call['model']}")
-                        st.write(f"**トークン**: {call['prompt_tokens']} + {call['completion_tokens']}")
-                    
-                    st.write("**プロンプト（messages）**:")
-                    st.markdown(format_messages_for_display(call['messages']))
-                    
-                    st.write("**レスポンス**:")
-                    response_text = call['response']
-                    if len(response_text) > 300:
-                        st.markdown(f"{response_text[:300]}...")
-                        if st.button(f"全文表示 {i+1}", key=f"full_response_{i}"):
-                            st.markdown(response_text)
-                    else:
-                        st.markdown(response_text)
+        log_file = Path("logs/llm") / f"{datetime.now().strftime('%Y-%m-%d')}.jsonl"
+        recent_entries = []
+        
+        if log_file.exists():
+            with open(log_file, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+            
+            # 最新10件を取得
+            for line in reversed(lines[-10:]):
+                if line.strip():
+                    try:
+                        entry = json.loads(line.strip())
+                        recent_entries.append(entry)
+                    except json.JSONDecodeError:
+                        continue
+        
+        if recent_entries:
+            # kind別にグループ化
+            chat_calls = []
+            memory_updates = []
+            
+            for entry in recent_entries:
+                if entry.get("kind") == "memory_update":
+                    memory_updates.append(entry)
+                else:
+                    chat_calls.append(entry)
+            
+            # 会話応答の表示
+            if chat_calls:
+                st.markdown("### 💬 会話応答 (ui_chat)")
+                for i, entry in enumerate(chat_calls[:3]):  # 最新3件
+                    icon = "🟢" if not entry.get("error") else "🔴"
+                    with st.expander(f"{icon} {entry.get('model', 'unknown')} | {entry.get('ts', '')[:19].replace('T', ' ')}", expanded=False):
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            st.write(f"**Tokens**: {entry.get('prompt_tokens', 0)} + {entry.get('completion_tokens', 0)}")
+                            st.write(f"**Latency**: {entry.get('request', {}).get('latency_ms', 0):.1f}ms")
+                        
+                        with col2:
+                            st.write(f"**Task ID**: {entry.get('task_id', 'N/A')}")
+                            st.write(f"**Subkind**: {entry.get('subkind', 'N/A')}")
+                        
+                        # メッセージ表示
+                        messages = entry.get("request", {}).get("messages", [])
+                        if messages:
+                            st.write("**プロンプト**:")
+                            st.markdown(format_messages_for_display(messages))
+                        
+                        # レスポンス表示
+                        response_content = entry.get("response", {}).get("content", "")
+                        if response_content:
+                            st.write("**レスポンス**:")
+                            if len(response_content) > 200:
+                                st.markdown(f"{response_content[:200]}...")
+                            else:
+                                st.markdown(response_content)
+            
+            # 記憶更新の表示
+            if memory_updates:
+                st.markdown("### 🧠 記憶更新 (memory_update)")
+                for i, entry in enumerate(memory_updates[:2]):  # 最新2件
+                    icon = "🟣" if not entry.get("error") else "🔴"
+                    with st.expander(f"{icon} N+1パッチ生成 | {entry.get('ts', '')[:19].replace('T', ' ')}", expanded=False):
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            st.write(f"**Tokens**: {entry.get('prompt_tokens', 0)} + {entry.get('completion_tokens', 0)}")
+                            st.write(f"**Latency**: {entry.get('request', {}).get('latency_ms', 0):.1f}ms")
+                        
+                        with col2:
+                            st.write(f"**Task ID**: {entry.get('task_id', 'N/A')}")
+                            st.write(f"**Subkind**: {entry.get('subkind', 'N/A')}")
+                        
+                        # 記憶パッチ表示
+                        response_content = entry.get("response", {}).get("content", "")
+                        if response_content:
+                            st.write("**生成された記憶パッチ**:")
+                            try:
+                                patch_json = json.loads(response_content)
+                                st.json(patch_json)
+                            except:
+                                st.markdown(f"```json\n{response_content[:300]}...\n```")
+            
+            # 統計サマリー
+            st.markdown("### 📊 サマリー")
+            total_calls = len(recent_entries)
+            memory_update_count = len(memory_updates)
+            chat_count = len(chat_calls)
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("総コール数", total_calls)
+            with col2:
+                st.metric("会話応答", chat_count)
+            with col3:
+                st.metric("記憶更新", memory_update_count)
+            
         else:
             st.write("まだLLM呼び出しログがありません")
             
