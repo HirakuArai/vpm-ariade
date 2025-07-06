@@ -250,8 +250,9 @@ class ProjectDetailsPage:
                 
                     log['log_request'](request_data)
                     
-                    # OpenAI APIを使用して説明を生成
-                    response = openai.chat.completions.create(**request_data)
+                    # OpenAI APIを使用して説明を生成（ログ記録ラッパー使用）
+                    from core.v2.openai_config import create_chat_completion
+                    response = create_chat_completion(**request_data)
                     
                     # レスポンスをログに記録
                     response_data = {

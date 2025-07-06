@@ -259,7 +259,8 @@ class AdaptiveQuestionGenerator:
 上記の文脈を考慮して、より適切で自然な質問に改善してください。
 """
             
-            response = openai.chat.completions.create(
+            from core.v2.openai_config import create_chat_completion
+            response = create_chat_completion(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},

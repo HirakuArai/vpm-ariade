@@ -138,8 +138,14 @@ class AIProjectManager:
                 # リクエストをログ
                 log['log_request'](request_data)
                 
-                # API呼び出し
-                response = self.client.chat.completions.create(**request_data)
+                # API呼び出し（ログ記録ラッパー使用）
+                from core.v2.openai_config import create_chat_completion
+                # request_dataからmessagesを抽出してcreate_chat_completion経由で呼び出し
+                messages = request_data.get('messages', [])
+                response = create_chat_completion(
+                    messages=messages,
+                    **{k: v for k, v in request_data.items() if k != 'messages'}
+                )
                 
                 # レスポンスをログ
                 log['log_response'](

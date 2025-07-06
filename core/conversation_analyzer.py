@@ -145,8 +145,9 @@ class ConversationAnalyzer:
             # 会話内容を整形
             conversation_text = self._format_conversation(messages)
             
-            # OpenAI API呼び出し
-            response = openai.chat.completions.create(
+            # OpenAI API呼び出し（ログ記録ラッパー使用）
+            from core.v2.openai_config import create_chat_completion
+            response = create_chat_completion(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},

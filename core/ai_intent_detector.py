@@ -113,7 +113,8 @@ class AIIntentDetector:
 }}
 """
             
-            response = self.client.chat.completions.create(
+            from core.v2.openai_config import create_chat_completion
+            response = create_chat_completion(
                 model="gpt-4.1",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.1,
@@ -220,7 +221,8 @@ class AIIntentDetector:
 }}
 """
             
-            response = self.client.chat.completions.create(
+            from core.v2.openai_config import create_chat_completion
+            response = create_chat_completion(
                 model="gpt-4.1",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.1,
@@ -340,7 +342,8 @@ class AIIntentDetector:
                 
                 log['log_request'](request_data)
                 
-                response = openai.chat.completions.create(**request_data)
+                from core.v2.openai_config import create_chat_completion
+                response = create_chat_completion(**request_data)
                 
                 # レスポンスをログに記録
                 response_data = {

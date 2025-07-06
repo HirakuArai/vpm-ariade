@@ -128,8 +128,9 @@ class AIQualityManager:
         # リトライロジック
         for attempt in range(self.max_retries + 1):
             try:
-                # リクエスト実行
-                response = self.client.chat.completions.create(
+                # リクエスト実行（ログ記録ラッパー使用）
+                from core.v2.openai_config import create_chat_completion
+                response = create_chat_completion(
                     model=model,
                     messages=messages,
                     temperature=temperature,

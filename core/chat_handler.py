@@ -198,8 +198,9 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
             try:
                 if not openai:
                     raise ImportError("OpenAI not available")
-                response = openai.chat.completions.create(
-                    model=get_openai_model() if get_openai_model else "gpt-4.1",
+                # ログ記録ラッパー使用
+                from core.v2.openai_config import create_chat_completion
+                response = create_chat_completion(
                     messages=[
                         {"role": "system", "content": "あなたは意図検出の専門家です。ユーザーの発言からアクティベーション意図を正確に判定してください。"},
                         {"role": "user", "content": activation_prompt}

@@ -90,7 +90,8 @@ class SimpleConversationAnalyzer:
                 
                 log['log_request'](request_data)
                 
-                response = openai.chat.completions.create(**request_data)
+                from core.v2.openai_config import create_chat_completion
+                response = create_chat_completion(**request_data)
                 
                 # レスポンスをログに記録
                 response_data = {
