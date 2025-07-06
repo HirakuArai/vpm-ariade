@@ -1,6 +1,6 @@
 {
   "memory_version": "2.0",
-  "last_updated": "2025-07-06T18:59:34.569376+00:00",
+  "last_updated": "2025-07-06T19:18:16.680091+00:00",
   "current_memory": {
     "active_projects": [],
     "user_preferences": {
@@ -191,6 +191,30 @@
       "event_type": "action_item",
       "description": "必要に応じて、LLM Call Logsのログ出力内容やUIの改善点をリストアップする予定。",
       "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-06T19:18:03.414254+00:00",
+      "event_type": "user_message",
+      "description": "Memory Chat: LLM Call Logsで君との会話時のAIリクエストが確認できるかが相変わらず課題です。",
+      "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-06T19:18:13.574885+00:00",
+      "event_type": "system",
+      "description": "Memory Chat回答: ご指摘ありがとうございます。はい、現時点でも「LLM Call Logs」で私（Ariade）との会話時に発生するAIリクエストがきちんと記録・表示されているかどうかが主要な課題であること、しっかり把...",
+      "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-06T19:18:16.677995+00:00",
+      "event_type": "current_issue",
+      "description": "LLM Call LogsでAriade（アシスタント）との会話時のAIリクエストがきちんと記録・表示されているかが主要な課題となっている。",
+      "importance": "high"
+    },
+    {
+      "timestamp": "2025-07-06T19:18:16.679698+00:00",
+      "event_type": "next_action",
+      "description": "実際に会話を行い、そのログがLLM Call Logs上にどのように表示されるかを確認し、抜け漏れや不明瞭な記録があれば具体例をピックアップし、必要に応じてログ出力内容やUI面での改善点をリストアップする。リブートやセッション切り替え後も同様の検証を繰り返す。",
+      "importance": "high"
     }
   ]
 }
