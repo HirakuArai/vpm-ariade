@@ -243,6 +243,17 @@ if user_input:
                         )
                         if memory_patch:
                             logger.info(f"Memory updated with patch: {memory_patch[:100]}...")
+                            
+                            # 記憶更新後に即座にGitHub同期を実行（仕様書準拠）
+                            try:
+                                with st.spinner("GitHub同期中..."):
+                                    sync_success, sync_message = manual_memory_sync()
+                                    if sync_success:
+                                        logger.info("Memory synced to GitHub after conversation")
+                                    else:
+                                        logger.warning(f"Memory sync failed: {sync_message}")
+                            except Exception as sync_error:
+                                logger.error(f"GitHub同期エラー: {sync_error}")
                         else:
                             logger.warning("Memory update returned no patch")
                 except Exception as e:

@@ -13,34 +13,40 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 
-def push_memory_to_github(commit_message: Optional[str] = None) -> bool:
+def push_memory_to_github(commit_message: Optional[str] = None, retry_count: int = 3) -> bool:
     """
-    Memory repoファイルをGitHubに自動Push（仕様書準拠版）
+    Memory repoファイルをGitHubに自動Push（堅牢化版・リトライ対応）
     
     Args:
         commit_message: カスタムコミットメッセージ
+        retry_count: リトライ回数
         
     Returns:
         bool: Push成功フラグ
     """
-    try:
-        repo_root = Path(__file__).resolve().parent.parent
-        
-        # デフォルトコミットメッセージ
-        if not commit_message:
-            ts = datetime.now().strftime("%Y-%m-%d %H:%M")
-            commit_message = f"chore: memory sync {ts}"
-        
-        # Git操作の実行（仕様書準拠）
+    repo_root = Path(__file__).resolve().parent.parent
+    
+    # デフォルトコミットメッセージ
+    if not commit_message:
+        ts = datetime.now().strftime("%Y-%m-%d %H:%M")
+        commit_message = f"chore: memory sync {ts}"
+    
+    for attempt in range(retry_count):
         try:
+            logger.info(f"GitHub同期試行 {attempt + 1}/{retry_count}")
+            
             # 1. git add memory_repo
-            subprocess.run(
+            add_result = subprocess.run(
                 ["git", "add", "memory_repo"],
                 cwd=repo_root,
                 check=False,
                 capture_output=True,
                 text=True
             )
+            
+            if add_result.returncode != 0:
+                logger.warning(f"Git add failed: {add_result.stderr}")
+                continue
             
             # 2. git commit -m "chore: memory sync YYYY-MM-DD HH:MM"
             commit_result = subprocess.run(
@@ -58,9 +64,25 @@ def push_memory_to_github(commit_message: Optional[str] = None) -> bool:
                     return True
                 else:
                     logger.warning(f"Git commit failed: {commit_result.stderr}")
-                    return False
+                    continue
             
-            # 3. git push origin main
+            # 3. 競合対策: git pull --rebase before push
+            try:
+                pull_result = subprocess.run(
+                    ["git", "pull", "--rebase", "origin", "main"],
+                    cwd=repo_root,
+                    env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+                    capture_output=True,
+                    text=True,
+                    timeout=20
+                )
+                if pull_result.returncode != 0:
+                    logger.warning(f"Git pull rebase failed: {pull_result.stderr}")
+                    # pullが失敗してもpushを試行
+            except subprocess.TimeoutExpired:
+                logger.warning("Git pull timed out, continuing with push")
+            
+            # 4. git push origin main
             push_result = subprocess.run(
                 ["git", "push", "origin", "main"],
                 cwd=repo_root,
@@ -75,25 +97,32 @@ def push_memory_to_github(commit_message: Optional[str] = None) -> bool:
                 if "403" in push_result.stderr or "401" in push_result.stderr:
                     logger.error(f"Git push authentication failed: {push_result.stderr}")
                     logger.error("Check GITHUB_PAT token and permissions")
+                    return False  # 認証エラーはリトライしない
+                elif "rejected" in push_result.stderr:
+                    logger.warning(f"Push rejected, will retry: {push_result.stderr}")
+                    continue  # リトライ
                 else:
                     logger.error(f"Git push failed: {push_result.stderr}")
-                return False
-            
-            logger.info("Memory files successfully pushed to GitHub")
-            return True
-            
+                    continue  # リトライ
+            else:
+                logger.info("Memory files successfully pushed to GitHub")
+                return True
+                
         except subprocess.TimeoutExpired:
-            logger.error("Git push timed out")
-            return False
+            logger.warning(f"Git operation timed out (attempt {attempt + 1})")
+            continue
         except subprocess.CalledProcessError as e:
-            logger.error(f"Git command error: {e}")
+            logger.warning(f"Git command error (attempt {attempt + 1}): {e}")
             if "403" in str(e) or "401" in str(e):
                 logger.error("Authentication error - check GITHUB_PAT token")
-            return False
-        
-    except Exception as e:
-        logger.error(f"Unexpected error during GitHub sync: {e}")
-        return False
+                return False  # 認証エラーはリトライしない
+            continue
+        except Exception as e:
+            logger.warning(f"Unexpected error (attempt {attempt + 1}): {e}")
+            continue
+    
+    logger.error(f"GitHub sync failed after {retry_count} attempts")
+    return False
 
 
 def check_git_auth() -> bool:
