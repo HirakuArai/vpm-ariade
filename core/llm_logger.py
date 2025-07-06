@@ -100,7 +100,7 @@ def log_llm_call(
     try:
         # 既存ログ形式との互換性を保った構造
         log_entry = {
-            "ts": datetime.now(timezone.utc).isoformat() + "Z",
+            "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
             "agent": agent,
             "model": model,
             "kind": kind,
