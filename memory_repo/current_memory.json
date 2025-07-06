@@ -1,6 +1,6 @@
 {
   "memory_version": "2.0",
-  "last_updated": "2025-07-05T19:39:45.685547+00:00",
+  "last_updated": "2025-07-06T16:55:28.130386+00:00",
   "current_memory": {
     "active_projects": [],
     "user_preferences": {
@@ -59,6 +59,12 @@
       "event_type": "system",
       "description": "追加機能統合テスト",
       "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-06T16:55:28.130054+00:00",
+      "event_type": "test",
+      "description": "GitHub同期テスト - Claude Code Debug (強制有効)",
+      "importance": "high"
     }
   ]
 }
