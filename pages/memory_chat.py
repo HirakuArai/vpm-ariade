@@ -454,6 +454,14 @@ with st.sidebar:
         else:
             st.write("まだLLM呼び出しログがありません")
             
+        # セッション状態のフォールバックログ表示
+        if 'llm_call_logs' in st.session_state and st.session_state['llm_call_logs']:
+            st.markdown("### ⚠️ セッション状態のログ（ファイル保存失敗時のフォールバック）")
+            for i, log in enumerate(st.session_state['llm_call_logs']):
+                st.write(f"{i+1}. {log['timestamp']} - {log['model']} ({log['kind']}) - {log['tokens']} tokens")
+                if log.get('error'):
+                    st.error(f"   エラー: {log['error']}")
+            
     except Exception as e:
         st.error(f"LLM Call Logs表示エラー: {e}")
     

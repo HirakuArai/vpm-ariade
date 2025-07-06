@@ -81,7 +81,7 @@ def log_llm_call(
     task_id: Optional[str] = None
 ) -> None:
     """
-    LLM呼び出しをログに記録（仕様書準拠・完全記録版）
+    LLM呼び出しをログに記録（Streamlit Cloud対応強化版）
     
     Args:
         model: 使用したモデル名
@@ -97,6 +97,19 @@ def log_llm_call(
         subkind: サブ種別（デフォルト: general）
         task_id: タスクID（オプション）
     """
+    # Streamlit環境での詳細デバッグ
+    try:
+        import streamlit as st
+        is_streamlit = True
+    except:
+        is_streamlit = False
+    
+    if is_streamlit:
+        try:
+            st.write(f"🔍 LLM Logger Debug: {kind} - {model}")
+        except:
+            pass
+    
     try:
         # 既存ログ形式との互換性を保った構造
         log_entry = {
@@ -122,17 +135,93 @@ def log_llm_call(
             }
         }
         
+        if is_streamlit:
+            try:
+                st.write(f"  - ログエントリ作成完了: {len(json.dumps(log_entry))} bytes")
+            except:
+                pass
+        
+        # ディレクトリ作成の確実な実行
+        try:
+            LLM_LOGS_DIR.mkdir(parents=True, exist_ok=True)
+            if is_streamlit:
+                try:
+                    st.write(f"  - ディレクトリ確認: {LLM_LOGS_DIR} (存在: {LLM_LOGS_DIR.exists()})")
+                except:
+                    pass
+        except Exception as dir_error:
+            if is_streamlit:
+                try:
+                    st.error(f"❌ ディレクトリ作成失敗: {dir_error}")
+                except:
+                    pass
+            logger.error(f"Failed to create log directory: {dir_error}")
+            return
+        
         # ファイル書き込み（ローテーション対応）
         log_file = get_daily_log_file()
         log_file = rotate_log_if_needed(log_file)
         
-        with open(log_file, "a", encoding="utf-8") as f:
-            f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
+        if is_streamlit:
+            try:
+                st.write(f"  - ログファイル: {log_file}")
+                st.write(f"  - ファイル存在: {log_file.exists()}")
+            except:
+                pass
+        
+        # ファイル書き込み試行
+        try:
+            with open(log_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
+                f.flush()  # 強制フラッシュ
             
-        logger.debug(f"LLM call logged: {model} ({prompt_tokens + completion_tokens} tokens, {latency_ms:.2f}ms)")
+            # 書き込み確認
+            if log_file.exists():
+                file_size = log_file.stat().st_size
+                if is_streamlit:
+                    try:
+                        st.write(f"  ✅ ログ書き込み成功: {file_size} bytes")
+                    except:
+                        pass
+                logger.debug(f"LLM call logged: {model} ({prompt_tokens + completion_tokens} tokens, {latency_ms:.2f}ms)")
+            else:
+                if is_streamlit:
+                    try:
+                        st.error("❌ ファイル書き込み後にファイルが存在しない")
+                    except:
+                        pass
+                logger.error("Log file does not exist after write")
+                
+        except Exception as write_error:
+            if is_streamlit:
+                try:
+                    st.error(f"❌ ファイル書き込みエラー: {write_error}")
+                except:
+                    pass
+            logger.error(f"Failed to write log file: {write_error}")
+            raise
         
     except Exception as e:
+        if is_streamlit:
+            try:
+                st.error(f"❌ LLMログ記録に失敗: {e}")
+            except:
+                pass
         logger.error(f"Failed to log LLM call: {e}")
+        
+        # 緊急フォールバック: st.session_stateに保存
+        if is_streamlit:
+            try:
+                if 'llm_call_logs' not in st.session_state:
+                    st.session_state['llm_call_logs'] = []
+                st.session_state['llm_call_logs'].append({
+                    'timestamp': datetime.now().isoformat(),
+                    'model': model,
+                    'kind': kind,
+                    'tokens': f"{prompt_tokens}/{completion_tokens}",
+                    'error': str(e)
+                })
+                st.warning(f"⚠️ ファイル保存失敗、セッション状態に保存: {len(st.session_state['llm_call_logs'])}件")
 
 
 def estimate_cost(model: str, prompt_tokens: int, completion_tokens: int) -> float:
