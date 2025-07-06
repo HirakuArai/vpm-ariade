@@ -1,6 +1,6 @@
 {
   "memory_version": "2.0",
-  "last_updated": "2025-07-06T19:18:16.678668+00:00",
+  "last_updated": "2025-07-06T19:36:18.202016+00:00",
   "current_memory": {
     "active_projects": [],
     "user_preferences": {
@@ -209,6 +209,24 @@
       "event_type": "current_issue",
       "description": "LLM Call LogsでAriade（アシスタント）との会話時のAIリクエストがきちんと記録・表示されているかが主要な課題となっている。",
       "importance": "high"
+    },
+    {
+      "timestamp": "2025-07-06T19:18:16.679698+00:00",
+      "event_type": "next_action",
+      "description": "実際に会話を行い、そのログがLLM Call Logs上にどのように表示されるかを確認し、抜け漏れや不明瞭な記録があれば具体例をピックアップし、必要に応じてログ出力内容やUI面での改善点をリストアップする。リブートやセッション切り替え後も同様の検証を繰り返す。",
+      "importance": "high"
+    },
+    {
+      "timestamp": "2025-07-06T19:36:06.544657+00:00",
+      "event_type": "user_message",
+      "description": "Memory Chat: LLM Call Logsで会話が確認できるようになしましたが、Githubへの反映がうまくいきません。テスト中です。",
+      "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-06T19:36:18.200841+00:00",
+      "event_type": "system",
+      "description": "Memory Chat回答: ご報告ありがとうございます。  \n現状、**LLM Call Logsでは会話記録の確認はできているが、Githubへの反映に課題が残っている**という状況ですね。現在テスト中とのこと、進捗をしっかり...",
+      "importance": "medium"
     }
   ]
 }
