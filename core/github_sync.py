@@ -40,8 +40,8 @@ def push_memory_to_github(commit_message: Optional[str] = None, retry_count: int
         try:
             logger.info(f"GitHub同期試行 {attempt + 1}/{retry_count}")
             
-            # 1. git add memory_repo
-            add_result = subprocess.run(
+            # 1a. git add memory_repo
+            add_memory_result = subprocess.run(
                 ["git", "add", "memory_repo"],
                 cwd=repo_root,
                 check=False,
@@ -49,8 +49,23 @@ def push_memory_to_github(commit_message: Optional[str] = None, retry_count: int
                 text=True
             )
             
-            if add_result.returncode != 0:
-                logger.warning(f"Git add failed: {add_result.stderr}")
+            # 1b. git add logs/llm (ディレクトリが存在する場合)
+            logs_dir = os.path.join(repo_root, "logs", "llm")
+            if os.path.exists(logs_dir):
+                add_logs_result = subprocess.run(
+                    ["git", "add", "logs/llm"],
+                    cwd=repo_root,
+                    check=False,
+                    capture_output=True,
+                    text=True
+                )
+                logger.info(f"Git add logs/llm result: {add_logs_result.returncode}")
+                if add_logs_result.returncode != 0:
+                    logger.warning(f"Git add logs failed: {add_logs_result.stderr}")
+            
+            # メモリリポジトリの追加が失敗した場合は継続しない
+            if add_memory_result.returncode != 0:
+                logger.warning(f"Git add memory_repo failed: {add_memory_result.stderr}")
                 continue
             
             # 2. git commit -m "chore: memory sync YYYY-MM-DD HH:MM"

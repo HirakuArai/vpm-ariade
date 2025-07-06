@@ -11,6 +11,7 @@ __pycache__/
 # 環境変数ファイル
 .env
 config/.env
+.streamlit/secrets.toml
 
 # Mac OS用キャッシュファイル
 .DS_Store
