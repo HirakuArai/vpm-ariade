@@ -26,6 +26,11 @@ def push_memory_to_github(commit_message: Optional[str] = None, retry_count: int
     """
     repo_root = Path(__file__).resolve().parent.parent
     
+    # Git認証設定を確実に実行（Streamlit Cloud対応）
+    if not setup_git_credentials():
+        logger.error("Git credentials setup failed")
+        return False
+    
     # デフォルトコミットメッセージ
     if not commit_message:
         ts = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -57,56 +62,81 @@ def push_memory_to_github(commit_message: Optional[str] = None, retry_count: int
                 text=True
             )
             
+            # デバッグ情報出力
+            logger.info(f"Git commit return code: {commit_result.returncode}")
+            logger.info(f"Git commit stdout: {commit_result.stdout}")
+            logger.info(f"Git commit stderr: {commit_result.stderr}")
+            
             # コミットが空の場合は正常終了
             if commit_result.returncode != 0:
                 if "nothing to commit" in commit_result.stdout or "nothing to commit" in commit_result.stderr:
                     logger.info("No memory changes to commit")
                     return True
                 else:
-                    logger.warning(f"Git commit failed: {commit_result.stderr}")
+                    logger.warning(f"Git commit failed: stdout='{commit_result.stdout}' stderr='{commit_result.stderr}'")
                     continue
             
-            # 3. 競合対策: git pull --rebase before push
+            # 3. git push origin main（リベースしてからプッシュ）
+            push_success = False
             try:
-                pull_result = subprocess.run(
-                    ["git", "pull", "--rebase", "origin", "main"],
+                # まず通常push試行
+                push_result = subprocess.run(
+                    ["git", "push", "origin", "main"],
                     cwd=repo_root,
                     env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
                     capture_output=True,
                     text=True,
-                    timeout=20
+                    timeout=30
                 )
-                if pull_result.returncode != 0:
-                    logger.warning(f"Git pull rebase failed: {pull_result.stderr}")
-                    # pullが失敗してもpushを試行
-            except subprocess.TimeoutExpired:
-                logger.warning("Git pull timed out, continuing with push")
-            
-            # 4. git push origin main
-            push_result = subprocess.run(
-                ["git", "push", "origin", "main"],
-                cwd=repo_root,
-                env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
-            
-            if push_result.returncode != 0:
-                # エラーハンドリング（仕様書準拠）
-                if "403" in push_result.stderr or "401" in push_result.stderr:
+                
+                if push_result.returncode == 0:
+                    logger.info("Memory files successfully pushed to GitHub")
+                    return True
+                elif "rejected" in push_result.stderr and "non-fast-forward" in push_result.stderr:
+                    # 競合時のリベース処理
+                    logger.info("Push rejected, attempting rebase...")
+                    
+                    # git pull --rebase origin main
+                    rebase_result = subprocess.run(
+                        ["git", "pull", "--rebase", "origin", "main"],
+                        cwd=repo_root,
+                        env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+                        capture_output=True,
+                        text=True,
+                        timeout=20
+                    )
+                    
+                    if rebase_result.returncode == 0:
+                        # リベース成功後に再push
+                        retry_push_result = subprocess.run(
+                            ["git", "push", "origin", "main"],
+                            cwd=repo_root,
+                            env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+                            capture_output=True,
+                            text=True,
+                            timeout=30
+                        )
+                        
+                        if retry_push_result.returncode == 0:
+                            logger.info("Memory files successfully pushed after rebase")
+                            return True
+                        else:
+                            logger.warning(f"Push failed after rebase: {retry_push_result.stderr}")
+                            continue
+                    else:
+                        logger.warning(f"Rebase failed: {rebase_result.stderr}")
+                        continue
+                elif "403" in push_result.stderr or "401" in push_result.stderr:
                     logger.error(f"Git push authentication failed: {push_result.stderr}")
                     logger.error("Check GITHUB_PAT token and permissions")
                     return False  # 認証エラーはリトライしない
-                elif "rejected" in push_result.stderr:
-                    logger.warning(f"Push rejected, will retry: {push_result.stderr}")
-                    continue  # リトライ
                 else:
-                    logger.error(f"Git push failed: {push_result.stderr}")
+                    logger.warning(f"Git push failed: {push_result.stderr}")
                     continue  # リトライ
-            else:
-                logger.info("Memory files successfully pushed to GitHub")
-                return True
+                    
+            except subprocess.TimeoutExpired:
+                logger.warning(f"Git push timed out (attempt {attempt + 1})")
+                continue
                 
         except subprocess.TimeoutExpired:
             logger.warning(f"Git operation timed out (attempt {attempt + 1})")
@@ -153,7 +183,7 @@ def check_git_auth() -> bool:
 
 def setup_git_credentials():
     """
-    Git認証の設定
+    Git認証の設定（Streamlit Cloud対応強化版）
     GitHub Personal Access Token を使用
     """
     try:
@@ -165,17 +195,41 @@ def setup_git_credentials():
         
         repo_root = Path(__file__).resolve().parent.parent
         
-        # Git credentialの設定
+        # Git credentialの設定（必須設定を確実に実行）
         commands = [
+            # ユーザー識別情報（必須）
+            ["git", "config", "--local", "user.email", "memory-bot@vpm-ariade.local"],
+            ["git", "config", "--local", "user.name", "VPM Ariade Memory Bot"],
+            # 認証設定
             ["git", "config", "--local", "credential.helper", "store"],
-            ["git", "config", "--local", "user.email", "noreply@anthropic.com"],
-            ["git", "config", "--local", "user.name", "Memory Layer Bot"]
+            # リモート設定確認・修正（HTTPS + Token）
+            ["git", "config", "--local", "remote.origin.url", f"https://{github_token}@github.com/HirakuArai/vpm-ariade.git"]
         ]
         
         for cmd in commands:
-            subprocess.run(cmd, cwd=repo_root, capture_output=True)
+            result = subprocess.run(cmd, cwd=repo_root, capture_output=True, text=True)
+            if result.returncode != 0:
+                logger.warning(f"Git config command failed: {' '.join(cmd)} - {result.stderr}")
+                # 必須でない設定は続行
+                if "user.email" in cmd or "user.name" in cmd:
+                    logger.error(f"Critical git config failed: {' '.join(cmd)}")
+                    return False
         
-        logger.info("Git credentials configured")
+        # 設定確認
+        check_commands = [
+            ["git", "config", "--local", "user.email"],
+            ["git", "config", "--local", "user.name"]
+        ]
+        
+        for cmd in check_commands:
+            result = subprocess.run(cmd, cwd=repo_root, capture_output=True, text=True)
+            if result.returncode == 0:
+                logger.info(f"Git config verified: {' '.join(cmd)} = {result.stdout.strip()}")
+            else:
+                logger.error(f"Git config verification failed: {' '.join(cmd)}")
+                return False
+        
+        logger.info("Git credentials configured successfully")
         return True
         
     except Exception as e:
