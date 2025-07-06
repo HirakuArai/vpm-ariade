@@ -8,7 +8,7 @@ import json
 import os
 import sys
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 # ロガーの設定
@@ -353,7 +353,7 @@ with st.sidebar:
         import json
         from datetime import datetime
         
-        log_file = Path("logs/llm") / f"{datetime.now().strftime('%Y-%m-%d')}.jsonl"
+        log_file = Path("logs/llm") / f"{datetime.now(timezone.utc).strftime('%Y-%m-%d')}.jsonl"
         recent_entries = []
         
         if log_file.exists():
@@ -473,7 +473,7 @@ with st.sidebar:
     from datetime import datetime
     
     log_dir = Path("logs/llm")
-    today_file = log_dir / f"{datetime.now().strftime('%Y-%m-%d')}.jsonl"
+    today_file = log_dir / f"{datetime.now(timezone.utc).strftime('%Y-%m-%d')}.jsonl"
     
     col1, col2 = st.columns(2)
     with col1:

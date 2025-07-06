@@ -24,8 +24,8 @@ MAX_FILE_SIZE = 1024 * 1024  # 1MB
 
 
 def get_daily_log_file() -> Path:
-    """今日のLLMログファイルパスを取得（仕様書準拠）"""
-    today = datetime.now().strftime("%Y-%m-%d")
+    """今日のLLMログファイルパスを取得（仕様書準拠・UTC基準）"""
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     return LLM_LOGS_DIR / f"{today}.jsonl"
 
 

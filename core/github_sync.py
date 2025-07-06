@@ -7,7 +7,7 @@ import subprocess
 import os
 import logging
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ def push_memory_to_github(commit_message: Optional[str] = None, retry_count: int
     
     # デフォルトコミットメッセージ
     if not commit_message:
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M")
+        ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
         commit_message = f"chore: memory sync {ts}"
     
     for attempt in range(retry_count):
