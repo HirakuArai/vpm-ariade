@@ -98,24 +98,28 @@ def log_llm_call(
         task_id: タスクID（オプション）
     """
     try:
-        # 仕様書準拠のログ構造
+        # 既存ログ形式との互換性を保った構造
         log_entry = {
             "ts": datetime.now(timezone.utc).isoformat() + "Z",
-            "model": model,
-            "prompt_tokens": prompt_tokens,
-            "completion_tokens": completion_tokens,
-            "latency_ms": round(latency_ms, 2),
-            "messages": messages or [],  # ← プロンプト全文
-            "response": response or "",   # ← 返答全文
-            
-            # 既存ログ形式との互換性
             "agent": agent,
+            "model": model,
             "kind": kind,
             "subkind": subkind,
             "task_id": task_id or f"memory-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
             "error": None,
-            "request": request_data or {},
-            "response_data": response_data or {}
+            "request": {
+                **(request_data or {}),
+                # 仕様書準拠: プロンプト全文をrequestに格納
+                "messages": messages or [],
+                "latency_ms": round(latency_ms, 2)
+            },
+            "response": {
+                # 仕様書準拠: 返答全文をresponse辞書に格納（既存スキーマ準拠）
+                "content": response or "",
+                "choices": [{"message": {"content": response or ""}}] if response else []
+            }
         }
         
         # ファイル書き込み（ローテーション対応）
@@ -205,7 +209,7 @@ def get_today_stats() -> Dict[str, Any]:
                         entry = json.loads(line.strip())
                         calls += 1
                         
-                        # 新しい形式のログから統計を計算
+                        # 新旧両形式から統計を計算
                         prompt_tokens = entry.get("prompt_tokens", 0)
                         completion_tokens = entry.get("completion_tokens", 0)
                         total_tokens += prompt_tokens + completion_tokens
@@ -215,9 +219,9 @@ def get_today_stats() -> Dict[str, Any]:
                         cost = estimate_cost(model, prompt_tokens, completion_tokens)
                         total_cost += cost
                         
-                        # レスポンス時間は現在の値を使用
-                        # 古い形式との互換性のため、複数のフィールドを確認
-                        latency = entry.get("latency_ms", 0.0)
+                        # レスポンス時間（新形式ではrequest.latency_ms、旧形式では直接）
+                        request_data = entry.get("request", {})
+                        latency = request_data.get("latency_ms", entry.get("latency_ms", 0.0))
                         total_latency += latency
                         
                     except json.JSONDecodeError:
@@ -349,15 +353,20 @@ def get_recent_llm_calls(limit: int = 10) -> List[Dict[str, Any]]:
             if line.strip():
                 try:
                     entry = json.loads(line.strip())
-                    # UIで表示するために整形
+                    # UIで表示するために整形（新旧両形式対応）
+                    request_data = entry.get("request", {})
+                    response_data = entry.get("response", {})
+                    
+                    # 新形式ではrequest.messagesとresponse.contentを使用
+                    # 旧形式では直接フィールドから取得（下位互換性）
                     formatted_entry = {
                         "timestamp": entry.get("ts", ""),
                         "model": entry.get("model", ""),
                         "prompt_tokens": entry.get("prompt_tokens", 0),
                         "completion_tokens": entry.get("completion_tokens", 0),
-                        "latency_ms": entry.get("latency_ms", 0),
-                        "messages": entry.get("messages", []),
-                        "response": entry.get("response", ""),
+                        "latency_ms": request_data.get("latency_ms", entry.get("latency_ms", 0)),
+                        "messages": request_data.get("messages", entry.get("messages", [])),
+                        "response": response_data.get("content", entry.get("response", "")),
                         "task_id": entry.get("task_id", "")
                     }
                     recent_calls.append(formatted_entry)
