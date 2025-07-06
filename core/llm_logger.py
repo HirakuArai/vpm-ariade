@@ -222,6 +222,8 @@ def log_llm_call(
                     'error': str(e)
                 })
                 st.warning(f"⚠️ ファイル保存失敗、セッション状態に保存: {len(st.session_state['llm_call_logs'])}件")
+            except:
+                pass  # フォールバック処理でもエラーの場合は無視
 
 
 def estimate_cost(model: str, prompt_tokens: int, completion_tokens: int) -> float:
