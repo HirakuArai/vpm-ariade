@@ -209,12 +209,18 @@ if user_input:
                 ]
                 
                 # GPT-4.1を使用（CLAUDE.mdの要求に従う）
+                st.write("🔍 Debug: LLMコール実行中...")
+                st.write(f"  - Model: {get_openai_model()}")
+                st.write(f"  - Messages: {len(messages)}件")
+                
                 response = create_chat_completion(
                     model=get_openai_model(),
                     messages=messages,
                     max_tokens=1000,
                     temperature=0.7
                 )
+                
+                st.write("✅ Debug: LLMコール完了")
                 
                 assistant_reply = response.choices[0].message.content
                 
@@ -236,6 +242,8 @@ if user_input:
                 # 記憶をLLMで更新（N+1パッチ生成）
                 try:
                     with st.spinner("記憶を更新中..."):
+                        st.write("🔍 Debug: Memory Update LLMコール実行中...")
+                        
                         memory_patch = update_memory_with_llm(
                             user_message=user_input,
                             assistant_response=assistant_reply,
@@ -448,6 +456,43 @@ with st.sidebar:
             
     except Exception as e:
         st.error(f"LLM Call Logs表示エラー: {e}")
+    
+    st.divider()
+    st.subheader("🔍 LLM Call Logs デバッグ")
+    
+    # LLMログファイル確認
+    from pathlib import Path
+    from datetime import datetime
+    
+    log_dir = Path("logs/llm")
+    today_file = log_dir / f"{datetime.now().strftime('%Y-%m-%d')}.jsonl"
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write(f"**ログディレクトリ**: {log_dir}")
+        st.write(f"**ディレクトリ存在**: {log_dir.exists()}")
+        if log_dir.exists():
+            files = list(log_dir.glob("*.jsonl"))
+            st.write(f"**ファイル数**: {len(files)}")
+            for f in files:
+                st.write(f"  - {f.name} ({f.stat().st_size} bytes)")
+    
+    with col2:
+        st.write(f"**今日のファイル**: {today_file.name}")
+        st.write(f"**ファイル存在**: {today_file.exists()}")
+        if today_file.exists():
+            st.write(f"**ファイルサイズ**: {today_file.stat().st_size} bytes")
+            # 最新行を表示
+            try:
+                with open(today_file, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+                st.write(f"**エントリ数**: {len(lines)}行")
+                if lines:
+                    import json
+                    last_entry = json.loads(lines[-1])
+                    st.write(f"**最新エントリ**: {last_entry.get('ts')} - {last_entry.get('kind')}")
+            except Exception as e:
+                st.error(f"ファイル読み込みエラー: {e}")
     
     st.divider()
     st.subheader("🔄 GitHub同期")
