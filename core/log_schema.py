@@ -22,6 +22,7 @@ class RequestKind(str, Enum):
     PROJECT_DETAIL = "project_detail"  # AI-generated project summaries and descriptions
     INTENT_DETECT = "intent_detect"    # User intent detection
     CONVERSATION_ANALYSIS = "conversation_analysis"  # Conversation summary and analysis
+    MEMORY_UPDATE = "memory_update"  # Memory update LLM calls (N+1 patch generation)
     UNKNOWN = "unknown"  # Fallback for unregistered kinds
 
 
@@ -30,6 +31,7 @@ class RequestContext(str, Enum):
     HOME_CHAT = "home_chat"        # Chat from home page (no project selected)
     PROJECT_CHAT = "project_chat"  # Chat from within a specific project
     GENERAL = "general"            # General context
+    N_PLUS_1_PATCH = "n_plus_1_patch"  # Memory update N+1 patch generation
 
 class LogEntry(BaseModel):
     """Schema for LLM call log entries"""
