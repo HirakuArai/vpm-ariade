@@ -24,14 +24,31 @@ JST = ZoneInfo("Asia/Tokyo")
 
 
 def load_all_logs(log_dir: Path, since_hours: int) -> list[LogEntry]:
-    """Load log entries from log directory"""
+    """Load log entries from log directory with Streamlit Cloud debugging"""
     entries = []
+    
+    # デバッグ情報をStreamlitに出力
+    import streamlit as st
+    
     # Use timezone-aware cutoff time to match log entries (UTC)
     from datetime import timezone
     cutoff_time = datetime.now(timezone.utc) - timedelta(hours=since_hours)
     
+    # デバッグ情報表示
+    st.write(f"🔍 Debug: ログディレクトリ = {log_dir}")
+    st.write(f"🔍 Debug: ディレクトリ存在 = {log_dir.exists()}")
+    st.write(f"🔍 Debug: 現在時刻(UTC) = {datetime.now(timezone.utc)}")
+    st.write(f"🔍 Debug: カットオフ時間({since_hours}h前) = {cutoff_time}")
+    
     if not log_dir.exists():
+        st.error(f"❌ ログディレクトリが存在しません: {log_dir}")
         return entries
+    
+    # ディレクトリ内のファイル一覧表示
+    all_files = list(log_dir.glob("*"))
+    st.write(f"🔍 Debug: ディレクトリ内ファイル数 = {len(all_files)}")
+    for f in all_files:
+        st.write(f"  - {f.name} ({f.stat().st_size} bytes)")
     
     # Find all JSONL files, excluding metadata files
     metadata_files = {"dedup_skipped.jsonl", "metrics_anomalies.jsonl", "dedup_index.json"}
@@ -40,17 +57,37 @@ def load_all_logs(log_dir: Path, since_hours: int) -> list[LogEntry]:
         # Skip metadata files that don't contain LogEntry format
         if log_file.name in metadata_files:
             continue
-        file_entries = from_jsonl(log_file)
+            
+        st.write(f"🔍 Debug: 処理中ファイル = {log_file.name}")
         
-        # Filter by timestamp
-        for entry in file_entries:
-            try:
-                entry_time = datetime.fromisoformat(entry.ts.replace('Z', '+00:00'))
-                if entry_time >= cutoff_time:
+        try:
+            file_entries = from_jsonl(log_file)
+            st.write(f"  - 読み込みエントリ数: {len(file_entries)}")
+            
+            # Filter by timestamp
+            valid_entries = 0
+            for entry in file_entries:
+                try:
+                    entry_time = datetime.fromisoformat(entry.ts.replace('Z', '+00:00'))
+                    time_diff = datetime.now(timezone.utc) - entry_time
+                    
+                    if entry_time >= cutoff_time:
+                        entries.append(entry)
+                        valid_entries += 1
+                    
+                    st.write(f"    エントリ: {entry.ts} ({time_diff.total_seconds()/3600:.1f}h前) - {entry.kind}")
+                        
+                except (ValueError, AttributeError) as e:
+                    st.write(f"    タイムスタンプ解析エラー: {e}")
                     entries.append(entry)
-            except (ValueError, AttributeError):
-                entries.append(entry)
+                    valid_entries += 1
+            
+            st.write(f"  - 有効エントリ数: {valid_entries}")
+            
+        except Exception as e:
+            st.error(f"❌ ファイル読み込みエラー {log_file.name}: {e}")
     
+    st.write(f"🔍 Debug: 最終エントリ数 = {len(entries)}")
     return sorted(entries, key=lambda e: e.ts, reverse=True)
 
 
