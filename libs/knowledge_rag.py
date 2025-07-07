@@ -10,6 +10,12 @@ from typing import Optional
 import openai
 from duckduckgo_search import DDGS
 
+try:
+    from core.v2.openai_config import get_openai_model, create_chat_completion
+except ImportError:
+    get_openai_model = None
+    create_chat_completion = None
+
 
 def get_domain_info(query: str, max_tokens: int = 300) -> str:
     """
@@ -101,14 +107,26 @@ def _summarize_text(text: str, original_query: str, max_tokens: int) -> str:
 
 要約:"""
         
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=max_tokens,
-            temperature=0
-        )
+        # Use logging wrapper and GPT-4.1 model
+        if create_chat_completion and get_openai_model:
+            response = create_chat_completion(
+                model=get_openai_model(),
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=max_tokens,
+                temperature=0
+            )
+        else:
+            # Fallback to direct API call with GPT-4.1
+            response = client.chat.completions.create(
+                model="gpt-4.1",
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=max_tokens,
+                temperature=0
+            )
         
         return response.choices[0].message.content
         
