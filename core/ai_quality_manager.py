@@ -105,7 +105,7 @@ class AIQualityManager:
                                       messages: List[Dict[str, str]], 
                                       model: str = "gpt-4.1",
                                       temperature: float = 0.7,
-                                      max_tokens: int = 128000) -> AIResponse:
+                                      max_tokens: int = 8000) -> AIResponse:
         """
         品質チェック付きAIリクエスト実行
         

@@ -267,7 +267,7 @@ class AdaptiveQuestionGenerator:
                     {"role": "user", "content": user_prompt}
                 ],
                 temperature=0.3,
-                max_tokens=128000
+                max_tokens=8000
             )
             
             # AI応答を解析して質問を改善

@@ -154,7 +154,7 @@ class ConversationAnalyzer:
                     {"role": "user", "content": f"会話内容:\n{conversation_text}"}
                 ],
                 temperature=0.1,
-                max_tokens=128000
+                max_tokens=8000
             )
             
             # レスポンスを解析

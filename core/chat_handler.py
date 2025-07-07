@@ -206,7 +206,7 @@ def process_chat_input(user_input: str, current_project_id: Optional[str] = None
                         {"role": "user", "content": activation_prompt}
                     ],
                     temperature=0.1,
-                    max_tokens=128000
+                    max_tokens=8000
                 )
                 
                 result = json.loads(response.choices[0].message.content.strip())
@@ -521,7 +521,7 @@ def process_ai_conversation(user_input: str, current_project_id: Optional[str]) 
             messages=messages,
             model=get_openai_model() if get_openai_model else "gpt-4.1",
             temperature=0.7,
-            max_tokens=128000
+            max_tokens=8000
         )
         
         # タイピングインジケータを削除

@@ -58,7 +58,7 @@ def get_default_openai_params() -> Dict[str, Any]:
     return {
         "model": get_openai_model(),
         "temperature": 0.7,
-        "max_tokens": 128000
+        "max_tokens": 8000  # GPT-4の実際の上限に合わせて設定
     }
 
 def get_openai_client(api_key: Optional[str] = None) -> openai.OpenAI:

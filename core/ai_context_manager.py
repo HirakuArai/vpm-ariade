@@ -147,7 +147,7 @@ class AIContextManager:
                     {"role": "user", "content": summary_prompt}
                 ],
                 temperature=0.3,
-                max_tokens=128000
+                max_tokens=8000
             )
             
             summary = response.choices[0].message.content.strip()
