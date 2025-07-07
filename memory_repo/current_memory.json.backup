@@ -1,6 +1,6 @@
 {
   "memory_version": "2.0",
-  "last_updated": "2025-07-07T16:25:54.443184+00:00",
+  "last_updated": "2025-07-07T17:27:56.513314+00:00",
   "current_memory": {
     "active_projects": [],
     "user_preferences": {
@@ -18,42 +18,6 @@
     }
   },
   "events": [
-    {
-      "timestamp": "2025-07-06T18:47:33.743771+00:00",
-      "event_type": "user_message",
-      "description": "Memory Chat: リブート後も「詳細メモリ内容」は継承されていることが確認できました。LLM Call Logsでリクエスト内容が確認できるかが課題です。",
-      "importance": "medium"
-    },
-    {
-      "timestamp": "2025-07-06T18:47:37.964374+00:00",
-      "event_type": "system",
-      "description": "Memory Chat回答: はい、ご指摘の通りです。\n\n現時点での状況を整理しますと――  \n- リブート後も「詳細メモリ内容」がしっかり継承されていることは確認済みです。\n- 一方で、「LLM Call Logs」でAIへのリ...",
-      "importance": "medium"
-    },
-    {
-      "timestamp": "2025-07-06T18:47:40.341476+00:00",
-      "event_type": "action_plan",
-      "description": "LLM Call Logs画面でリクエスト・レスポンスが抜け漏れなく、分かりやすいフォーマットで表示されているか再度チェックすることが今後のアクションとなっている。",
-      "importance": "high"
-    },
-    {
-      "timestamp": "2025-07-06T18:47:40.348034+00:00",
-      "event_type": "action_plan",
-      "description": "必要に応じて、LLM Call Logsのログ出力内容やUIの改善点をリストアップする予定。",
-      "importance": "medium"
-    },
-    {
-      "timestamp": "2025-07-06T18:47:40.351650+00:00",
-      "event_type": "action_plan",
-      "description": "継続的にリブートやセッションの切り替えを行い、想定通りログが保持されるか確認することが今後のアクションとなっている。",
-      "importance": "high"
-    },
-    {
-      "timestamp": "2025-07-06T18:59:28.062235+00:00",
-      "event_type": "user_message",
-      "description": "Memory Chat: LLM Call LogsでAIへのリクエストが確認できるか、確認します。",
-      "importance": "medium"
-    },
     {
       "timestamp": "2025-07-06T18:59:32.402123+00:00",
       "event_type": "system",
@@ -317,6 +281,42 @@
       "event_type": "design_guideline",
       "description": "プロジェクト詳細生成（2000トークン）は情報量の多い要約・説明に活用できる。意図検出・要約系（300-500トークン）は構造を単純・明快に保つことで精度向上が期待できる。",
       "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-07T16:25:54.444508+00:00",
+      "event_type": "design_guideline",
+      "description": "Memory Chat βの1000トークン上限を活かし、必要に応じて要約・圧縮処理を前後に挟む運用が推奨された。",
+      "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-07T17:27:29.843067+00:00",
+      "event_type": "user_message",
+      "description": "Memory Chat: 現状を整理し出力してください。",
+      "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-07T17:27:43.406405+00:00",
+      "event_type": "system",
+      "description": "Memory Chat回答: 承知しました。  \n現状の整理を以下にまとめます。\n\n---\n\n## 🟦 現状整理（2025-07-07時点）\n\n### 1. システム・人格構成\n\n- **Kai VPM**には、今後以下4つの人格...",
+      "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-07T17:27:56.508617+00:00",
+      "event_type": "system_update",
+      "description": "Kai VPMには4つの人格（ariade、kai_pm_＊、eliot（予定）、kai_root）が定義され、各人格の責務・トーン・禁止事項が明文化された。Kai統括人格は監査・評価・改善のみに徹し、直接LLM生成リクエストは行わない。",
+      "importance": "high"
+    },
+    {
+      "timestamp": "2025-07-07T17:27:56.511171+00:00",
+      "event_type": "memory_mechanism_policy",
+      "description": "Claude Codeローカル環境プロジェクトでは、記憶は/projets/{project_id}/memory/配下に時系列スナップショット（memory_{timestamp}.jsonl）とlogs/（会話ログ・差分記録）として保存し、記憶メカニズムは独立モジュール化・API化して共通利用。会話送信・新規作成時に自動保存し、保存ごとにgit add/commit/pushでGitHubへ反映。ファイル構造・命名・保存タイミング・バックアップ・トークン管理も明文化する方針。",
+      "importance": "high"
+    },
+    {
+      "timestamp": "2025-07-07T17:27:56.512753+00:00",
+      "event_type": "token_limit_policy",
+      "description": "各AI機能ごとにトークン上限が定められている（例：Memory Chat β会話1000、Memory Update500、通常会話800、AI Project Manager1000、プロジェクト詳細生成2000、AI意図検出300-500、AI Context Manager300）。Memory Updateは圧縮・要約重視、プロジェクト詳細生成は情報量多い要約に活用、意図検出・要約系は構造をシンプルに設計することが推奨されている。",
+      "importance": "high"
     }
   ]
 }
