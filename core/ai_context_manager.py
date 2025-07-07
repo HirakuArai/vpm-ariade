@@ -139,9 +139,9 @@ class AIContextManager:
 - キーワード:
 """
             
-            from core.v2.openai_config import create_chat_completion
+            from core.v2.openai_config import create_chat_completion, get_openai_model
             response = create_chat_completion(
-                model="gpt-3.5-turbo",
+                model=get_openai_model(),
                 messages=[
                     {"role": "system", "content": "あなたは会話要約の専門家です。簡潔で有用な要約を作成してください。"},
                     {"role": "user", "content": summary_prompt}
