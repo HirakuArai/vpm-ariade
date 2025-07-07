@@ -216,7 +216,7 @@ if user_input:
                 response = create_chat_completion(
                     model=get_openai_model(),
                     messages=messages,
-                    max_tokens=1000,
+                    max_tokens=128000,
                     temperature=0.7
                 )
                 

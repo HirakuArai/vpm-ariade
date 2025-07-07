@@ -85,7 +85,7 @@ class SimpleConversationAnalyzer:
                     {"role": "user", "content": user_prompt}
                 ],
                     "temperature": 0.1,
-                    "max_tokens": 2000
+                    "max_tokens": 128000
                 }
                 
                 log['log_request'](request_data)

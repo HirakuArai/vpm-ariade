@@ -245,7 +245,7 @@ class ProjectDetailsPage:
                             {"role": "user", "content": prompt}
                         ],
                         "temperature": 0.7,
-                        "max_tokens": 2000
+                        "max_tokens": 128000
                     }
                 
                     log['log_request'](request_data)

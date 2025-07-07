@@ -118,7 +118,7 @@ class AIIntentDetector:
                 model="gpt-4.1",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.1,
-                max_tokens=500
+                max_tokens=128000
             )
             
             result = json.loads(response.choices[0].message.content)
@@ -226,7 +226,7 @@ class AIIntentDetector:
                 model="gpt-4.1",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.1,
-                max_tokens=400
+                max_tokens=128000
             )
             
             result = json.loads(response.choices[0].message.content)
@@ -337,7 +337,7 @@ class AIIntentDetector:
                         {"role": "user", "content": prompt}
                     ],
                     "temperature": 0.1,
-                    "max_tokens": 300
+                    "max_tokens": 128000
                 }
                 
                 log['log_request'](request_data)

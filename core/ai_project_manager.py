@@ -132,7 +132,7 @@ class AIProjectManager:
                         }
                     ],
                     "temperature": 0.3,
-                    "max_tokens": 1000
+                    "max_tokens": 128000
                 }
                 
                 # リクエストをログ

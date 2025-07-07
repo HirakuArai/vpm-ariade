@@ -327,7 +327,7 @@ def update_memory_with_llm(user_message: str, assistant_response: str, memory_co
         response = create_memory_update_completion(
             model=get_openai_model(),
             messages=messages,
-            max_tokens=500,
+            max_tokens=128000,
             temperature=0.3  # 記憶更新は一貫性重視で低温度
         )
         print(f"[DEBUG] LLM call completed successfully")
