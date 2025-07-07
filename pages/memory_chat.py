@@ -209,9 +209,10 @@ if user_input:
                 ]
                 
                 # GPT-4.1を使用（CLAUDE.mdの要求に従う）
-                st.write("🔍 Debug: LLMコール実行中...")
-                st.write(f"  - Model: {get_openai_model()}")
-                st.write(f"  - Messages: {len(messages)}件")
+                # デバッグ出力を一時的に無効化（会話表示の問題を修正）
+                # st.write("🔍 Debug: LLMコール実行中...")
+                # st.write(f"  - Model: {get_openai_model()}")
+                # st.write(f"  - Messages: {len(messages)}件")
                 
                 response = create_chat_completion(
                     model=get_openai_model(),
@@ -220,7 +221,7 @@ if user_input:
                     temperature=0.7
                 )
                 
-                st.write("✅ Debug: LLMコール完了")
+                # st.write("✅ Debug: LLMコール完了")
                 
                 assistant_reply = response.choices[0].message.content
                 
@@ -242,7 +243,7 @@ if user_input:
                 # 記憶をLLMで更新（N+1パッチ生成）
                 try:
                     with st.spinner("記憶を更新中..."):
-                        st.write("🔍 Debug: Memory Update LLMコール実行中...")
+                        # st.write("🔍 Debug: Memory Update LLMコール実行中...")
                         
                         memory_patch = update_memory_with_llm(
                             user_message=user_input,
