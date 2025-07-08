@@ -7,7 +7,8 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 import sys
 
@@ -18,6 +19,31 @@ sys.path.insert(0, str(project_root))
 from core.progress_monitor import ProgressMonitor, AlertLevel
 from core.project_service import list_projects
 from core.schedule_manager import ScheduleManager
+
+# JST timezone
+JST = ZoneInfo("Asia/Tokyo")
+
+def utc_to_jst_string(utc_timestamp_str):
+    """UTC timestamp string を JST の文字列に変換"""
+    try:
+        # ISO format の UTC timestamp をパース
+        if utc_timestamp_str.endswith('Z'):
+            utc_timestamp_str = utc_timestamp_str[:-1] + '+00:00'
+        
+        utc_dt = datetime.fromisoformat(utc_timestamp_str)
+        
+        # UTC timezone を明示的に設定（naive datetime の場合）
+        if utc_dt.tzinfo is None:
+            utc_dt = utc_dt.replace(tzinfo=timezone.utc)
+        
+        # JST に変換
+        jst_dt = utc_dt.astimezone(JST)
+        
+        # YYYY-MM-DD HH:MM:SS 形式で返す
+        return jst_dt.strftime("%Y-%m-%d %H:%M:%S")
+    except Exception as e:
+        # フォールバック: 元の文字列を返す
+        return utc_timestamp_str
 from core.notification_system import NotificationSystem
 
 st.set_page_config(
@@ -186,7 +212,7 @@ try:
                             "タイトル": alert.title,
                             "説明": alert.description,
                             "影響": alert.impact,
-                            "作成日時": alert.created_at[:16]  # YYYY-MM-DD HH:MM
+                            "作成日時": utc_to_jst_string(alert.created_at)
                         })
                     
                     alert_df = pd.DataFrame(alert_data)

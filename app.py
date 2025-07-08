@@ -11,7 +11,7 @@ import os
 import sys
 import traceback
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from pathlib import Path
 from textwrap import dedent
 from zoneinfo import ZoneInfo
@@ -31,6 +31,31 @@ st.set_page_config(
 )
 
 # CSS will be loaded at the end of the file
+
+# JST timezone
+JST = ZoneInfo("Asia/Tokyo")
+
+def utc_to_jst_string(utc_timestamp_str):
+    """UTC timestamp string を JST の文字列に変換"""
+    try:
+        # ISO format の UTC timestamp をパース
+        if utc_timestamp_str.endswith('Z'):
+            utc_timestamp_str = utc_timestamp_str[:-1] + '+00:00'
+        
+        utc_dt = datetime.fromisoformat(utc_timestamp_str)
+        
+        # UTC timezone を明示的に設定（naive datetime の場合）
+        if utc_dt.tzinfo is None:
+            utc_dt = utc_dt.replace(tzinfo=timezone.utc)
+        
+        # JST に変換
+        jst_dt = utc_dt.astimezone(JST)
+        
+        # YYYY-MM-DD 形式で返す（日付のみ）
+        return jst_dt.strftime("%Y-%m-%d")
+    except Exception as e:
+        # フォールバック: 元の文字列の最初の10文字を返す
+        return utc_timestamp_str[:10]
 
 # Streamlitのマルチページ機能を無効化
 # pagesディレクトリの存在による自動ページ検出を防ぐ
@@ -310,7 +335,7 @@ def render_phase_management_ui(project_id: str):
                     from_phase = entry.get("from_phase", "")
                     to_phase = entry.get("to_phase", "")
                     if timestamp:
-                        date_str = timestamp[:10]  # YYYY-MM-DD部分
+                        date_str = utc_to_jst_string(timestamp)  # UTC to JST date
                         st.write(f"**{date_str}**: {from_phase} → {to_phase}")
         
     except Exception as e:

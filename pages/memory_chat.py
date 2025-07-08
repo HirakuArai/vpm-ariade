@@ -9,10 +9,36 @@ import os
 import sys
 import logging
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 # ロガーの設定
 logger = logging.getLogger(__name__)
+
+# JST timezone
+JST = ZoneInfo("Asia/Tokyo")
+
+def utc_to_jst_string(utc_timestamp_str):
+    """UTC timestamp string を JST の文字列に変換"""
+    try:
+        # ISO format の UTC timestamp をパース
+        if utc_timestamp_str.endswith('Z'):
+            utc_timestamp_str = utc_timestamp_str[:-1] + '+00:00'
+        
+        utc_dt = datetime.fromisoformat(utc_timestamp_str)
+        
+        # UTC timezone を明示的に設定（naive datetime の場合）
+        if utc_dt.tzinfo is None:
+            utc_dt = utc_dt.replace(tzinfo=timezone.utc)
+        
+        # JST に変換
+        jst_dt = utc_dt.astimezone(JST)
+        
+        # YYYY-MM-DD HH:MM:SS 形式で返す
+        return jst_dt.strftime("%Y-%m-%d %H:%M:%S")
+    except Exception as e:
+        logger.error(f"Timestamp conversion failed: {e}")
+        return utc_timestamp_str
 
 # プロジェクトルートをパスに追加
 project_root = Path(__file__).parent.parent
@@ -128,7 +154,7 @@ try:
     with col3:
         last_updated = current_memory.get("last_updated", "未更新")
         if last_updated != "未更新":
-            last_updated = last_updated[:19].replace('T', ' ') + " UTC"  # YYYY-MM-DD HH:MM:SS UTC
+            last_updated = utc_to_jst_string(last_updated)
         st.metric("最終更新", last_updated)
     
     # 詳細メモリ表示（展開可能）
@@ -386,7 +412,7 @@ with st.sidebar:
                 st.markdown("### 💬 会話応答 (ui_chat)")
                 for i, entry in enumerate(chat_calls[:3]):  # 最新3件
                     icon = "🟢" if not entry.get("error") else "🔴"
-                    with st.expander(f"{icon} {entry.get('model', 'unknown')} | {entry.get('ts', '')[:19].replace('T', ' ')} UTC", expanded=False):
+                    with st.expander(f"{icon} {entry.get('model', 'unknown')} | {utc_to_jst_string(entry.get('ts', ''))}", expanded=False):
                         col1, col2 = st.columns(2)
                         
                         with col1:
@@ -417,7 +443,7 @@ with st.sidebar:
                 st.markdown("### 🧠 記憶更新 (memory_update)")
                 for i, entry in enumerate(memory_updates[:2]):  # 最新2件
                     icon = "🟣" if not entry.get("error") else "🔴"
-                    with st.expander(f"{icon} N+1パッチ生成 | {entry.get('ts', '')[:19].replace('T', ' ')} UTC", expanded=False):
+                    with st.expander(f"{icon} N+1パッチ生成 | {utc_to_jst_string(entry.get('ts', ''))}", expanded=False):
                         col1, col2 = st.columns(2)
                         
                         with col1:
