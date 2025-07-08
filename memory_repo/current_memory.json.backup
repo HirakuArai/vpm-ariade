@@ -1,6 +1,6 @@
 {
   "memory_version": "2.0",
-  "last_updated": "2025-07-08T16:51:48.769944+00:00",
+  "last_updated": "2025-07-08T16:59:07.575903+00:00",
   "current_memory": {
     "active_projects": [],
     "user_preferences": {
@@ -18,30 +18,6 @@
     }
   },
   "events": [
-    {
-      "timestamp": "2025-07-06T22:36:21.416917+00:00",
-      "event_type": "system",
-      "description": "Memory Chat回答: ご指摘ありがとうございます。  \nおっしゃる通り、VPM（Virtual Project Management）においては、「プロジェクト新設画面」と「各プロジェクトの画面」それぞれが担う役割や場面に...",
-      "importance": "medium"
-    },
-    {
-      "timestamp": "2025-07-06T22:36:24.052408+00:00",
-      "event_type": "project_progress",
-      "description": "VPMのチャット画面（プロジェクト新設画面・各プロジェクト画面）ごとに最適化されたプロンプト設計は、記憶の蓄積・更新・リクエスト反映の仕組みが安定動作することを確認した後に実装予定。現在は記憶の仕組みの検証が優先されている。",
-      "importance": "high"
-    },
-    {
-      "timestamp": "2025-07-06T22:37:32.709298+00:00",
-      "event_type": "user_message",
-      "description": "Memory Chat: 合わせて、現在記憶の蓄積検証用である君は、このプロジェクトの統括的AI人格として再定義します。",
-      "importance": "medium"
-    },
-    {
-      "timestamp": "2025-07-06T22:37:41.867051+00:00",
-      "event_type": "system",
-      "description": "Memory Chat回答: ご指示、ありがとうございます。  \n承知しました。今後、私はこのプロジェクトの「統括的AI人格」として、以下の方針でサポートいたします。\n\n---\n\n## Ariadeの再定義（統括的AI人格として）...",
-      "importance": "medium"
-    },
     {
       "timestamp": "2025-07-06T22:37:43.709064+00:00",
       "event_type": "role_update",
@@ -316,6 +292,30 @@
       "timestamp": "2025-07-08T16:51:48.769278+00:00",
       "event_type": "status_update",
       "description": "CLAUDE.mdの「GPT-4.1 ONLY」要件が厳格に遵守されており、中央API管理で全リクエストが統合管理されている。ユーザー操作からAIリクエスト発生までのフローが一元化・明確化されている。",
+      "importance": "high"
+    },
+    {
+      "timestamp": "2025-07-08T16:51:48.771693+00:00",
+      "event_type": "focus_area",
+      "description": "今後の注力ポイントはmemory_layer_implementation（メモリレイヤー実装）であり、記憶機能の強化やパーソナライズが焦点となっている。",
+      "importance": "high"
+    },
+    {
+      "timestamp": "2025-07-08T16:58:55.109249+00:00",
+      "event_type": "user_message",
+      "description": "Memory Chat: AIリクエストをリストしてください。",
+      "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-08T16:59:02.787082+00:00",
+      "event_type": "system",
+      "description": "Memory Chat回答: はい、Kai VPMにおける現在のAIリクエスト（2025年7月8日時点で整理されている主要なもの）の一覧をまとめます。\n\n---\n\n## Kai VPMの主なAIリクエスト一覧\n\n### 1. **...",
+      "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-08T16:59:07.574782+00:00",
+      "event_type": "system_update",
+      "description": "2025年7月8日時点でKai VPMの主なAIリクエスト一覧が整理された。ホーム画面（タスク要約・進捗サマリー、本日のアクション提案、通知要約）、プロジェクトページ（進行状況要約、次のステップ提案、課題抽出、ドキュメント要約）、Memory Chat β（会話参照・要約、記憶・文脈保持、履歴参照、パーソナライズ回答）、知識検索・FAQ（ナレッジ検索、FAQ自動回答、用語解説）、共通リクエスト（メール・通知ドラフト生成、会話ログ記録・要約、入力校正提案）などが含まれる。",
       "importance": "high"
     }
   ]

@@ -1,6 +1,6 @@
 {
   "memory_version": "2.0",
-  "last_updated": "2025-07-08T16:51:48.772840+00:00",
+  "last_updated": "2025-07-08T16:59:07.577896+00:00",
   "current_memory": {
     "active_projects": [],
     "user_preferences": {
@@ -18,30 +18,6 @@
     }
   },
   "events": [
-    {
-      "timestamp": "2025-07-06T22:36:24.052408+00:00",
-      "event_type": "project_progress",
-      "description": "VPMのチャット画面（プロジェクト新設画面・各プロジェクト画面）ごとに最適化されたプロンプト設計は、記憶の蓄積・更新・リクエスト反映の仕組みが安定動作することを確認した後に実装予定。現在は記憶の仕組みの検証が優先されている。",
-      "importance": "high"
-    },
-    {
-      "timestamp": "2025-07-06T22:37:32.709298+00:00",
-      "event_type": "user_message",
-      "description": "Memory Chat: 合わせて、現在記憶の蓄積検証用である君は、このプロジェクトの統括的AI人格として再定義します。",
-      "importance": "medium"
-    },
-    {
-      "timestamp": "2025-07-06T22:37:41.867051+00:00",
-      "event_type": "system",
-      "description": "Memory Chat回答: ご指示、ありがとうございます。  \n承知しました。今後、私はこのプロジェクトの「統括的AI人格」として、以下の方針でサポートいたします。\n\n---\n\n## Ariadeの再定義（統括的AI人格として）...",
-      "importance": "medium"
-    },
-    {
-      "timestamp": "2025-07-06T22:37:43.709064+00:00",
-      "event_type": "role_update",
-      "description": "Ariadeはこのプロジェクトの統括的AI人格として再定義された。主な役割は、プロジェクト全体の記憶管理・最適化の統括、文脈理解と会話履歴の活用、記憶蓄積・継承プロセスの検証・レポート、プロンプト設計・運用方針への助言、統括的な進捗管理・タスク整理。",
-      "importance": "high"
-    },
     {
       "timestamp": "2025-07-06T22:38:48.080670+00:00",
       "event_type": "user_message",
@@ -316,6 +292,30 @@
       "timestamp": "2025-07-08T16:51:48.771693+00:00",
       "event_type": "focus_area",
       "description": "今後の注力ポイントはmemory_layer_implementation（メモリレイヤー実装）であり、記憶機能の強化やパーソナライズが焦点となっている。",
+      "importance": "high"
+    },
+    {
+      "timestamp": "2025-07-08T16:58:55.109249+00:00",
+      "event_type": "user_message",
+      "description": "Memory Chat: AIリクエストをリストしてください。",
+      "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-08T16:59:02.787082+00:00",
+      "event_type": "system",
+      "description": "Memory Chat回答: はい、Kai VPMにおける現在のAIリクエスト（2025年7月8日時点で整理されている主要なもの）の一覧をまとめます。\n\n---\n\n## Kai VPMの主なAIリクエスト一覧\n\n### 1. **...",
+      "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-08T16:59:07.574782+00:00",
+      "event_type": "system_update",
+      "description": "2025年7月8日時点でKai VPMの主なAIリクエスト一覧が整理された。ホーム画面（タスク要約・進捗サマリー、本日のアクション提案、通知要約）、プロジェクトページ（進行状況要約、次のステップ提案、課題抽出、ドキュメント要約）、Memory Chat β（会話参照・要約、記憶・文脈保持、履歴参照、パーソナライズ回答）、知識検索・FAQ（ナレッジ検索、FAQ自動回答、用語解説）、共通リクエスト（メール・通知ドラフト生成、会話ログ記録・要約、入力校正提案）などが含まれる。",
+      "importance": "high"
+    },
+    {
+      "timestamp": "2025-07-08T16:59:07.577340+00:00",
+      "event_type": "technical_policy",
+      "description": "全AIリクエストはgpt-4.1モデルで統一、max_tokensは標準8000（Memory Chat記憶更新等は可変）、API呼び出しはcreate_chat_completion()経由で約90%統一、logs/llm/で全リクエスト記録、品質管理・エラーハンドリングも全体統合されている。",
       "importance": "high"
     }
   ]
