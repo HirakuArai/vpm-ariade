@@ -128,7 +128,7 @@ try:
     with col3:
         last_updated = current_memory.get("last_updated", "未更新")
         if last_updated != "未更新":
-            last_updated = last_updated[:19].replace('T', ' ')  # YYYY-MM-DD HH:MM:SS
+            last_updated = last_updated[:19].replace('T', ' ') + " UTC"  # YYYY-MM-DD HH:MM:SS UTC
         st.metric("最終更新", last_updated)
     
     # 詳細メモリ表示（展開可能）
@@ -386,7 +386,7 @@ with st.sidebar:
                 st.markdown("### 💬 会話応答 (ui_chat)")
                 for i, entry in enumerate(chat_calls[:3]):  # 最新3件
                     icon = "🟢" if not entry.get("error") else "🔴"
-                    with st.expander(f"{icon} {entry.get('model', 'unknown')} | {entry.get('ts', '')[:19].replace('T', ' ')}", expanded=False):
+                    with st.expander(f"{icon} {entry.get('model', 'unknown')} | {entry.get('ts', '')[:19].replace('T', ' ')} UTC", expanded=False):
                         col1, col2 = st.columns(2)
                         
                         with col1:
@@ -417,7 +417,7 @@ with st.sidebar:
                 st.markdown("### 🧠 記憶更新 (memory_update)")
                 for i, entry in enumerate(memory_updates[:2]):  # 最新2件
                     icon = "🟣" if not entry.get("error") else "🔴"
-                    with st.expander(f"{icon} N+1パッチ生成 | {entry.get('ts', '')[:19].replace('T', ' ')}", expanded=False):
+                    with st.expander(f"{icon} N+1パッチ生成 | {entry.get('ts', '')[:19].replace('T', ' ')} UTC", expanded=False):
                         col1, col2 = st.columns(2)
                         
                         with col1:
