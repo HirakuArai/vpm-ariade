@@ -1,6 +1,6 @@
 {
   "memory_version": "2.0",
-  "last_updated": "2025-07-07T18:26:18.899521+00:00",
+  "last_updated": "2025-07-08T16:51:48.769944+00:00",
   "current_memory": {
     "active_projects": [],
     "user_preferences": {
@@ -18,48 +18,6 @@
     }
   },
   "events": [
-    {
-      "timestamp": "2025-07-06T19:36:20.103090+00:00",
-      "event_type": "project_progress",
-      "description": "LLM Call Logsでは会話内容の記録・確認はできているが、Githubへの反映がうまくいっておらず、現在テスト中。",
-      "importance": "high"
-    },
-    {
-      "timestamp": "2025-07-06T22:32:33.971984+00:00",
-      "event_type": "user_message",
-      "description": "Memory Chat: 今回のプロジェクトについて、以下の課題があります。\nプロンプトの最適化。→君との会話が適切に記憶として蓄積継承されるか。その次は、その記憶に基づいた正しい判断ができるかで、プロンプトの最適化を追求します。",
-      "importance": "medium"
-    },
-    {
-      "timestamp": "2025-07-06T22:32:40.709629+00:00",
-      "event_type": "system",
-      "description": "Memory Chat回答: ご指摘ありがとうございます。  \n現時点でのプロジェクト課題を整理すると――\n\n### 1. プロンプトの最適化\n- **目的：**  \n　Ariade（私）との会話内容が、正しく記憶（メモリレイヤー...",
-      "importance": "medium"
-    },
-    {
-      "timestamp": "2025-07-06T22:32:43.912778+00:00",
-      "event_type": "project_issue",
-      "description": "プロジェクト課題はプロンプトの最適化。Ariadeとの会話内容が正しく記憶として蓄積・継承されるか、その記憶に基づいて正しい判断ができるかを重視している。",
-      "importance": "high"
-    },
-    {
-      "timestamp": "2025-07-06T22:32:43.914575+00:00",
-      "event_type": "project_progress",
-      "description": "LLM Call LogsでAriadeとの会話内容の記録・確認は可能になったが、記憶の継承性（リブートやセッション切り替え後の維持）とGithubへの反映が課題であり、現在テスト中。",
-      "importance": "high"
-    },
-    {
-      "timestamp": "2025-07-06T22:32:43.916142+00:00",
-      "event_type": "next_action",
-      "description": "会話ログやMemory Chatの記録精度を継続的に確認し、記憶された内容が応答にどう活かされているかを例示。必要に応じてプロンプトや記憶処理の最適化案をリストアップする。",
-      "importance": "medium"
-    },
-    {
-      "timestamp": "2025-07-06T22:36:12.719562+00:00",
-      "event_type": "user_message",
-      "description": "Memory Chat: 現在、チャット画面はいくつかあり、\n1.プロジェクト新設画面\n2.各プロジェクトの画面\nこれがVPMとしてプロジェクト管理上のメインの会話の画面ですが、これらはそれぞれの役割に応じたプロンプトである必要があります。ただしその前に、現在検証中の記憶の蓄積、更新、リクエストへの反映の仕組みがうまく機能したのであれば、上記の会話においてもそれを実装する必要があります。",
-      "importance": "medium"
-    },
     {
       "timestamp": "2025-07-06T22:36:21.416917+00:00",
       "event_type": "system",
@@ -316,6 +274,48 @@
       "timestamp": "2025-07-07T18:26:18.898612+00:00",
       "event_type": "system_architecture_update",
       "description": "Kai VPMの全AIリクエストの起点画面・ユーザー操作・目的・呼び出しフロー・モデル設定が一覧化され、ホーム画面・プロジェクトページ・Memory Chat β・知識検索等の各画面でのAIリクエスト発生パターンが整理された。全AIリクエストはGPT-4.1モデルで統一され、max_tokensは標準8000（Memory Chat記憶更新等一部は可変）。API呼び出しはcreate_chat_completion()経由で約90%統一、全リクエストがlogs/llm/で分類記録され、エラーハンドリングと品質管理も全体に統合されている。",
+      "importance": "high"
+    },
+    {
+      "timestamp": "2025-07-07T18:26:18.900846+00:00",
+      "event_type": "operational_policy",
+      "description": "Chat Handler AIが全会話処理の統一エントリーポイントとなり、AIファースト設計（パターンマッチング排除・AI判断優先）、完全なログ記録、Memory Chat βによる記憶機能の完全統合、全体品質保証（エラーハンドリング・品質チェック）が運用の重要ポイントとして明確化された。",
+      "importance": "high"
+    },
+    {
+      "timestamp": "2025-07-08T16:51:30.278976+00:00",
+      "event_type": "user_message",
+      "description": "Memory Chat: 現状を説明してください。",
+      "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-08T16:51:41.143482+00:00",
+      "event_type": "system",
+      "description": "Memory Chat回答: はい、現状について整理してご説明します。\n\n---\n\n## Kai VPMの現状まとめ（2025年7月8日時点）\n\n### 1. **AIリクエスト機能の全体像**\n- 全AIリクエスト機能の調査が完...",
+      "importance": "medium"
+    },
+    {
+      "timestamp": "2025-07-08T16:51:48.761438+00:00",
+      "event_type": "status_update",
+      "description": "2025年7月8日時点でKai VPMの全AIリクエスト機能の調査・一覧化が完了し、主要カテゴリごとに詳細が整理されている。全AIリクエストはgpt-4.1モデルで統一、max_tokensは標準8000（一部例外あり）、API呼び出し・エラーハンドリング・ログ記録・品質管理も統一されている。",
+      "importance": "high"
+    },
+    {
+      "timestamp": "2025-07-08T16:51:48.764464+00:00",
+      "event_type": "status_update",
+      "description": "各画面（ホーム、プロジェクト、Memory Chat β、知識検索など）ごとのAIリクエスト発生パターンとフローが整理され、Chat Handler AIが全会話処理の統一エントリーポイントとなっている。",
+      "importance": "high"
+    },
+    {
+      "timestamp": "2025-07-08T16:51:48.766898+00:00",
+      "event_type": "status_update",
+      "description": "全AIリクエストはlogs/llm/に完全記録され、エラーハンドリング・品質チェックも全体に統合。Memory Chat βではAI会話と記憶機能が完全統合されている。",
+      "importance": "high"
+    },
+    {
+      "timestamp": "2025-07-08T16:51:48.769278+00:00",
+      "event_type": "status_update",
+      "description": "CLAUDE.mdの「GPT-4.1 ONLY」要件が厳格に遵守されており、中央API管理で全リクエストが統合管理されている。ユーザー操作からAIリクエスト発生までのフローが一元化・明確化されている。",
       "importance": "high"
     }
   ]
