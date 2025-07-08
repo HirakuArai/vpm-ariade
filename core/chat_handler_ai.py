@@ -74,7 +74,7 @@ def _append_log(role: str, content: str) -> None:
     # Memory Layer Phase 2: Log conversation event
     try:
         log_event("user_message" if role == "user" else "system", 
-                 f"{role}: {content[:100]}..." if len(content) > 100 else f"{role}: {content}",
+                 f"{role}: {content}",
                  importance="medium")
     except Exception as e:
         logger.warning(f"Failed to log event to memory layer: {e}")
@@ -106,7 +106,7 @@ def _append_project_log(project_id: str, role: str, content: str) -> None:
     # Memory Layer Phase 2: Log project-specific event
     try:
         log_event("user_message" if role == "user" else "project_update",
-                 f"[{project_id}] {role}: {content[:100]}..." if len(content) > 100 else f"[{project_id}] {role}: {content}",
+                 f"[{project_id}] {role}: {content}",
                  project_id=project_id,
                  importance="medium")
     except Exception as e:

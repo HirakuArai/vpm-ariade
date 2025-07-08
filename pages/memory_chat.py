@@ -262,7 +262,7 @@ if user_input:
                 
                 # メモリにアシスタントレスポンスをログ
                 try:
-                    log_event("system", f"Memory Chat回答: {assistant_reply[:100]}...", importance="medium")
+                    log_event("system", f"Memory Chat回答: {assistant_reply}", importance="medium")
                 except Exception as e:
                     st.warning(f"回答のメモリログに失敗: {e}")
                 
