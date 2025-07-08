@@ -218,8 +218,8 @@ class MemoryBridge:
     
     def _log_to_events_file(self, event: Dict[str, Any]):
         """Log event to daily events file"""
-        today = datetime.now().strftime("%Y-%m")
-        daily_file = self.events_dir / f"{today}" / f"{datetime.now().strftime('%d')}.log"
+        today = datetime.now(timezone.utc).strftime("%Y-%m")
+        daily_file = self.events_dir / f"{today}" / f"{datetime.now(timezone.utc).strftime('%d')}.log"
         
         # Ensure daily directory exists
         daily_file.parent.mkdir(exist_ok=True)

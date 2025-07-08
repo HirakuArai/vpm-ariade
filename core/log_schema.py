@@ -7,7 +7,7 @@ across the Kai VPM system.
 
 from enum import Enum
 from typing import Optional, Dict, Any, Union
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 import json
 from pathlib import Path
@@ -126,7 +126,7 @@ def get_log_filepath(timestamp: Optional[datetime] = None) -> Path:
         Path object for the log file
     """
     if timestamp is None:
-        timestamp = datetime.now()
+        timestamp = datetime.now(timezone.utc)
     
     filename = timestamp.strftime("%Y%m%d-%H%M%S.jsonl")
     return Path("logs/llm") / filename

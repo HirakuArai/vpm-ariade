@@ -10,7 +10,7 @@ import time
 import json
 import hashlib
 from contextlib import contextmanager
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any, Callable, Generator
 from pathlib import Path
 
@@ -45,7 +45,7 @@ class PromptLogger:
     
     def _get_current_log_file(self) -> Path:
         """Get the current log file path with 5MB rotation support"""
-        now = datetime.utcnow()  # Use UTC for consistency
+        now = datetime.now(timezone.utc)  # Use UTC for consistency
         
         # Check if we need a new log file (new day, first call, or size limit exceeded)
         if self._current_log_file is None or self._should_rotate_log_file(now):
@@ -110,17 +110,17 @@ class PromptLogger:
             # Check if hash exists and is within 24h window
             if hash_key in index:
                 entry_time = datetime.fromisoformat(index[hash_key].rstrip('Z'))
-                time_diff = datetime.utcnow() - entry_time
+                time_diff = datetime.now(timezone.utc) - entry_time
                 if time_diff.total_seconds() < 86400:  # 24 hours
                     # Log deduplication skip
                     self._log_dedup_skip(hash_key)
                     return True
             
             # Update index with current timestamp
-            index[hash_key] = datetime.utcnow().isoformat(timespec="milliseconds") + "Z"
+            index[hash_key] = datetime.now(timezone.utc).isoformat(timespec="milliseconds") + "Z"
             
             # Clean old entries (older than 24h)
-            cutoff_time = datetime.utcnow() - timedelta(hours=24)
+            cutoff_time = datetime.now(timezone.utc) - timedelta(hours=24)
             index = {
                 k: v for k, v in index.items()
                 if datetime.fromisoformat(v.rstrip('Z')) > cutoff_time
@@ -145,7 +145,7 @@ class PromptLogger:
             dedup_log_file = metadata_dir / "dedup_skipped.jsonl"
             
             skip_entry = {
-                "ts": datetime.utcnow().isoformat(timespec="milliseconds") + "Z",
+                "ts": datetime.now(timezone.utc).isoformat(timespec="milliseconds") + "Z",
                 "dedup_skipped": True,
                 "hash_key": hash_key
             }
@@ -183,7 +183,7 @@ class PromptLogger:
             anomaly_log_file = metadata_dir / "metrics_anomalies.jsonl"
             
             anomaly_entry = {
-                "ts": datetime.utcnow().isoformat(timespec="milliseconds") + "Z",
+                "ts": datetime.now(timezone.utc).isoformat(timespec="milliseconds") + "Z",
                 "metrics_anomaly": True,
                 "task_id": task_id,
                 "prompt_tokens": prompt_tokens,
@@ -244,7 +244,7 @@ class PromptLogger:
             task_id = str(uuid.uuid4())
         
         # AI Log Output Guidelines v1.0 compliance: ISO-8601 with UTC timezone
-        timestamp = datetime.utcnow().isoformat(timespec="milliseconds") + "Z"
+        timestamp = datetime.now(timezone.utc).isoformat(timespec="milliseconds") + "Z"
         request_data = None
         response_data = None
         prompt_tokens = 0

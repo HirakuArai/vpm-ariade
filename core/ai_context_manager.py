@@ -7,7 +7,7 @@ AI Context Manager - 高度なAIコンテキスト管理システム
 import json
 import logging
 from typing import Dict, List, Optional, Tuple, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from dataclasses import dataclass, asdict
 import hashlib
@@ -288,7 +288,7 @@ class AIContextManager:
     
     def cleanup_old_contexts(self, days_threshold: int = 30):
         """古いコンテキストをクリーンアップ"""
-        cutoff_date = datetime.now() - timedelta(days=days_threshold)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_threshold)
         
         to_remove = []
         for conv_id, context in self.contexts.items():
