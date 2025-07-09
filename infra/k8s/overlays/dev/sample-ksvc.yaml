@@ -1,0 +1,199 @@
+# Sample Knative Service for Hyper-Swarm cells
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: planner-cell
+  namespace: hyper-swarm
+  labels:
+    app.kubernetes.io/part-of: hyper-swarm
+    cell-type: planner
+spec:
+  template:
+    metadata:
+      annotations:
+        # Enable scale to zero with 30s grace period
+        autoscaling.knative.dev/scale-to-zero-grace-period: "30s"
+        # Set concurrency limits
+        autoscaling.knative.dev/target: "10"
+      labels:
+        cell-type: planner
+    spec:
+      # Set timeout for long-running planning operations
+      timeoutSeconds: 300
+      containers:
+      - image: ghcr.io/hyper-swarm/planner-cell:latest
+        name: planner
+        ports:
+        - containerPort: 8080
+          name: http1
+        env:
+        - name: CELL_TYPE
+          value: "planner"
+        - name: NATS_URL
+          value: "nats://nats-streaming.hyper-swarm.svc.cluster.local:4222"
+        - name: REDIS_URL
+          value: "redis://redis.hyper-swarm.svc.cluster.local:6379"
+        - name: LOG_LEVEL
+          value: "debug"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: curator-cell
+  namespace: hyper-swarm
+  labels:
+    app.kubernetes.io/part-of: hyper-swarm
+    cell-type: curator
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/scale-to-zero-grace-period: "30s"
+        autoscaling.knative.dev/target: "10"
+      labels:
+        cell-type: curator
+    spec:
+      timeoutSeconds: 300
+      containers:
+      - image: ghcr.io/hyper-swarm/curator-cell:latest
+        name: curator
+        ports:
+        - containerPort: 8080
+          name: http1
+        env:
+        - name: CELL_TYPE
+          value: "curator"
+        - name: NATS_URL
+          value: "nats://nats-streaming.hyper-swarm.svc.cluster.local:4222"
+        - name: REDIS_URL
+          value: "redis://redis.hyper-swarm.svc.cluster.local:6379"
+        - name: MILVUS_HOST
+          value: "milvus.default.svc.cluster.local"
+        - name: MILVUS_PORT
+          value: "19530"
+        - name: LOG_LEVEL
+          value: "debug"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: archivist-cell
+  namespace: hyper-swarm
+  labels:
+    app.kubernetes.io/part-of: hyper-swarm
+    cell-type: archivist
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/scale-to-zero-grace-period: "60s"
+        autoscaling.knative.dev/target: "5"
+      labels:
+        cell-type: archivist
+    spec:
+      timeoutSeconds: 600
+      containers:
+      - image: ghcr.io/hyper-swarm/archivist-cell:latest
+        name: archivist
+        ports:
+        - containerPort: 8080
+          name: http1
+        env:
+        - name: CELL_TYPE
+          value: "archivist"
+        - name: NATS_URL
+          value: "nats://nats-streaming.hyper-swarm.svc.cluster.local:4222"
+        - name: REDIS_URL
+          value: "redis://redis.hyper-swarm.svc.cluster.local:6379"
+        - name: MINIO_ENDPOINT
+          value: "minio.default.svc.cluster.local:9000"
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: access-key
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: secret-key
+        - name: LOG_LEVEL
+          value: "debug"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: watcher-cell
+  namespace: hyper-swarm
+  labels:
+    app.kubernetes.io/part-of: hyper-swarm
+    cell-type: watcher
+spec:
+  template:
+    metadata:
+      annotations:
+        # Watcher should always have at least 1 instance
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "3"
+        autoscaling.knative.dev/target: "20"
+      labels:
+        cell-type: watcher
+    spec:
+      timeoutSeconds: 30
+      containers:
+      - image: ghcr.io/hyper-swarm/watcher-cell:latest
+        name: watcher
+        ports:
+        - containerPort: 8080
+          name: http1
+        env:
+        - name: CELL_TYPE
+          value: "watcher"
+        - name: NATS_URL
+          value: "nats://nats-streaming.hyper-swarm.svc.cluster.local:4222"
+        - name: REDIS_URL
+          value: "redis://redis.hyper-swarm.svc.cluster.local:6379"
+        - name: METRICS_PORT
+          value: "9090"
+        - name: LOG_LEVEL
+          value: "info"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
